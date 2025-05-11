@@ -30,3 +30,7 @@
 *.exe
 *.out
 *.app
+
+# Make and CMake files
+build/*
+!build/
