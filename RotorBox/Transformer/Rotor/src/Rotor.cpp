@@ -4,8 +4,10 @@
 
 Rotor::Rotor(){
     notchPosition = 0;
+    rotorRotationCount = 0;
     type = rotor;
     initTransformLUT();
+    initRotorPosition();
 }
 
 Rotor::~Rotor(){}
@@ -23,7 +25,7 @@ bool Rotor::initTransformLUT(){
     
     for (int fv = 0; fv < TRANSFORMER_SIZE; fv++){
         // Find the target in the transformation vector
-        auto it = std::find_if(&transformLUT[1][0], &transformLUT[1][TRANSFORMER_SIZE], 
+        auto it = std::find_if(&transformLUT[0][0], &transformLUT[0][TRANSFORMER_SIZE], 
         [fv] (int value){
             return value == fv;
         });
@@ -41,13 +43,26 @@ bool Rotor::initTransformLUT(){
 
 }
 
-bool Rotor::isNotchPosition(int position){
+int Rotor::initRotorPosition(int offset){
+    rotorRotationCount = offset;
+    return 0;
+}
+
+inline bool Rotor::isNotchPosition(int position){
     return (position == notchPosition);
 }
 
-int Rotor::transform(int position, int &newPosition, bool reverse){
-    int returnValue = 0;
-    newPosition = transformLUT[reverse][position];
+int Rotor::transform(int position, bool reverse){
+    int newPosition;
 
-    return returnValue;
+    position += rotorRotationCount; 
+    newPosition = transformLUT[(int)reverse][position];
+    newPosition -= rotorRotationCount;
+
+    return newPosition;
+}
+
+int Rotor::rotate(){
+    rotorRotationCount = (rotorRotationCount + 1) % TRANSFORMER_SIZE;
+    return isNotchPosition(rotorRotationCount) ? 1 : 0;
 }

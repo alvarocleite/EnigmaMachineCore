@@ -22,7 +22,8 @@ bool Reflector::initTransformLUT(){
     return true;
 }
 
-int Reflector::transform(int position, int &newPosition, bool reverse){
-    newPosition = transformLUT[reverse][position];
-    return reverse * -1;
+int Reflector::transform(int position, bool reverse){
+    int newPosition = transformLUT[reverse][position];
+    // transformLUT[reverse][position] = -1,  when reverse is true 
+    return newPosition;
 }

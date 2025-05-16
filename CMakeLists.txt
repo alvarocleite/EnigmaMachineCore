@@ -9,15 +9,15 @@ add_executable(${PROJECT_NAME}
 )
 
 target_include_directories(${PROJECT_NAME} PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/RotorBox/include
     ${CMAKE_CURRENT_SOURCE_DIR}/RotorBox/Transformer/include
     ${CMAKE_CURRENT_SOURCE_DIR}/RotorBox/Transformer/Reflector/include
     ${CMAKE_CURRENT_SOURCE_DIR}/RotorBox/Transformer/Rotor/include
-    ${CMAKE_CURRENT_SOURCE_DIR}/RotorBox/Transformer/Normalizer/include
 )
 
 target_sources(${PROJECT_NAME} PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/RotorBox/src/RotorBox.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/RotorBox/Transformer/src/Transformer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/RotorBox/Transformer/Reflector/src/Reflector.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/RotorBox/Transformer/Rotor/src/Rotor.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/RotorBox/Transformer/Normalizer/src/Normalizer.cpp
 )

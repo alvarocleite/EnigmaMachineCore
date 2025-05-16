@@ -8,5 +8,6 @@ private:
 public:
     Reflector();
     ~Reflector();
-    int transform(int position, int &newPosition, bool reverse = false);
+    int transform(int position, bool reverse = false);
+    int rotate() { return 0; } // Reflectors do not rotate
 };
