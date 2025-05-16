@@ -41,6 +41,10 @@ bool Rotor::initTransformLUT(){
 
 }
 
+bool Rotor::isNotchPosition(int position){
+    return (position == notchPosition);
+}
+
 int Rotor::transform(int position, int &newPosition, bool reverse){
     int returnValue = 0;
     newPosition = transformLUT[reverse][position];

@@ -13,8 +13,8 @@ class Transformer{
 protected:
     transformerType type;
     int weightTransformVec[TRANSFORMER_SIZE] = {0};
-    int transformLUT[2][TRANSFORMER_SIZE];
-    void initTransformLUT();
+    int transformLUT[2][TRANSFORMER_SIZE] = {0};
+    virtual bool initTransformLUT() = 0;
 public:
     Transformer();
     ~Transformer();

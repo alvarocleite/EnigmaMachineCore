@@ -8,7 +8,7 @@ Reflector::Reflector(){
 
 Reflector::~Reflector(){}
 
-void Reflector::initTransformLUT(){
+bool Reflector::initTransformLUT(){
     // Initialize forward transformation vector
     for (int i = 0; i < TRANSFORMER_SIZE; i++){
         transformLUT[0][i] = (i + weightTransformVec[i]) % TRANSFORMER_SIZE;
@@ -18,6 +18,8 @@ void Reflector::initTransformLUT(){
     for (int i = 0; i < TRANSFORMER_SIZE; i++){
         transformLUT[1][i] = -1;
     }
+
+    return true;
 }
 
 int Reflector::transform(int position, int &newPosition, bool reverse){

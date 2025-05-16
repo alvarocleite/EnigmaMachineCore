@@ -10,4 +10,5 @@ public:
     Rotor();
     ~Rotor();
     int transform(int position, int &newPosition, bool reverse = false);
+    bool isNotchPosition(int position);
 };

@@ -4,7 +4,7 @@
 
 class Reflector : public Transformer {
 private:
-    void initTransformLUT();
+    bool initTransformLUT();
 public:
     Reflector();
     ~Reflector();
