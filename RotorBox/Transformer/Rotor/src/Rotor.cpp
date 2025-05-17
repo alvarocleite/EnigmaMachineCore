@@ -25,14 +25,14 @@ bool Rotor::initTransformLUT(){
     
     for (int fv = 0; fv < TRANSFORMER_SIZE; fv++){
         // Find the target in the transformation vector
-        auto it = std::find_if(&transformLUT[0][0], &transformLUT[0][TRANSFORMER_SIZE], 
+        auto it = std::find_if(&transformLUT[0][0], &transformLUT[0][TRANSFORMER_SIZE-1], 
         [fv] (int value){
             return value == fv;
         });
 
         // If the target is found, set the reverse transformation vector
-        if (it != &transformLUT[1][TRANSFORMER_SIZE] + size){
-            transformLUT[1][fv] = *it;
+        if (it != &transformLUT[1][TRANSFORMER_SIZE-1] + size){
+            transformLUT[1][fv] = it - &transformLUT[0][0];
         } else {
             transformLUT[1][fv] = -1; // Not found
             canBeInitialized = false;
