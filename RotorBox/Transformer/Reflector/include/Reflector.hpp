@@ -4,9 +4,9 @@
 
 class Reflector : public Transformer {
 private:
-    bool initTransformLUT();
+    bool initTransformLUT(std::string fileName);
 public:
-    Reflector();
+    Reflector(std::string fileName);
     ~Reflector();
     int transform(int position, bool reverse = false);
     int rotate() { return 0; } // Reflectors do not rotate

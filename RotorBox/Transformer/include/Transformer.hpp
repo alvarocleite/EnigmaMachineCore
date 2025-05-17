@@ -1,5 +1,7 @@
 #pragma once
 
+#include <string>
+
 #define TRANSFORMER_SIZE 26
 
 typedef enum transformerType{
@@ -15,7 +17,8 @@ protected:
                                                 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
                                                 1, 1, 1, 1, 1, 1};
     int transformLUT[2][TRANSFORMER_SIZE] = {0};
-    virtual bool initTransformLUT() = 0;
+    virtual bool initTransformLUT(std::string fileName) = 0;
+    int initForwardTransformLUT(std::string fileName);
 public:
     Transformer();
     ~Transformer();

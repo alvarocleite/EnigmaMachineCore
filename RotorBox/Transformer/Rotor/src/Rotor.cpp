@@ -1,28 +1,25 @@
 #include "../include/Rotor.hpp"
 
 #include <algorithm>
+#include <string>
 
-Rotor::Rotor(){
+Rotor::Rotor(std::string fileName){
     notchPosition = 0;
     rotorRotationCount = 0;
     type = rotor;
-    initTransformLUT();
+    initTransformLUT(fileName);
     initRotorPosition();
 }
 
 Rotor::~Rotor(){}
 
-bool Rotor::initTransformLUT(){
+bool Rotor::initTransformLUT(std::string fileName){
     bool canBeInitialized = true;
     
     // Initialize forward transformation vector
-    for (int i = 0; i < TRANSFORMER_SIZE; i++){
-        transformLUT[0][i] = (i + weightTransformVec[i]) % TRANSFORMER_SIZE;
-    }
+    initForwardTransformLUT(fileName);
 
-    // size of reverse transformation vector 
-    int size = sizeOfTransformLUT()/2;
-    
+    // Initialize reverse transformation vector 
     for (int fv = 0; fv < TRANSFORMER_SIZE; fv++){
         // Find the target in the transformation vector
         auto it = std::find_if(&transformLUT[0][0], &transformLUT[0][TRANSFORMER_SIZE-1], 
@@ -31,7 +28,7 @@ bool Rotor::initTransformLUT(){
         });
 
         // If the target is found, set the reverse transformation vector
-        if (it != &transformLUT[1][TRANSFORMER_SIZE-1] + size){
+        if (it != &transformLUT[1][TRANSFORMER_SIZE-1] + TRANSFORMER_SIZE){
             transformLUT[1][fv] = it - &transformLUT[0][0];
         } else {
             transformLUT[1][fv] = -1; // Not found

@@ -1,22 +1,16 @@
 
 #include "../include/Reflector.hpp"
 
-Reflector::Reflector(){
+Reflector::Reflector(std::string fileName){
     type = reflector;
-    initTransformLUT();
+    initTransformLUT(fileName);
 }
 
 Reflector::~Reflector(){}
 
-bool Reflector::initTransformLUT(){
+bool Reflector::initTransformLUT(std::string fileName){
     // Initialize forward transformation vector
-    for (int i = 0; i < TRANSFORMER_SIZE; i++){
-        if (i % 2 == 0){
-            transformLUT[0][i] = i + 1;
-        } else {
-            transformLUT[0][i] = i - 1;
-        }
-    }
+    initForwardTransformLUT(fileName);
 
     // Initialize reverse transformation vector
     for (int i = 0; i < TRANSFORMER_SIZE; i++){
