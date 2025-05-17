@@ -1,4 +1,5 @@
 #include <iostream>
+#include <string>
 
 #include "../include/RotorBox.hpp"
 #include "../Transformer/Reflector/include/Reflector.hpp"
@@ -9,10 +10,13 @@ RotorBox::RotorBox(){
     for(int i = 0; i < nRotorCount; i++){
         rotorPositions.push_back(0);
     }
-    initTransformerVec(nRotorCount);
+    initTransformerVec(nRotorCount, std::vector<std::string> {"../assets/Rotor1.txt", 
+                                         "../assets/Rotor2.txt", 
+                                         "../assets/Rotor3.txt", 
+                                         "../assets/Reflector.txt"});
 }
 
-RotorBox::RotorBox(int nRotorCount, const std::vector<int> &rotorPositions){
+RotorBox::RotorBox(int nRotorCount, const std::vector<int> &rotorPositions, const std::vector<std::string> &rotorFiles){
     if (nRotorCount != rotorPositions.size()){
         std::cerr << "Error: Number of rotors and number of rotor positions do not match." << std::endl;
         return;
@@ -23,16 +27,19 @@ RotorBox::RotorBox(int nRotorCount, const std::vector<int> &rotorPositions){
         this->rotorPositions.push_back(position);
     }
     
-    initTransformerVec(nRotorCount);
+    initTransformerVec(nRotorCount, rotorFiles);
 }
 
 RotorBox::~RotorBox(){}
 
-int RotorBox::initTransformerVec(int nRotorCount){
-    do{
-        transformerVec.push_back(std::make_unique<Rotor>());
-    } while (--nRotorCount);
-    transformerVec.push_back(std::make_unique<Reflector>());
+int RotorBox::initTransformerVec(int nRotorCount, const std::vector<std::string> &rotorFiles){
+    int index = 0;
+    while(index < nRotorCount){
+        transformerVec.push_back(std::make_unique<Rotor>(rotorFiles[index]));
+        index++;
+    };
+    //transformerVec.push_back(std::make_unique<Reflector>(std::string("../assets/Reflector.txt")));
+    transformerVec.push_back(std::make_unique<Reflector>(rotorFiles[nRotorCount]));
 
     return 0;
 }
@@ -44,8 +51,8 @@ void RotorBox::printTransformerVec(){
 }
 
 int RotorBox::keyTransform(int input){
-    // update rotors position
-    //updateRotors();
+    // update rotors position rotating
+    updateRotors();
 
     // transform trough rotors forward
     bool reverse = false;
