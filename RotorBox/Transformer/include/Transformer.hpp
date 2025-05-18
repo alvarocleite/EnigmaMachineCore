@@ -2,7 +2,7 @@
 
 #include <string>
 
-#define TRANSFORMER_SIZE 26
+#include "../../config/config.hpp"
 
 typedef enum transformerType{
     notDefined = 0,
@@ -13,9 +13,6 @@ typedef enum transformerType{
 class Transformer{
 protected:
     transformerType type;
-    int weightTransformVec[TRANSFORMER_SIZE] = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-                                                1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-                                                1, 1, 1, 1, 1, 1};
     int transformLUT[2][TRANSFORMER_SIZE] = {0};
     virtual bool initTransformLUT(std::string fileName) = 0;
     int initForwardTransformLUT(std::string fileName);
