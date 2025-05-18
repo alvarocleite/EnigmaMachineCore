@@ -2,13 +2,14 @@
 #include <vector>
 
 #include "../include/EnigmaMachine.hpp"
+#include "../../config/config.hpp"
 
 EnigmaMachine::EnigmaMachine()
     : rotorBox(3, std::vector<int> {0, 0, 0},
-              std::vector<std::string> {"../assets/Rotor1.txt", 
-                                        "../assets/Rotor2.txt", 
-                                        "../assets/Rotor3.txt", 
-                                        "../assets/Reflector.txt"})
+              std::vector<std::string> {assetsDir + "Rotor1.txt", 
+                                        assetsDir + "Rotor2.txt", 
+                                        assetsDir + "Rotor3.txt", 
+                                        assetsDir + "Reflector.txt"})
 {}
 
 EnigmaMachine::~EnigmaMachine(){}

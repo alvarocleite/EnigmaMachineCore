@@ -14,6 +14,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/RotorBox/Transformer/Reflector/include
     ${CMAKE_CURRENT_SOURCE_DIR}/RotorBox/Transformer/Rotor/include
     ${CMAKE_CURRENT_SOURCE_DIR}/EnigmaMachine/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/config/
 )
 
 target_sources(${PROJECT_NAME} PRIVATE
