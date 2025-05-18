@@ -74,12 +74,12 @@ int RotorBox::keyTransform(int input){
 }
 
 int RotorBox::updateRotors(){
-    int rotorIt = 0;
+    int rotorIx = 0;
     int isNotch = 0;
     do{
-        isNotch = transformerVec[rotorIt]->rotate();
-        rotorIt++;
-    } while (rotorIt < nRotorCount && isNotch == 1);
+        isNotch = transformerVec[rotorIx]->rotate();
+        rotorIx++;
+    } while (rotorIx < nRotorCount && isNotch == 1);
 
     return 0;
 }
