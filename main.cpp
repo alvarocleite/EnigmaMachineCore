@@ -15,8 +15,8 @@ int main(){
         std::cout << "Input: " << input[i] << ", Output: " << (char)(newPosition + 'A') << std::endl;
     }
     
-    std::cout << "Decode: \"EHPPMBMKPA\"" << std::endl;
-    char input2[11] = "EHPPMBMKPA";
+    std::cout << "Decode: \"WRXRXPCXBH\"" << std::endl;
+    char input2[11] = "WRXRXPCXBH";
     for (int i = 0; i < 10; i++){
         newPosition = enigmaMachineDecode.keyTransform(input2[i] - 'A');
         std::cout << "Input: " << input2[i] << ", Output: " << (char)(newPosition + 'A') << std::endl;
