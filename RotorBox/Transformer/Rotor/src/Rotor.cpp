@@ -50,13 +50,11 @@ inline bool Rotor::isNotchPosition(int position){
 }
 
 int Rotor::transform(int position, bool reverse){
-    int newPosition;
-
     position = (position + rotorRotationCount) % TRANSFORMER_SIZE; 
-    newPosition = transformLUT[(int)reverse][position];
-    newPosition = (position - rotorRotationCount) % TRANSFORMER_SIZE;
+    position = transformLUT[(int)reverse][position];
+    position = (position - rotorRotationCount + TRANSFORMER_SIZE) % TRANSFORMER_SIZE;
 
-    return newPosition;
+    return position;
 }
 
 int Rotor::rotate(){
