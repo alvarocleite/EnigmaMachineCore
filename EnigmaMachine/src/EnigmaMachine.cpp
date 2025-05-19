@@ -12,6 +12,10 @@ EnigmaMachine::EnigmaMachine()
                                         assetsDir + "Reflector.txt"})
 {}
 
+EnigmaMachine::EnigmaMachine(int nRotorCount, const std::vector<int> &rotorPositions, const std::vector<std::string> &rotorFiles)
+    : rotorBox(nRotorCount, rotorPositions, rotorFiles)
+{}
+
 EnigmaMachine::~EnigmaMachine(){}
 
 int EnigmaMachine::keyTransform(int input){
