@@ -2,6 +2,10 @@
 #include <iostream>
 #include "./EnigmaMachine/include/EnigmaMachine.hpp"
 
+/**
+ * @brief Main function to demonstrate the encoding and decoding of a message using the Enigma machine.
+ * It encodes a message, decodes it back, and checks if the decoded message matches the original.
+ */
 int main(){
     EnigmaMachine enigmaMachineEncode;
     EnigmaMachine enigmaMachineDecode;
