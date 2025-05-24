@@ -3,6 +3,11 @@
 #include <algorithm>
 #include <string>
 
+/**
+ * @brief Constructor for the Rotor class.
+ * Sets the notch position to 0 and initializes the rotor rotation count.
+ * Initializes the rotor with a transformation lookup table (LUT) from a file.
+ */
 Rotor::Rotor(std::string fileName){
     notchPosition = 0;
     rotorRotationCount = 0;
@@ -56,15 +61,35 @@ bool Rotor::initTransformLUT(std::string fileName){
 
 }
 
+/**
+ * @brief Initializes the rotor position.
+ * This function sets the initial position of the rotor based on the provided offset.
+ * 
+ * @param offset The initial offset for the rotor position.
+ * @return int Returns 0 on success.
+ */
 int Rotor::initRotorPosition(int offset){
     rotorRotationCount = offset;
     return 0;
 }
 
+/**
+ * @brief Checks if the given position is the notch position.
+ * 
+ * @param position The position to check.
+ * @return true if the position is the notch position, false otherwise.
+ */
 inline bool Rotor::isNotchPosition(int position){
     return (position == notchPosition);
 }
 
+/**
+ * @brief Transforms the given position based on the transformation lookup table (LUT).
+ * 
+ * @param position The current position in the rotor.
+ * @param reverse If true, transforms using the reverse LUT; otherwise, uses the forward LUT.
+ * @return int The transformed position.
+ */
 int Rotor::transform(int position, bool reverse){
     position = (position + rotorRotationCount) % TRANSFORMER_SIZE; 
     position = transformLUT[(int)reverse][position];
@@ -73,6 +98,13 @@ int Rotor::transform(int position, bool reverse){
     return position;
 }
 
+/**
+ * @brief Rotates the rotor by one position.
+ * If the rotor reaches the notch position, it returns 1, indicating that the next rotor should rotate.
+ * Otherwise, it returns 0.
+ * 
+ * @return int Returns 1 if the rotor reached the notch position, otherwise returns 0.
+ */
 int Rotor::rotate(){
     rotorRotationCount = (rotorRotationCount + 1) % TRANSFORMER_SIZE;
     return isNotchPosition(rotorRotationCount) ? 1 : 0;

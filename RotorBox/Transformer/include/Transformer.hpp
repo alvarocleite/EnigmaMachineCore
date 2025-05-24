@@ -4,12 +4,19 @@
 
 #include "../../config/config.hpp"
 
+/** 
+ * @brief Enum representing the type of transformer.
+ */
 typedef enum transformerType{
     notDefined = 0,
     rotor,
     reflector
 } transformerType;
 
+/** 
+ * @brief Base class for transformers (rotors and reflectors).
+ * This class provides the interface for transforming positions and initializing transformation lookup tables (LUT).
+ */
 class Transformer{
 protected:
     transformerType type;

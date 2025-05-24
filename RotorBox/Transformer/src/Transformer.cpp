@@ -6,16 +6,30 @@
 
 #include <toml.hpp> 
 
+/**
+ * @brief Constructor for the Transformer class.
+ * Initializes the transformer type to notDefined.
+ */
 Transformer::Transformer(){
     type = notDefined;
 }
 
 Transformer::~Transformer(){}
 
+/** 
+ * @brief Calculates the size of the transformation lookup table (LUT).
+ * 
+ * @return int Returns the size of the transformation lookup table.
+ */
 int Transformer::sizeOfTransformLUT(){
     return sizeof(transformLUT) / sizeof(transformLUT[0][0]);
 }
 
+/** 
+ * @brief Returns the type of the transformer.
+ * 
+ * @return transformerType Returns the type of the transformer (rotor, reflector, or notDefined).
+*/
 transformerType Transformer::getType(){
     return type;
 }

@@ -1,6 +1,11 @@
 
 #include "../include/Reflector.hpp"
 
+/**
+ * @brief Constructor for the Reflector class.
+ * Initializes the reflector with a transformation lookup table (LUT) from a file.
+ * Sets the type of the transformer to reflector.
+ */
 Reflector::Reflector(std::string fileName){
     type = reflector;
     initTransformLUT(fileName);
@@ -35,6 +40,13 @@ bool Reflector::initTransformLUT(std::string fileName){
     return true;
 }
 
+/**
+ * @brief Transforms the given position using the reflector's transformation lookup table (LUT).
+ * 
+ * @param position The input position to be transformed.
+ * @param reverse It should not be set to true.
+ * @return int The transformed position. Returns "-1" if the position is not found in the LUT when reverse is true.
+ */
 int Reflector::transform(int position, bool reverse){
     int newPosition = transformLUT[reverse][position];
     // transformLUT[reverse][position] = -1,  when reverse is true 

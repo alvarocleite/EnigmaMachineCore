@@ -3,6 +3,12 @@
 #include <string>
 #include "../../include/Transformer.hpp"
 
+/**
+ * @brief Class representing a rotor in the Enigma machine.
+ * This class inherits from the Transformer class and implements the functionality
+ * for transforming positions based on the rotor's transformation lookup table (LUT).
+ * It also handles the rotor's rotation and notch position.
+ */
 class Rotor: public Transformer {
 private:
     int notchPosition;
