@@ -13,11 +13,27 @@ Rotor::Rotor(std::string fileName){
 
 Rotor::~Rotor(){}
 
+/** 
+ * @brief Initializes the Rotor transformation lookup tables (LUT).
+ * This function calls the function that reads the forward transformation data from a file and initializes it,
+ * then it initializes the reverse transformation vector based on the forward transformation data.
+ * 
+ * @param fileName The name of the file containing the transformation data.
+ * @return bool Returns true if successful, false otherwise.
+ */
 bool Rotor::initTransformLUT(std::string fileName){
     bool canBeInitialized = true;
+    int notchPosition = 0;
     
     // Initialize forward transformation vector
-    initForwardTransformLUT(fileName);
+    notchPosition == initForwardTransformLUT(fileName);
+
+    // Check if the notch position is valid
+    if (notchPosition > -1 && notchPosition < TRANSFORMER_SIZE){
+        this->notchPosition = notchPosition;
+    } else { 
+        return false; // Initialization failed
+    }
 
     // Initialize reverse transformation vector 
     for (int fv = 0; fv < TRANSFORMER_SIZE; fv++){

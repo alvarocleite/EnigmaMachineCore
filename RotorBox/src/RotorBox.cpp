@@ -10,10 +10,10 @@ RotorBox::RotorBox(){
     for(int i = 0; i < nRotorCount; i++){
         rotorPositions.push_back(0);
     }
-    initTransformerVec(nRotorCount, std::vector<std::string> {"../assets/Rotor1.txt", 
-                                         "../assets/Rotor2.txt", 
-                                         "../assets/Rotor3.txt", 
-                                         "../assets/Reflector.txt"});
+    initTransformerVec(nRotorCount, std::vector<std::string> {"../assets/Rotor1.toml", 
+                                         "../assets/Rotor2.toml", 
+                                         "../assets/Rotor3.toml", 
+                                         "../assets/Reflector.toml"});
 }
 
 RotorBox::RotorBox(int nRotorCount, const std::vector<int> &rotorPositions, const std::vector<std::string> &rotorFiles){

@@ -24,3 +24,6 @@ target_sources(${PROJECT_NAME} PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/RotorBox/Transformer/Rotor/src/Rotor.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/EnigmaMachine/src/EnigmaMachine.cpp
 )
+
+add_subdirectory(external/toml11)
+target_link_libraries(${PROJECT_NAME} PRIVATE toml11::toml11)

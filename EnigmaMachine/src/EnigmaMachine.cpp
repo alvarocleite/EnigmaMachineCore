@@ -6,10 +6,10 @@
 
 EnigmaMachine::EnigmaMachine()
     : rotorBox(3, std::vector<int> {0, 0, 0},
-              std::vector<std::string> {assetsDir + "Rotor1.txt", 
-                                        assetsDir + "Rotor2.txt", 
-                                        assetsDir + "Rotor3.txt", 
-                                        assetsDir + "Reflector.txt"})
+              std::vector<std::string> {assetsDir + "Rotor1.toml", 
+                                        assetsDir + "Rotor2.toml", 
+                                        assetsDir + "Rotor3.toml", 
+                                        assetsDir + "Reflector.toml"})
 {}
 
 EnigmaMachine::EnigmaMachine(int nRotorCount, const std::vector<int> &rotorPositions, const std::vector<std::string> &rotorFiles)

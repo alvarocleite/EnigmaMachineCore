@@ -8,9 +8,24 @@ Reflector::Reflector(std::string fileName){
 
 Reflector::~Reflector(){}
 
+/** 
+ * @brief Initializes the transformation lookup table (LUT) for the reflector.
+ * This function the function that reads the transformation data from a file and initializes 
+ * the forward vector. 
+ * This function also initializes the reverse transformation vector with "-1".
+ * 
+ * @param fileName The name of the file containing the transformation data.
+ * @return bool Returns true if the initialization is successful, false otherwise.
+ */
 bool Reflector::initTransformLUT(std::string fileName){
+    int notchPosition = 0;
+
     // Initialize forward transformation vector
-    initForwardTransformLUT(fileName);
+    notchPosition = initForwardTransformLUT(fileName);
+
+    if (notchPosition != TRANSFORMER_SIZE){
+        return false; // Initialization failed
+    }
 
     // Initialize reverse transformation vector
     for (int i = 0; i < TRANSFORMER_SIZE; i++){
