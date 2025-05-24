@@ -2,6 +2,11 @@
 
 #include "../../RotorBox/include/RotorBox.hpp"
 
+/**
+ * @brief Class representing the Enigma machine.
+ * This class encapsulates the functionality of the Enigma machine, including the rotor box
+ * and the transformation of input keys through the rotors and reflector.
+ */
 class EnigmaMachine{
 private:
     RotorBox rotorBox;

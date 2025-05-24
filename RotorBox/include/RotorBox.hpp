@@ -5,6 +5,11 @@
 
 #include "../Transformer/include/Transformer.hpp"
 
+/**
+ * @brief Class representing a box of rotors in the Enigma machine.
+ * This class manages multiple rotors and a reflector, allowing for the transformation of input keys.
+ * It handles the initialization of rotors, their positions, and the transformation process.
+ */
 class RotorBox{
 private:
     int nRotorCount;
