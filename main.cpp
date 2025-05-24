@@ -3,23 +3,45 @@
 #include "./EnigmaMachine/include/EnigmaMachine.hpp"
 
 int main(){
-    int position = 0;
-    int newPosition;
     EnigmaMachine enigmaMachineEncode;
     EnigmaMachine enigmaMachineDecode;
-    
-    std::cout << "Ecode: \"HELLOWORLD\"" << std::endl;
-    char input[11] = "HELLOWORLD"; 
+   
+    char msg2encode[11] = "HELLOWORLD";
+    std::cout << "Encoding message: " << msg2encode << std::endl;
+
+    char msg2decode[11];    
     for (int i = 0; i < 10; i++){
-        newPosition = enigmaMachineEncode.keyTransform(input[i] - 'A');
-        std::cout << "Input: " << input[i] << ", Output: " << (char)(newPosition + 'A') << std::endl;
+        msg2decode[i] = enigmaMachineEncode.keyTransform(msg2encode[i] - 'A') + 'A';
+        std::cout << "Input: " << msg2encode[i] << ", Output: " << msg2decode[i] << std::endl;
     }
-    
-    std::cout << "Decode: \"WRXRXPCXBH\"" << std::endl;
-    char input2[11] = "WRXRXPCXBH";
+    msg2decode[10] = '\0'; // Null-terminate the string
+
+    std::cout << "Decoding message: " << msg2decode << std::endl;
+
+    char decodedMsg[11];
     for (int i = 0; i < 10; i++){
-        newPosition = enigmaMachineDecode.keyTransform(input2[i] - 'A');
-        std::cout << "Input: " << input2[i] << ", Output: " << (char)(newPosition + 'A') << std::endl;
+        decodedMsg[i] = enigmaMachineDecode.keyTransform(msg2decode[i] - 'A') + 'A';
+        std::cout << "Input: " << msg2decode[i] << ", Output: " << decodedMsg[i] << std::endl;
     }
+
+    bool isEqual = true;
+    for (int i = 0; i < 10; i++){
+        if (msg2encode[i] != decodedMsg[i]){
+            isEqual = false;
+            break;
+        }
+    }
+
+    decodedMsg[10] = '\0'; // Null-terminate the string
+    std::cout << "Original message: " << msg2encode << std::endl;
+    std::cout << "Decoded message: " << decodedMsg << std::endl;
+
+    if (isEqual){
+        std::cout << "Decoded message matches the original message!" << std::endl;
+    } else {
+        std::cout << "Decoded message does not match the original message!" << std::endl;
+    }
+
+    std::cout << "End of program." << std::endl;
     return 0;
 }
