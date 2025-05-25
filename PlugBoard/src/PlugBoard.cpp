@@ -9,14 +9,18 @@ PlugBoard::PlugBoard() : pairs{}, pairCount(0) {}
 
 /**
  * @brief Constructor for the PlugBoard class.
- * Initializes the plugboard with a given array of pairs, adding only valid pairs.
+ * Initializes the plugboard with a given array of pairs, 
+ * adding valid pairs, and file unused pairs with {-1. -1}.
  * 
  * @param pairs An array of pairs to initialize the plugboard with.
  */
-PlugBoard::PlugBoard(std::array<Pair_t, 10> pairs) {
+PlugBoard::PlugBoard(std::array<Pair_t, PLUGBOARD_MAX_PAIRS> pairs) {
     for (const auto& pair : pairs) {
         if (isPairValid(pair.a, pair.b)) {
             addPair(pair.a, pair.b);
+        }
+        else {
+            addPair(-1, -1); // Add an invalid pair to signal that the pair is invalid
         }
     }
 }

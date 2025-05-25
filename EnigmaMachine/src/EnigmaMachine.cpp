@@ -3,6 +3,12 @@
 #include "../include/EnigmaMachine.hpp"
 #include "../../config/config.hpp"
 
+const std::array<Pair_t, PLUGBOARD_MAX_PAIRS> emptyPlugboard = []{
+    std::array<Pair_t, PLUGBOARD_MAX_PAIRS> arr{};
+    for (auto& p : arr) { p.a = -1; p.b = -1; }
+    return arr;
+}();
+
 /**
  * @brief Default constructor for the EnigmaMachine class.
  * Initializes the rotor box with 3 rotors, all starting at position 0,
@@ -14,7 +20,7 @@ EnigmaMachine::EnigmaMachine()
                                         assetsDir + "Rotor2.toml", 
                                         assetsDir + "Rotor3.toml", 
                                         assetsDir + "Reflector.toml"}),
-        plugBoard(std::array<Pair_t, PLUGBOARD_MAX_PAIRS> {{}})
+        plugBoard(emptyPlugboard)
 {}
 
 /**
@@ -28,7 +34,7 @@ EnigmaMachine::EnigmaMachine()
  */
 EnigmaMachine::EnigmaMachine(int nRotorCount, const std::vector<int> &rotorPositions, const std::vector<std::string> &rotorFiles)
     : rotorBox(nRotorCount, rotorPositions, rotorFiles),
-        plugBoard(std::array<Pair_t, PLUGBOARD_MAX_PAIRS> {{}})
+        plugBoard(emptyPlugboard)
 {}
 
 /**
@@ -50,12 +56,15 @@ EnigmaMachine::~EnigmaMachine(){}
 
 /**
  * @brief Transforms the input key through the rotor box.
- * This function updates the rotor positions, transforms the input through the rotors and reflector,
- * and returns the transformed output.
+ * This function first applies the plugboard transformation to the input key,
+ * then call rotorBox key transform (which updates the rotor positions, and transforms the input through the rotors), 
+ * and finally applies the plugboard transformation again to the output key.
  * 
  * @param input The input key to be transformed.
  * @return int The transformed output key.
  */
 int EnigmaMachine::keyTransform(int input){
-    return rotorBox.keyTransform(input);
+    input = plugBoard.swap(input);
+    input = rotorBox.keyTransform(input);
+    return plugBoard.swap(input);
 }
