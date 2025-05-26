@@ -60,6 +60,8 @@ EnigmaMachine::EnigmaMachine(int nRotorCount, const std::vector<int> &rotorPosit
  * Parses the configuration file to extract the number of rotors, their positions, files, and plugboard pairs.
  * 
  * @param fileName The name of the configuration file containing the settings for the Enigma machine.
+ * @return A tuple containing the number of rotors, their positions, files, and plugboard pairs.
+ * @throws std::runtime_error if the configuration file is invalid or if the number of rotors, positions, and files do not match.
  */
 static std::tuple<int, std::vector<int>, std::vector<std::string>, std::array<Pair_t, PLUGBOARD_MAX_PAIRS>>
 parseConfig(const std::string& fileName) {
