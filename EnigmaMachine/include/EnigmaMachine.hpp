@@ -16,6 +16,7 @@ public:
     EnigmaMachine();
     EnigmaMachine(int nRotorCount, const std::vector<int> &rotorPositions, const std::vector<std::string> &transformerFiles);
     EnigmaMachine(int nRotorCount, const std::vector<int> &rotorPositions, const std::vector<std::string> &transformerFiles, const std::array<Pair_t, PLUGBOARD_MAX_PAIRS> &plugBoardPairs);
+    EnigmaMachine(std::string fileName);
     ~EnigmaMachine();
 
     int keyTransform(int input);

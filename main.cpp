@@ -2,13 +2,15 @@
 #include <iostream>
 #include "./EnigmaMachine/include/EnigmaMachine.hpp"
 
+#include "../config/config.hpp"
+
 /**
  * @brief Main function to demonstrate the encoding and decoding of a message using the Enigma machine.
  * It encodes a message, decodes it back, and checks if the decoded message matches the original.
  */
 int main(){
-    EnigmaMachine enigmaMachineEncode;
-    EnigmaMachine enigmaMachineDecode;
+    EnigmaMachine enigmaMachineEncode(assetsDir + "EnigmaMachineConfig1.toml");
+    EnigmaMachine enigmaMachineDecode(assetsDir + "EnigmaMachineConfig1.toml");
    
     char msg2encode[11] = "HELLOWORLD";
     std::cout << "Encoding message: " << msg2encode << std::endl;

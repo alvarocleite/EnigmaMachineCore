@@ -1,0 +1,20 @@
+Name = "EnigmaMachineConfig1"
+ReflectorFile = "Reflector.toml"
+
+[rotors]
+RotorCount = 3
+RotorFiles = [
+    "Rotor1.toml",
+    "Rotor2.toml",
+    "Rotor3.toml"
+]
+RotorPositions = [6, 18, 1]
+
+[plugboard]
+PlugCount = 4
+PlugBoardPairs = [
+    { from =  4, to =  7 },
+    { from = 18, to = 20 },
+    { from =  9, to = 13 },
+    { from = 10, to = 12 }
+]
