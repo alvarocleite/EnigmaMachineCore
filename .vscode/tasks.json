@@ -1,0 +1,68 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "CMake: Configure (Debug)",
+            "type": "shell",
+            "command": "cmake",
+            "args": [
+                "-DCMAKE_BUILD_TYPE=Debug",
+                "-S",
+                ".",
+                "-B",
+                "build/debug"
+            ],
+            "group": "build",
+            "detail": "Generates Makefiles for Debug build."
+        },
+        {
+            "label": "CMake: Configure (Release)",
+            "type": "shell",
+            "command": "cmake",
+            "args": [
+                "-DCMAKE_BUILD_TYPE=Release",
+                "-S",
+                ".",
+                "-B",
+                "build/release"
+            ],
+            "group": "build",
+            "detail": "Generates Makefiles for Release build."
+        },
+        {
+            "label": "Build (Debug)",
+            "type": "shell",
+            "command": "cmake",
+            "args": [
+                "--build",
+                "build/debug",
+                "--parallel"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "dependsOn": "CMake: Configure (Debug)",
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "detail": "Compiles the project in Debug mode."
+        },
+        {
+            "label": "Build (Release)",
+            "type": "shell",
+            "command": "cmake",
+            "args": [
+                "--build",
+                "build/release",
+                "--parallel"
+            ],
+            "group": "build",
+            "dependsOn": "CMake: Configure (Release)",
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "detail": "Compiles the project in Release mode."
+        }
+    ]
+}
