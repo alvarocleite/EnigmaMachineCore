@@ -1,4 +1,4 @@
-#include "../include/Transformer.hpp"
+#include "Transformer.hpp"
 
 #include <fstream>
 #include <iostream>

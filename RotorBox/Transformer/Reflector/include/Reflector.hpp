@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../include/Transformer.hpp"
+#include "Transformer.hpp"
 
 /**
  * @brief Class representing a reflector in the Enigma machine.

@@ -1,9 +1,9 @@
 #include <iostream>
 #include <string>
 
-#include "../include/RotorBox.hpp"
-#include "../Transformer/Reflector/include/Reflector.hpp"
-#include "../Transformer/Rotor/include/Rotor.hpp"
+#include "RotorBox.hpp"
+#include "Reflector.hpp"
+#include "Rotor.hpp"
 
 /**
  * @brief Constructor for the RotorBox class.

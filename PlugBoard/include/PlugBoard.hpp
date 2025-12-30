@@ -2,7 +2,7 @@
 
 #include <array>
 
-#include "../../config/config.hpp"
+#include "config.hpp"
 
 typedef struct {
     int a;

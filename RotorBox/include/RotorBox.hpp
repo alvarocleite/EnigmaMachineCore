@@ -3,7 +3,7 @@
 #include <vector>
 #include <memory>
 
-#include "../Transformer/include/Transformer.hpp"
+#include "Transformer.hpp"
 
 /**
  * @brief Class representing a box of rotors in the Enigma machine.

@@ -1,7 +1,7 @@
 #pragma once
 
 #include <string>
-#include "../../include/Transformer.hpp"
+#include "Transformer.hpp"
 
 /**
  * @brief Class representing a rotor in the Enigma machine.

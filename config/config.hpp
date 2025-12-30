@@ -8,5 +8,5 @@
 #define PLUGBOARD_MAX_PAIRS 10
 
 /* assets base directory */
-const std::string assetsDir = "../assets/";
+const std::string assetsDir = "assets/";
 

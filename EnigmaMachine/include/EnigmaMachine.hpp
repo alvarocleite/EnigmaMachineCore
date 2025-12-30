@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../../RotorBox/include/RotorBox.hpp"
-#include "../../PlugBoard/include/PlugBoard.hpp"
+#include "RotorBox.hpp"
+#include "PlugBoard.hpp"
 
 /**
  * @brief Class representing the Enigma machine.

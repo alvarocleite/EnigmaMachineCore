@@ -2,7 +2,7 @@
 #include <iostream>
 #include "./EnigmaMachine/include/EnigmaMachine.hpp"
 
-#include "../config/config.hpp"
+#include "config/config.hpp"
 
 /**
  * @brief Main function to demonstrate the encoding and decoding of a message using the Enigma machine.

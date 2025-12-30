@@ -1,4 +1,4 @@
-#include "../include/Rotor.hpp"
+#include "Rotor.hpp"
 
 #include <algorithm>
 #include <string>

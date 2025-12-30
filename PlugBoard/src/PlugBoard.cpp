@@ -1,5 +1,5 @@
-#include "../include/PlugBoard.hpp"
-#include "../../config/config.hpp"
+#include "PlugBoard.hpp"
+#include "config.hpp"
 
 /**
  * @brief Constructor for the PlugBoard class.

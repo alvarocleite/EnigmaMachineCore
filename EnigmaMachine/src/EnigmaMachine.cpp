@@ -1,8 +1,8 @@
 #include <vector>
 #include <iostream>
 
-#include "../include/EnigmaMachine.hpp"
-#include "../../config/config.hpp"
+#include "EnigmaMachine.hpp"
+#include "config.hpp"
 
 #include <toml.hpp> 
 

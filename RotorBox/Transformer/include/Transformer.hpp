@@ -2,7 +2,7 @@
 
 #include <string>
 
-#include "../../config/config.hpp"
+#include "config.hpp"
 
 /** 
  * @brief Enum representing the type of transformer.
