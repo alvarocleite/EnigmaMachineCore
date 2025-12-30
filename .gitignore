@@ -34,3 +34,10 @@
 # Make and CMake files
 build/*
 !build/
+
+# Documentation (Generated)
+docs/doxygen-gen-files/
+
+# IDE files
+.vscode/
+.idea/
