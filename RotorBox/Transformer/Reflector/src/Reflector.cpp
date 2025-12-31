@@ -4,10 +4,10 @@
 /**
  * @brief Constructor for the Reflector class.
  * Initializes the reflector with a transformation lookup table (LUT) from a file.
- * Sets the type of the transformer to reflector.
+ * Sets the type of the transformer to Reflector.
  */
 Reflector::Reflector(std::string fileName){
-    type = reflector;
+    type = TransformerType::Reflector;
     initTransformLUT(fileName);
 }
 
@@ -48,7 +48,7 @@ bool Reflector::initTransformLUT(std::string fileName){
  * @return int The transformed position. Returns "-1" if the position is not found in the LUT when reverse is true.
  */
 int Reflector::transform(int position, bool reverse){
-    int newPosition = transformLUT[reverse][position];
+    int newPosition = transformLUT[(int)reverse][position];
     // transformLUT[reverse][position] = -1,  when reverse is true 
     return newPosition;
 }

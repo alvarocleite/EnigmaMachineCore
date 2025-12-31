@@ -14,6 +14,6 @@ private:
 public:
     Reflector(std::string fileName);
     ~Reflector();
-    int transform(int position, bool reverse = false);
-    int rotate() { return 0; } // Reflectors do not rotate
+    int transform(int position, bool reverse = false) override;
+    int rotate() override { return 0; } // Reflectors do not rotate
 };
