@@ -8,10 +8,10 @@
 
 /**
  * @brief Constructor for the Transformer class.
- * Initializes the transformer type to notDefined.
+ * Initializes the transformer type to NotDefined.
  */
 Transformer::Transformer(){
-    type = notDefined;
+    type = TransformerType::NotDefined;
 }
 
 Transformer::~Transformer(){}
@@ -28,9 +28,9 @@ int Transformer::sizeOfTransformLUT(){
 /** 
  * @brief Returns the type of the transformer.
  * 
- * @return transformerType Returns the type of the transformer (rotor, reflector, or notDefined).
+ * @return TransformerType Returns the type of the transformer (Rotor, Reflector, or NotDefined).
 */
-transformerType Transformer::getType(){
+TransformerType Transformer::getType(){
     return type;
 }
 
@@ -39,7 +39,7 @@ transformerType Transformer::getType(){
  * For rotors, it also initializes the notch position. For reflectors, it sets the notch position to TRANSFORMER_SIZE.
  * 
  * @param fileName The name of the file containing the transformation data.
- * @return int Returns the notch position on success, or an "-1" on failure.
+ * @return int Returns the notch position on success, or -1 on failure.
  */
 int Transformer::initForwardTransformLUT(std::string fileName){
     int notchPosition = 0;
@@ -56,7 +56,7 @@ int Transformer::initForwardTransformLUT(std::string fileName){
 
         // In case of rotor config file
         if (type == "rotor") {
-            if (this->type != rotor) {
+            if (this->type != TransformerType::Rotor) {
                 std::cerr << "Wrong config file" << std::endl;
                 return -1; // Indicating failure
             }
@@ -81,7 +81,7 @@ int Transformer::initForwardTransformLUT(std::string fileName){
 
         // In case of reflector config file
         else if (type == "reflector") {
-            if (this->type != reflector) {
+            if (this->type != TransformerType::Reflector) {
                 std::cerr << "Wrong config file" << std::endl;
                 return -1; // Indicating failure
             }
