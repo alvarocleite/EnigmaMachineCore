@@ -19,6 +19,7 @@ private:
 public:
     Rotor(std::string fileName);
     ~Rotor();
-    int transform(int position, bool reverse = false);
-    int rotate();
+    int transform(int position, bool reverse = false) override;
+    int rotate() override;
+    void setPosition(int position) override;
 };

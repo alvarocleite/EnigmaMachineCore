@@ -11,7 +11,7 @@
 Rotor::Rotor(std::string fileName){
     notchPosition = 0;
     rotorRotationCount = 0;
-    type = rotor;
+    type = TransformerType::Rotor;
     initTransformLUT(fileName);
     initRotorPosition();
 }
@@ -31,7 +31,7 @@ bool Rotor::initTransformLUT(std::string fileName){
     int notchPosition = 0;
     
     // Initialize forward transformation vector
-    notchPosition == initForwardTransformLUT(fileName);
+    notchPosition = initForwardTransformLUT(fileName);
 
     // Check if the notch position is valid
     if (notchPosition > -1 && notchPosition < TRANSFORMER_SIZE){
@@ -108,4 +108,8 @@ int Rotor::transform(int position, bool reverse){
 int Rotor::rotate(){
     rotorRotationCount = (rotorRotationCount + 1) % TRANSFORMER_SIZE;
     return isNotchPosition(rotorRotationCount) ? 1 : 0;
+}
+
+void Rotor::setPosition(int position){
+    rotorRotationCount = position;
 }
