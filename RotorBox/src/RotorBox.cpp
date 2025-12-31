@@ -15,10 +15,12 @@ RotorBox::RotorBox(){
     for(int i = 0; i < nRotorCount; i++){
         rotorPositions.push_back(0);
     }
-    initTransformerVec(nRotorCount, std::vector<std::string> {"../assets/Rotor1.toml", 
-                                         "../assets/Rotor2.toml", 
-                                         "../assets/Rotor3.toml", 
-                                         "../assets/Reflector.toml"});
+    if (initTransformerVec(nRotorCount, std::vector<std::string> {assetsDir + "Rotor1.toml", 
+                                         assetsDir + "Rotor2.toml", 
+                                         assetsDir + "Rotor3.toml", 
+                                         assetsDir + "Reflector.toml"}) != 0) {
+        std::cerr << "Error: Failed to initialize default transformers in RotorBox." << std::endl;
+    }
 }
 
 /**
@@ -40,7 +42,14 @@ RotorBox::RotorBox(int nRotorCount, const std::vector<int> &rotorPositions, cons
         this->rotorPositions.push_back(position);
     }
     
-    initTransformerVec(nRotorCount, rotorFiles);
+    if (initTransformerVec(nRotorCount, rotorFiles) != 0) {
+        std::cerr << "Error: Failed to initialize transformers in RotorBox." << std::endl;
+        return;
+    }
+
+    for(int i = 0; i < nRotorCount; i++){
+        transformerVec[i]->setPosition(this->rotorPositions[i]);
+    }
 }
 
 RotorBox::~RotorBox(){}
@@ -69,7 +78,7 @@ int RotorBox::initTransformerVec(int nRotorCount, const std::vector<std::string>
  */
 void RotorBox::printTransformerVec(){
     for(auto &transformer : transformerVec){
-        std::cout << "Transformer Type: " << transformer->getType() << std::endl;
+        std::cout << "Transformer Type: " << static_cast<int>(transformer->getType()) << std::endl;
     }
 }
 
@@ -85,7 +94,7 @@ int RotorBox::keyTransform(int input){
     // update rotors position rotating
     updateRotors();
 
-    // transform trough rotors forward
+    // transform through rotors forward
     bool reverse = false;
     int newPosition = input;
     for(int i = 0; i < nRotorCount; i++){
@@ -95,7 +104,7 @@ int RotorBox::keyTransform(int input){
     // reflector
     newPosition = transformerVec[nRotorCount]->transform(newPosition, reverse);
 
-    // transform trough rotors in reverse
+    // transform through rotors in reverse
     reverse = true;
     for(int i = nRotorCount - 1; i >= 0; i--){ 
         newPosition = transformerVec[i]->transform(newPosition, reverse);
