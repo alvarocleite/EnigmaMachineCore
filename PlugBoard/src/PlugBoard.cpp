@@ -1,89 +1,59 @@
 #include "PlugBoard.hpp"
 #include "config.hpp"
+#include <iostream>
 
 /**
  * @brief Constructor for the PlugBoard class.
- * Initializes an empty plugboard with no pairs.
+ * Initializes an empty plugboard with no pairs (identity mapping).
  */
-PlugBoard::PlugBoard() : pairs{}, pairCount(0) {}
+PlugBoard::PlugBoard() {
+    for (int i = 0; i < TRANSFORMER_SIZE; ++i) {
+        mapping[i] = i;
+    }
+}
 
 /**
  * @brief Constructor for the PlugBoard class.
- * Initializes the plugboard with a given array of pairs, 
- * adding valid pairs, and file unused pairs with {-1. -1}.
+ * Initializes the plugboard with a given array of pairs.
+ * Validates that ports are not already used before connecting.
  * 
  * @param pairs An array of pairs to initialize the plugboard with.
  */
-PlugBoard::PlugBoard(std::array<Pair_t, PLUGBOARD_MAX_PAIRS> pairs) {
+PlugBoard::PlugBoard(std::array<Pair_t, PLUGBOARD_MAX_PAIRS> pairs) : PlugBoard() {
     for (const auto& pair : pairs) {
-        if (isPairValid(pair.a, pair.b)) {
-            addPair(pair.a, pair.b);
+        int a = pair.a;
+        int b = pair.b;
+
+        if (a < 0 || a >= TRANSFORMER_SIZE || b < 0 || b >= TRANSFORMER_SIZE) {
+            continue;
         }
-        else {
-            addPair(-1, -1); // Add an invalid pair to signal that the pair is invalid
+
+        if (a == b) {
+            continue;
         }
+
+        if (mapping[a] != a || mapping[b] != b) {
+            std::cerr << "Warning: PlugBoard conflict for pair (" << a << ", " << b << "). Skipping." << std::endl;
+            continue;
+        }
+
+        mapping[a] = b;
+        mapping[b] = a;
     }
 }
 
 PlugBoard::~PlugBoard() {}
 
 /**
- * @brief Checks if a pair of values is valid for the plugboard.
- * 
- * @param a The first value of the pair.
- * @param b The second value of the pair.
- * @return true if the pair is valid, false otherwise.
- */
-bool PlugBoard::isPairValid(int a, int b) {
-    // Check if values are within valid range and not the same
-    if (a < 0 || a >= TRANSFORMER_SIZE || b < 0 || b >= TRANSFORMER_SIZE) {
-        return false; // Invalid pair
-    }
-
-    // Check if the values are not the same
-    if (a == b) {
-        return false; // Pair cannot have the same elements
-    }
-
-    // Check if each value of the pair already exists
-    for (int i = 0; i < pairCount; i++) {
-        if ((pairs[i].a == a && pairs[i].b == b) || (pairs[i].a == b && pairs[i].b == a)) {
-            return false; // At least one of the values already exists
-        }
-    }
-
-    return true;
-}
-
-/**
- * @brief Adds a pair of values to the plugboard.
- * 
- * @param a The first value of the pair.
- * @param b The second value of the pair.
- * @return true if the pair was added successfully, false otherwise.
- */
-bool PlugBoard::addPair(int a, int b) {
-    if (pairCount < pairs.size()) {
-        pairs[pairCount++] = {a, b};
-        return true; // Pair added successfully
-    }
-    return false; // No space to add more pairs
-}
-
-/**
  * @brief Swaps the input key based on the plugboard pairs.
+ * Uses a direct lookup table for O(1) performance.
  * 
  * @param key The input key to be swapped.
- * @return int The swapped key, or the original key if no swap is found.
+ * @return int The swapped key.
  */
-int PlugBoard::swap(int key) {
-    for (const auto& pair : pairs) {
-        if (pair.a == key) {
-            return pair.b; // Return the paired value
-        } 
-        else if (pair.b == key) {
-            return pair.a; // Return the paired value
-        }
+int PlugBoard::swap(int key) const {
+    if (key < 0 || key >= TRANSFORMER_SIZE) {
+        return key; 
     }
-    return key; // No swap, return the original key
+    return mapping[key];
 }
