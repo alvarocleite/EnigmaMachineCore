@@ -6,16 +6,16 @@
 
 #include <toml.hpp> 
 
-const std::array<Pair_t, PLUGBOARD_MAX_PAIRS> emptyPlugboard = []{
-    std::array<Pair_t, PLUGBOARD_MAX_PAIRS> arr{};
-    for (auto& p : arr) { p.a = -1; p.b = -1; }
-    return arr;
-}();
 
 /**
- * @brief Default constructor for the EnigmaMachine class.
- * Initializes the rotor box with 3 rotors, all starting at position 0,
- * and uses default rotor and reflector files.
+ * @brief Default Constructor for the EnigmaMachine class.
+ *
+ * Initializes a standard Enigma Machine configuration with:
+ * - 3 Rotors (Rotor1, Rotor2, Rotor3) positioned at 0.
+ * - A standard Reflector.
+ * - An empty PlugBoard (identity mapping).
+ *
+ * This configuration is useful for basic testing or default behavior.
  */
 EnigmaMachine::EnigmaMachine()
     : rotorBox(3, std::vector<int> {0, 0, 0},
@@ -23,33 +23,34 @@ EnigmaMachine::EnigmaMachine()
                                         assetsDir + "Rotor2.toml", 
                                         assetsDir + "Rotor3.toml", 
                                         assetsDir + "Reflector.toml"}),
-        plugBoard(emptyPlugboard)
+        plugBoard()
 {}
 
 /**
- * @brief Constructor for the EnigmaMachine class.
- * Initializes the rotor box with a specified number of rotors, their initial positions,
- * and corresponding files for each rotor and reflector.
- * 
- * @param nRotorCount The number of rotors in the rotor box.
- * @param rotorPositions A vector containing the initial positions of each rotor.
- * @param rotorFiles A vector containing the file names for each rotor and reflector.
+ * @brief Parameterized Constructor for the EnigmaMachine class (No PlugBoard).
+ *
+ * Initializes the machine with a custom RotorBox configuration and an empty PlugBoard.
+ *
+ * @param nRotorCount The number of rotors to be used in the RotorBox.
+ * @param rotorPositions A vector defining the initial rotational position (0-25) for each rotor.
+ * @param rotorFiles A vector of file paths defining the wiring for each rotor and the reflector.
+ *                   The last file in the list is expected to be the Reflector.
  */
 EnigmaMachine::EnigmaMachine(int nRotorCount, const std::vector<int> &rotorPositions, const std::vector<std::string> &rotorFiles)
     : rotorBox(nRotorCount, rotorPositions, rotorFiles),
-        plugBoard(emptyPlugboard)
+        plugBoard()
 {}
 
 /**
- * @brief Constructor for the EnigmaMachine class.
- * Initializes the rotor box with a specified number of rotors, their initial positions,
- * and corresponding files for each rotor and reflector.
- * This constructor also allows for the inclusion of a plugboard with specified pairs.
- * 
- * @param nRotorCount The number of rotors in the rotor box.
- * @param rotorPositions A vector containing the initial positions of each rotor.
- * @param rotorFiles A vector containing the file names for each rotor and reflector.
- * @param plugBoardPairs An array of pairs for the plugboard, allowing for additional transformations.
+ * @brief Parameterized Constructor for the EnigmaMachine class (With PlugBoard).
+ *
+ * Initializes the machine with a fully custom configuration for both the RotorBox and PlugBoard.
+ *
+ * @param nRotorCount The number of rotors to be used in the RotorBox.
+ * @param rotorPositions A vector defining the initial rotational position (0-25) for each rotor.
+ * @param rotorFiles A vector of file paths defining the wiring for each rotor and the reflector.
+ *                   The last file in the list is expected to be the Reflector.
+ * @param plugBoardPairs An array of `Pair_t` defining the swaps to be configured on the PlugBoard.
  */
 EnigmaMachine::EnigmaMachine(int nRotorCount, const std::vector<int> &rotorPositions, const std::vector<std::string> &rotorFiles, const std::array<Pair_t, PLUGBOARD_MAX_PAIRS> &plugBoardPairs)
     : rotorBox(nRotorCount, rotorPositions, rotorFiles), plugBoard(plugBoardPairs)
@@ -63,13 +64,13 @@ EnigmaMachine::EnigmaMachine(int nRotorCount, const std::vector<int> &rotorPosit
  * @return A tuple containing the number of rotors, their positions, files, and plugboard pairs.
  * @throws std::runtime_error if the configuration file is invalid or if the number of rotors, positions, and files do not match.
  */
-static std::tuple<int, std::vector<int>, std::vector<std::string>, std::array<Pair_t, PLUGBOARD_MAX_PAIRS>>
-parseConfig(const std::string& fileName) {
+std::tuple<int, std::vector<int>, std::vector<std::string>, std::array<Pair_t, PLUGBOARD_MAX_PAIRS>>
+EnigmaMachine::parseConfig(const std::string& fileName) {
     auto data = toml::parse(fileName);
     int nRotorCount = toml::find<int>(data, "rotors", "RotorCount");
     auto rotorPositions = toml::find<std::vector<int>>(data, "rotors", "RotorPositions");
     auto rotorFiles = toml::find<std::vector<std::string>>(data, "rotors", "RotorFiles");
-    if (nRotorCount != rotorPositions.size() || nRotorCount != rotorFiles.size()) {
+    if (static_cast<size_t>(nRotorCount) != rotorPositions.size() || static_cast<size_t>(nRotorCount) != rotorFiles.size()) {
         throw std::runtime_error("Error: Number of rotors, positions, and files do not match.");
     }
     for (auto& rotorFile : rotorFiles) {
@@ -83,7 +84,7 @@ parseConfig(const std::string& fileName) {
         throw std::runtime_error("Error: Plugboard pairs exceed maximum allowed.");
     }
     auto plugBoardArr = toml::find<std::vector<toml::value>>(data, "plugboard", "PlugBoardPairs");
-    if (plugBoardArr.size() != plugsCount) {
+    if (plugBoardArr.size() != static_cast<size_t>(plugsCount)) {
         throw std::runtime_error("Error: Plugboard pairs count does not match specified count.");
     }
     std::array<Pair_t, PLUGBOARD_MAX_PAIRS> plugBoardPairs;
@@ -102,18 +103,30 @@ parseConfig(const std::string& fileName) {
 }
 
 /**
- * @brief Constructor for the EnigmaMachine class.
- * Initializes the rotor box and plugboard based on a configuration file.
- * 
- * @param fileName The name of the configuration file containing the rotor and plugboard settings.
+ * @brief Private Delegating Constructor.
+ *
+ * Used as an intermediary to unpack the configuration tuple returned by `parseConfig`
+ * and pass the individual components to the main public constructor.
+ *
+ * @param config A tuple containing: {RotorCount, RotorPositions, RotorFiles, PlugBoardPairs}.
+ */
+EnigmaMachine::EnigmaMachine(std::tuple<int, std::vector<int>, std::vector<std::string>, std::array<Pair_t, PLUGBOARD_MAX_PAIRS>> config)
+    : EnigmaMachine(std::get<0>(config), std::get<1>(config), std::get<2>(config), std::get<3>(config))
+{}
+
+/**
+ * @brief File-based Constructor for the EnigmaMachine class.
+ *
+ * Initializes the machine by parsing a TOML configuration file.
+ *
+ * This constructor delegates the parsing logic to `parseConfig` and then delegates
+ * initialization to the main parameterized constructor.
+ *
+ * @param fileName The path to the TOML configuration file.
+ * @throws std::runtime_error If the file cannot be parsed or contains invalid configuration data.
  */
 EnigmaMachine::EnigmaMachine(std::string fileName)
-    : EnigmaMachine(
-        std::get<0>(parseConfig(fileName)),
-        std::get<1>(parseConfig(fileName)),
-        std::get<2>(parseConfig(fileName)),
-        std::get<3>(parseConfig(fileName))
-    )
+    : EnigmaMachine(parseConfig(fileName))
 {}
 
 EnigmaMachine::~EnigmaMachine(){}

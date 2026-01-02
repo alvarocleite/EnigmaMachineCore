@@ -1,5 +1,6 @@
 #pragma once
 
+#include <tuple>
 #include "RotorBox.hpp"
 #include "PlugBoard.hpp"
 
@@ -12,6 +13,11 @@ class EnigmaMachine{
 private:
     RotorBox rotorBox;
     PlugBoard plugBoard; // Optional: if you want to include a plugboard for additional transformations
+
+    EnigmaMachine(std::tuple<int, std::vector<int>, std::vector<std::string>, std::array<Pair_t, PLUGBOARD_MAX_PAIRS>> config);
+
+    static std::tuple<int, std::vector<int>, std::vector<std::string>, std::array<Pair_t, PLUGBOARD_MAX_PAIRS>> parseConfig(const std::string& fileName);
+
 public:
     EnigmaMachine();
     EnigmaMachine(int nRotorCount, const std::vector<int> &rotorPositions, const std::vector<std::string> &transformerFiles);
