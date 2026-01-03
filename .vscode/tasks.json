@@ -63,6 +63,19 @@
                 "$gcc"
             ],
             "detail": "Compiles the project in Release mode."
+        },
+        {
+            "label": "Run Tests",
+            "type": "shell",
+            "command": "ctest",
+            "args": [
+                "--output-on-failure",
+                "--test-dir",
+                "build/debug"
+            ],
+            "group": "test",
+            "dependsOn": "Build (Debug)",
+            "detail": "Runs all unit tests using CTest."
         }
     ]
 }

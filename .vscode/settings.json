@@ -1,4 +1,6 @@
 {
+    "cmake.buildDirectory": "${workspaceFolder}/build/debug",
+    "cmake.configureOnOpen": true,
     "files.associations": {
         "numeric": "cpp",
         "optional": "cpp",

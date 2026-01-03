@@ -12,65 +12,34 @@ This project provides a modular and extensive implementation of Enigma's core co
 - **Modular Design:** Clean separation of components (rotors, reflectors, RotorBox logic) for extensibility and testing.
 - **C++20 and CMake:** Modern C++ codebase with cross-platform build support.
 
-## Prerequisites & Dependencies
+## Getting Started
 
-To build and run this project, you will need the following tools and libraries:
+### Prerequisites
+To build and run this project, you will need a **C++20 compatible compiler**, **CMake 3.15+**, and **Git**. 
 
-### Core Build Tools
-- **C++ Compiler:** Requires a C++20 compatible compiler (GCC 10+, Clang 10+, or MSVC 2019+).
-- **[CMake](https://cmake.org/):** Version 3.15 or higher is required to generate the build files.
-- **[GDB](https://www.sourceware.org/gdb/):** Essential for debugging logic on Linux environments.
-- **Git:** Required for version control and to manage the project's submodules.
+For a complete list of dependencies and detailed environment setup, please refer to the [Building and Testing guide](docs/Building.md).
 
-### Libraries
-- **[toml11](https://github.com/ToruNiina/toml11):** A powerful C++11 header-only library for TOML. ***Note:** This is included as a git submodule in the `external/` directory.*
-
-### Documentation & Visualization (Optional)
-- **[Doxygen](https://www.doxygen.nl/):** Used for generating the HTML/XML API documentation.
-- **[Graphviz](https://graphviz.org/):** Enables Doxygen to generate interactive call graphs and class diagrams.
-- **[PlantUML](https://plantuml.com/):** Required if you wish to process and view manual diagrams within the `/docs` folder.
-
-## Usage
-
-### 1. Clone the project
+### Quick Start
 ```bash
+# 1. Clone the project
 git clone --recurse-submodules https://github.com/alvarocleite/EnigmaMachineCore.git
 cd EnigmaMachineCore
-```
 
-### 2. Build the project
-The project supports different build types. It is recommended to use separate directories for Debug and Release builds.
-
-**Release Build (Optimized for performance):**
-```bash
+# 2. Configure and Build (Release)
 cmake -DCMAKE_BUILD_TYPE=Release -S . -B build/release
 cmake --build build/release
+
+# 3. Run Tests (Optional, requires Debug build)
+# cmake -DCMAKE_BUILD_TYPE=Debug -S . -B build/debug
+# cmake --build build/debug
+# cd build/debug && ctest
 ```
 
-**Debug Build (With debug symbols for development):**
-```bash
-cmake -DCMAKE_BUILD_TYPE=Debug -S . -B build/debug
-cmake --build build/debug
-```
-
-### 3. Run the project
-```bash
-# From the root directory:
-./build/release/EnigmaMachineCore
-```
-
-## VS Code Integration
-
-The project includes pre-configured settings for Visual Studio Code:
-
-- **Build:** Press `Ctrl+Shift+B` to trigger the default build (Debug).
-- **Debug:** Press `F5` to start debugging with GDB. This will automatically build the project in Debug mode before launching.
-- **Tasks:** Use `Run Task` to access specific commands like `Build (Release)` or `CMake: Configure`.
+For more detailed build configurations, VS Code integration, and an overview of the build architecture, see [docs/Building.md](docs/Building.md). For details on the testing infrastructure, see the [Testing Guide](docs/Testing.md).
 
 ## Documentation
 
-Upon building with documentation enabled, HTML documentation is generated in:
-`docs/doxygen-gen-files/html/index.html`
+If you have Doxygen installed, you can generate the project documentation.
 
 **Using the modern CMake CLI:**
 ```bash
@@ -79,9 +48,11 @@ cmake --build build/debug --target doxygen
 
 **Using the traditional Makefile approach:**
 ```bash
+cd build/debug
 make doxygen     # Generate only the documentation
-make full_build  # Build everything (executable + documentation)
 ```
+
+HTML documentation is generated in: `docs/doxygen-gen-files/html/index.html`
 
 ## Customization
 
