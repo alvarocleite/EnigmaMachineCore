@@ -16,7 +16,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 # --- Source Files ---
-# Group core logic files for easier maintenance
+# Group core logic files for the library
 set(CORE_SOURCES
     EnigmaMachine/src/EnigmaMachine.cpp
     PlugBoard/src/PlugBoard.cpp
@@ -31,18 +31,11 @@ set(APP_SOURCES
     main.cpp
 )
 
-# Create the main executable target
-add_executable(${PROJECT_NAME}
-    ${APP_SOURCES}
+# Create Target (EnigmaCore)
+# Create a static library contains the business logic, to be testable without main()
+add_library(EnigmaCore STATIC
     ${CORE_SOURCES}
 )
-
-# --- Compiler Warnings ---
-if(MSVC)
-    target_compile_options(${PROJECT_NAME} PRIVATE /W4)
-else()
-    target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -Wpedantic)
-endif()
 
 # --- Include Directories ---
 # Define search paths for header files
@@ -56,13 +49,30 @@ set(INCLUDE_DIRS
     ${CMAKE_CURRENT_SOURCE_DIR}/config/
 )
 
-# Apply include paths to the target
-target_include_directories(${PROJECT_NAME} PRIVATE ${INCLUDE_DIRS})
+# Apply include paths to EnigmaCore
+# PUBLIC visibility ensures any target linking EnigmaCore also inherits these paths
+target_include_directories(EnigmaCore PUBLIC ${INCLUDE_DIRS})
+
+# --- Compiler Warnings ---
+if(MSVC)
+    target_compile_options(EnigmaCore PRIVATE /W4)
+else()
+    target_compile_options(EnigmaCore PRIVATE -Wall -Wextra -Wpedantic)
+endif()
 
 # --- External Dependencies ---
 # Initialize and link toml11 library (header-only submodule)
 add_subdirectory(external/toml11)
-target_link_libraries(${PROJECT_NAME} PRIVATE toml11::toml11)
+target_link_libraries(EnigmaCore PUBLIC toml11::toml11)
+
+# --- Main Executable Target ---
+# The EnigmaMachineCore application executable, which is just a wrapper around the EnigmaCore
+add_executable(${PROJECT_NAME}
+    ${APP_SOURCES}
+)
+
+# Link the core library logic to the executable
+target_link_libraries(${PROJECT_NAME} PRIVATE EnigmaCore)
 
 # --- Asset Handling ---
 # Copy assets to build directory after build
@@ -76,3 +86,16 @@ add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
 # --- Documentation ---
 # Include external module for Doxygen and PlantUML configuration
 include(cmake/Doc.cmake)
+
+# --- Testing (GoogleTest) ---
+include(FetchContent)
+FetchContent_Declare(
+  googletest
+  URL https://github.com/google/googletest/archive/refs/tags/v1.14.0.zip
+)
+# For Windows: Prevent overriding the parent project's compiler/linker settings
+set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+FetchContent_MakeAvailable(googletest)
+
+enable_testing()
+add_subdirectory(tests)
