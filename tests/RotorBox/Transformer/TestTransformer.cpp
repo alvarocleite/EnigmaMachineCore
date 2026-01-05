@@ -1,5 +1,26 @@
 #include <gtest/gtest.h>
+#include "Transformer.hpp"
 
-TEST(TransformerTests, SanityCheck) {
-  EXPECT_TRUE(true);
+/**
+ * @brief Concrete implementation of Transformer for testing purposes.
+ */
+class ConcreteTransformer : public Transformer {
+public:
+    ConcreteTransformer() : Transformer() {}
+    
+    // Minimal implementations of pure virtual methods
+    int transform(int position, bool reverse = false) override { return position; }
+    int rotate() override { return 0; }
+    bool initTransformLUT(std::string fileName) override { return true; }
+};
+
+TEST(TransformerTests, DefaultInitialization) {
+    ConcreteTransformer transformer;
+    EXPECT_EQ(transformer.getType(), TransformerType::NotDefined);
+}
+
+TEST(TransformerTests, LUTSize) {
+    ConcreteTransformer transformer;
+    // TRANSFORMER_SIZE is 26, LUT is [2][26] = 52 elements
+    EXPECT_EQ(transformer.sizeOfTransformLUT(), 52);
 }
