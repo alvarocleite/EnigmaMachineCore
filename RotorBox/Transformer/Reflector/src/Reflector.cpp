@@ -1,11 +1,6 @@
 
 #include "Reflector.hpp"
 
-/**
- * @brief Constructor for the Reflector class.
- * Initializes the reflector with a transformation lookup table (LUT) from a file.
- * Sets the type of the transformer to Reflector.
- */
 Reflector::Reflector(std::string fileName){
     type = TransformerType::Reflector;
     initTransformLUT(fileName);
@@ -13,26 +8,23 @@ Reflector::Reflector(std::string fileName){
 
 Reflector::~Reflector(){}
 
-/** 
- * @brief Initializes the transformation lookup table (LUT) for the reflector.
- * This function the function that reads the transformation data from a file and initializes 
- * the forward vector. 
- * This function also initializes the reverse transformation vector with "-1".
- * 
- * @param fileName The name of the file containing the transformation data.
- * @return bool Returns true if the initialization is successful, false otherwise.
+/**
+ * @details Reflectors are symmetric components. 
+ * While they only have one physical set of wirings, the system treats them as 
+ * non-notching transformers with a static wiring map.
  */
 bool Reflector::initTransformLUT(std::string fileName){
     int notchPosition = 0;
 
-    // Initialize forward transformation vector
     notchPosition = initForwardTransformLUT(fileName);
 
     if (notchPosition != TRANSFORMER_SIZE){
-        return false; // Initialization failed
+        return false; 
     }
 
-    // Initialize reverse transformation vector
+    // Initialize reverse transformation vector to -1.
+    // Conceptually, for a reflector, Forward == Reverse, but the signal 
+    // only ever passes through it once per key press.
     for (int i = 0; i < TRANSFORMER_SIZE; i++){
         transformLUT[1][i] = -1;
     }
@@ -41,11 +33,9 @@ bool Reflector::initTransformLUT(std::string fileName){
 }
 
 /**
- * @brief Transforms the given position using the reflector's transformation lookup table (LUT).
- * 
- * @param position The input position to be transformed.
- * @param reverse It should not be set to true.
- * @return int The transformed position. Returns "-1" if the position is not found in the LUT when reverse is true.
+ * @details Performs the signal reflection.
+ * @internal The 'reverse' parameter is ignored for reflectors as they 
+ * occupy the 'turn-around' point in the signal path.
  */
 int Reflector::transform(int position, bool reverse){
     int newPosition = transformLUT[(int)reverse][position];
