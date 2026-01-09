@@ -25,17 +25,27 @@ For a complete list of dependencies and detailed environment setup, please refer
 git clone --recurse-submodules https://github.com/alvarocleite/EnigmaMachineCore.git
 cd EnigmaMachineCore
 
-# 2. Configure and Build (Release)
-cmake -DCMAKE_BUILD_TYPE=Release -S . -B build/release
-cmake --build build/release
+# 2. Configure and Build
+# Choose -DCMAKE_BUILD_TYPE=Release for production or Debug for debugging and for testing
+cmake -DCMAKE_BUILD_TYPE=Release -S . -B build
+cmake --build build
 
-# 3. Run Tests (Optional, requires Debug build)
-# cmake -DCMAKE_BUILD_TYPE=Debug -S . -B build/debug
-# cmake --build build/debug
-# cd build/debug && ctest
+# 3. Run Tests
+cd build && ctest --output-on-failure
 ```
 
-For more detailed build configurations, VS Code integration, and an overview of the build architecture, see [docs/Building.md](docs/Building.md). For details on the testing infrastructure, see the [Testing Guide](docs/Testing.md).
+For more detailed build configurations and VS Code integration, see [docs/Building.md](docs/Building.md).
+
+## Running Tests
+
+The project uses **Google Test (GTest)** for unit testing and **CTest** for execution. To run the tests, navigate to the build directory and use the following command:
+
+```bash
+cd build
+ctest --output-on-failure
+```
+
+For a detailed overview of the testing infrastructure, VS Code integration, and how to add new tests, refer to the [Testing Guide](docs/Testing.md).
 
 ## Documentation
 
