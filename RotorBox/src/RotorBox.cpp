@@ -5,11 +5,6 @@
 #include "Reflector.hpp"
 #include "Rotor.hpp"
 
-/**
- * @brief Constructor for the RotorBox class.
- * Initializes the rotor box with a default number of rotors (3) and their positions (all set to 0).
- * Also initializes the transformer vector with default rotor and reflector files.
- */
 RotorBox::RotorBox(){
     nRotorCount = 3;
     for(int i = 0; i < nRotorCount; i++){
@@ -23,14 +18,6 @@ RotorBox::RotorBox(){
     }
 }
 
-/**
- * @brief Constructor for the RotorBox class.
- * Initializes the rotor box with a specified number of rotors, their positions, and corresponding files.
- * 
- * @param nRotorCount The number of rotors in the rotor box.
- * @param rotorPositions A vector containing the initial positions of each rotor.
- * @param rotorFiles A vector containing the file names for each rotor and reflector.
- */
 RotorBox::RotorBox(int nRotorCount, const std::vector<int> &rotorPositions, const std::vector<std::string> &rotorFiles){
     if (nRotorCount != rotorPositions.size()){
         std::cerr << "Error: Number of rotors and number of rotor positions do not match." << std::endl;
@@ -54,13 +41,6 @@ RotorBox::RotorBox(int nRotorCount, const std::vector<int> &rotorPositions, cons
 
 RotorBox::~RotorBox(){}
 
-/**
- * @brief Initializes the transformer vector with rotors and a reflector.
- * 
- * @param nRotorCount The number of rotors to be initialized.
- * @param rotorFiles A vector containing the file names for each rotor and reflector.
- * @return int Returns 0 on success.
- */
 int RotorBox::initTransformerVec(int nRotorCount, const std::vector<std::string> &rotorFiles){
     int index = 0;
     while(index < nRotorCount){
@@ -72,10 +52,6 @@ int RotorBox::initTransformerVec(int nRotorCount, const std::vector<std::string>
     return 0;
 }
 
-/**
- * @brief Prints the types of transformers in the transformer vector.
- * This function iterates through the transformer vector and prints the type of each transformer.
- */
 void RotorBox::printTransformerVec(){
     for(auto &transformer : transformerVec){
         std::cout << "Transformer Type: " << static_cast<int>(transformer->getType()) << std::endl;
@@ -83,15 +59,13 @@ void RotorBox::printTransformerVec(){
 }
 
 /**
- * @brief Transforms the input key through the rotor box.
- * This function updates the rotor positions, transforms the input through the rotors and reflector,
- * and returns the transformed output.
- * 
- * @param input The input key to be transformed.
- * @return int The transformed output key.
+ * @details The signal path inside the RotorBox simulates the actual wiring:
+ * 1. Mechanical Step: Rotate rotors BEFORE signal processing.
+ * 2. Forward Pass: Right-to-Left from the entry wheel through all rotors.
+ * 3. Reflector: Swaps the character and sends it back.
+ * 4. Reverse Pass: Left-to-Right back through the rotors using inverse mappings.
  */
 int RotorBox::keyTransform(int input){
-    // update rotors position rotating
     updateRotors();
 
     // transform through rotors forward
@@ -114,15 +88,17 @@ int RotorBox::keyTransform(int input){
 }
 
 /**
- * @brief Updates the positions of the rotors.
- * This function rotates each rotor in the transformer vector and checks for notch positions.
- * If a rotor reaches its notch position, it triggers the rotation of the next rotor.
+ * @details Implements odometer-style stepping logic.
+ * The right-most rotor (index 0) always rotates. 
+ * Subsequent rotors rotate only if the preceding rotor hits its notch.
  * 
- * @return int Returns 0 on success.
+ * @internal This is a simplified linear stepping. Real Enigma "double stepping" 
+ * is not implemented here to favor modularity over exact historical fidelity in this version.
  */
 int RotorBox::updateRotors(){
     int rotorIx = 0;
     int isNotch = 0;
+    
     do{
         isNotch = transformerVec[rotorIx]->rotate();
         rotorIx++;

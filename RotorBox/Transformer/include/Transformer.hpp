@@ -22,8 +22,19 @@ protected:
     TransformerType type;
     int transformLUT[2][TRANSFORMER_SIZE] = {0};
     virtual bool initTransformLUT(std::string fileName) = 0;
+
+    /**
+     * @brief Initializes the forward transformation lookup table from a TOML file.
+     * 
+     * @param fileName The name of the file containing the transformation data.
+     * @return int Returns the notch position on success, or -1 on failure.
+     */
     int initForwardTransformLUT(std::string fileName);
 public:
+    /**
+     * @brief Constructor for the Transformer class.
+     * Initializes the transformer type to NotDefined.
+     */
     Transformer();
     virtual ~Transformer();
 
@@ -31,6 +42,17 @@ public:
     virtual int rotate() = 0;
     virtual void setPosition(int position) {};
 
+    /** 
+     * @brief Calculates the size of the transformation lookup table (LUT).
+     * 
+     * @return int Returns the size of the transformation lookup table.
+     */
     int sizeOfTransformLUT();
+
+    /** 
+     * @brief Returns the type of the transformer.
+     * 
+     * @return TransformerType Returns the type of the transformer (Rotor, Reflector, or NotDefined).
+    */
     TransformerType getType();
 };
