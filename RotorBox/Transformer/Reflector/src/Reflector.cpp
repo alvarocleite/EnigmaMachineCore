@@ -1,6 +1,7 @@
 
 #include "Reflector.hpp"
 #include <iostream>
+#include <stdexcept>
 #include <toml.hpp>
 
 Reflector::Reflector(std::string fileName){
@@ -15,15 +16,11 @@ Reflector::~Reflector(){}
  * This function orchestrates the initialization by delegating TOML parsing 
  * to parseConfig and then initializing the reverse mapping.
  */
-bool Reflector::initTransformLUT(std::string fileName){
-    if (!parseConfig(fileName)) {
-        return false;
-    }
+void Reflector::initTransformLUT(std::string fileName){
+    parseConfig(fileName);
 
     // Initialize reverse transformation vector to -1.
     fillTransformRow(1, -1);
-
-    return true;
 }
 
 /**
@@ -31,28 +28,22 @@ bool Reflector::initTransformLUT(std::string fileName){
  * @internal This method enforces strict size and type checking to ensure 
  * the configuration matches the expected transformer size and type.
  */
-bool Reflector::parseConfig(std::string fileName){
+void Reflector::parseConfig(std::string fileName){
     toml::value data;
-    if (!parseBasicConfig(fileName, "reflector", data)) {
-        return false;
-    }
+    parseBasicConfig(fileName, "reflector", data);
 
     try {
         auto arr = toml::find<std::vector<int>>(data, "reflector", "map");
         if(arr.size() != TRANSFORMER_SIZE) {
-            std::cerr << "TOML array size mismatch" << std::endl;
-            return false;
+            throw std::runtime_error("TOML array size mismatch");
         }
 
         for(size_t i = 0; i < arr.size(); ++i) {
             setTransformValue(0, i, arr[i]);
         }
 
-        return true;
-
     } catch(const std::exception& e) {
-        std::cerr << "TOML parse error: " << e.what() << std::endl;
-        return false;
+        throw std::runtime_error("TOML parse error: " + std::string(e.what()));
     }
 }
 

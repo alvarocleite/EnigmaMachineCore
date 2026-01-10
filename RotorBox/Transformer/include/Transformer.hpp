@@ -31,9 +31,9 @@ protected:
      * This must be implemented by derived classes to handle specific configuration loading.
      * 
      * @param fileName The path to the configuration file.
-     * @return bool Returns true if initialization is successful, false otherwise.
+     * @throws std::runtime_error If initialization fails.
      */
-    virtual bool initTransformLUT(std::string fileName) = 0;
+    virtual void initTransformLUT(std::string fileName) = 0;
 
     /**
      * @brief Parses the common configuration from a TOML file (size and type checks).
@@ -41,9 +41,9 @@ protected:
      * @param fileName The path to the configuration file.
      * @param expectedType The expected type string ("rotor" or "reflector").
      * @param outData Reference to store the parsed TOML data if successful.
-     * @return bool Returns true if parsing and checks pass, false otherwise.
+     * @throws std::runtime_error If parsing fails or checks fail.
      */
-    bool parseBasicConfig(std::string fileName, std::string expectedType, toml::value& outData);
+    void parseBasicConfig(std::string fileName, std::string expectedType, toml::value& outData);
 
     /**
      * @brief Sets a value in the transformation lookup table.

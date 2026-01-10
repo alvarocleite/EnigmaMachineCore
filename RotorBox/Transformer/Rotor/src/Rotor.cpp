@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <string>
 #include <iostream>
+#include <stdexcept>
 #include <toml.hpp>
 
 Rotor::Rotor(std::string fileName){
@@ -21,11 +22,9 @@ Rotor::~Rotor(){}
  * configuration parsing to parseConfig and the inverse table generation 
  * to initReverseTransformLUT.
  */
-bool Rotor::initTransformLUT(std::string fileName){
-    if (!parseConfig(fileName)) {
-        return false;
-    }
-    return initReverseTransformLUT();
+void Rotor::initTransformLUT(std::string fileName){
+    parseConfig(fileName);
+    initReverseTransformLUT();
 }
 
 /**
@@ -33,30 +32,24 @@ bool Rotor::initTransformLUT(std::string fileName){
  * @internal This method enforces strict size and type checking to ensure 
  * the configuration matches the expected transformer size and type.
  */
-bool Rotor::parseConfig(std::string fileName){
+void Rotor::parseConfig(std::string fileName){
     toml::value data;
-    if (!parseBasicConfig(fileName, "rotor", data)) {
-        return false;
-    }
+    parseBasicConfig(fileName, "rotor", data);
 
     try {
         this->notchPosition = toml::find<int>(data, "rotor", "notchPosition");
         
         auto arr = toml::find<std::vector<int>>(data, "rotor", "forward");
         if(arr.size() != TRANSFORMER_SIZE) {
-            std::cerr << "TOML array size mismatch" << std::endl;
-            return false;
+            throw std::runtime_error("TOML array size mismatch");
         }
 
         for(size_t i = 0; i < arr.size(); ++i) {
             setTransformValue(0, i, arr[i]);
         }
 
-        return true;
-
     } catch(const std::exception& e) {
-        std::cerr << "TOML parse error: " << e.what() << std::endl;
-        return false;
+        throw std::runtime_error("TOML parse error: " + std::string(e.what()));
     }
 }
 
@@ -67,8 +60,7 @@ bool Rotor::parseConfig(std::string fileName){
  * back through the rotors after being reflected. It iterates through the forward LUT 
  * to map outputs back to inputs.
  */
-bool Rotor::initReverseTransformLUT(){
-    bool canBeInitialized = true;
+void Rotor::initReverseTransformLUT(){
     const auto& forwardRow = getTransformRow(0); 
 
     for (int forwardValue = 0; forwardValue < TRANSFORMER_SIZE; forwardValue++){
@@ -80,12 +72,10 @@ bool Rotor::initReverseTransformLUT(){
             int reverseIndex = std::distance(forwardRow.begin(), it);
             setTransformValue(1, forwardValue, reverseIndex);
         } else {
-            setTransformValue(1, forwardValue, -1);
-            canBeInitialized = false;
+            // This implies the forward mapping is not a bijection (valid permutation)
+            throw std::runtime_error("Invalid Rotor mapping: Not a bijection. Missing output: " + std::to_string(forwardValue));
         }
     }
-
-    return canBeInitialized;
 }
 
 int Rotor::initRotorPosition(int offset){

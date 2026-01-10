@@ -11,7 +11,7 @@ public:
     // Minimal implementations of pure virtual methods
     int transform(int position, bool reverse = false) override { return position; }
     int rotate() override { return 0; }
-    bool initTransformLUT(std::string fileName) override { return true; }
+    void initTransformLUT(std::string fileName) override { }
 };
 
 TEST(TransformerTests, DefaultInitialization) {

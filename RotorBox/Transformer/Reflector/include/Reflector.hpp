@@ -14,17 +14,17 @@ private:
      * @brief Initializes the transformation lookup table (LUT) for the reflector.
      * 
      * @param fileName The name of the file containing the transformation data.
-     * @return bool Returns true if the initialization is successful, false otherwise.
+     * @throws std::runtime_error If initialization fails.
      */
-    bool initTransformLUT(std::string fileName);
+    void initTransformLUT(std::string fileName);
 
     /**
      * @brief Parses the reflector configuration from a TOML file.
      * 
      * @param fileName The path to the configuration file.
-     * @return bool Returns true if parsing is successful, false otherwise.
+     * @throws std::runtime_error If parsing fails.
      */
-    bool parseConfig(std::string fileName);
+    void parseConfig(std::string fileName);
 public:
     /**
      * @brief Constructor for the Reflector class.

@@ -3,6 +3,7 @@
 #include <fstream>
 #include <iostream>
 #include <string>
+#include <stdexcept>
 
 Transformer::Transformer(){
     type = TransformerType::NotDefined;
@@ -26,28 +27,24 @@ TransformerType Transformer::getType() const{
  * 
  * @internal This method centralizes file I/O and common metadata validation to ensure 
  * that malformed or mismatched configuration files are caught before component-specific 
- * parsing begins. Errors are logged to std::cerr and return false to signal failure.
+ * parsing begins. Errors are thrown as std::runtime_error.
  */
-bool Transformer::parseBasicConfig(std::string fileName, std::string expectedType, toml::value& outData){
+void Transformer::parseBasicConfig(std::string fileName, std::string expectedType, toml::value& outData){
     try {
         outData = toml::parse(fileName);
         
         auto size = toml::find<int>(outData, "size");
         if (size != TRANSFORMER_SIZE) {
-            std::cerr << "Transformer size mismatch: expected " << TRANSFORMER_SIZE << ", got " << size << std::endl;
-            return false;
+            throw std::runtime_error("Transformer size mismatch: expected " + std::to_string(TRANSFORMER_SIZE) + ", got " + std::to_string(size));
         }
 
         auto typeStr = toml::find<std::string>(outData, "type");
         if (typeStr != expectedType) {
-            std::cerr << "Wrong config file: expected " << expectedType << ", got " << typeStr << std::endl;
-            return false;
+            throw std::runtime_error("Wrong config file: expected " + expectedType + ", got " + typeStr);
         }
 
-        return true;
     } catch(const std::exception& e) {
-        std::cerr << "TOML parse error: " << e.what() << std::endl;
-        return false;
+        throw std::runtime_error("TOML parse error in " + fileName + ": " + e.what());
     }
 }
 

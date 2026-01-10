@@ -18,24 +18,23 @@ private:
      * @brief Initializes the Rotor transformation lookup tables (LUT).
      * 
      * @param fileName The name of the file containing the transformation data.
-     * @return bool Returns true if successful, false otherwise.
+     * @throws std::runtime_error If initialization fails.
      */
-    bool initTransformLUT(std::string fileName);
+    void initTransformLUT(std::string fileName);
 
     /**
      * @brief Generates the reverse transformation lookup table.
-     * 
-     * @return bool Returns true if the reverse table was successfully generated, false otherwise.
+     * @throws std::runtime_error If reverse mapping generation fails.
      */
-    bool initReverseTransformLUT();
+    void initReverseTransformLUT();
 
     /**
      * @brief Parses the rotor configuration from a TOML file.
      * 
      * @param fileName The path to the configuration file.
-     * @return bool Returns true if parsing is successful, false otherwise.
+     * @throws std::runtime_error If parsing fails.
      */
-    bool parseConfig(std::string fileName);
+    void parseConfig(std::string fileName);
 
     /**
      * @brief Initializes the rotor position.
