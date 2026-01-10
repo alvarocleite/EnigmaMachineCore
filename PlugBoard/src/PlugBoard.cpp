@@ -4,7 +4,7 @@
 
 PlugBoard::PlugBoard() {
     for (int i = 0; i < TRANSFORMER_SIZE; ++i) {
-        mapping[i] = i;
+        mapping.at(i) = i;
     }
 }
 
@@ -27,13 +27,13 @@ PlugBoard::PlugBoard(std::array<Pair_t, PLUGBOARD_MAX_PAIRS> pairs) : PlugBoard(
             continue;
         }
 
-        if (mapping[a] != a || mapping[b] != b) {
+        if (mapping.at(a) != a || mapping.at(b) != b) {
             std::cerr << "Warning: PlugBoard conflict for pair (" << a << ", " << b << "). Skipping." << std::endl;
             continue;
         }
 
-        mapping[a] = b;
-        mapping[b] = a;
+        mapping.at(a) = b;
+        mapping.at(b) = a;
     }
 }
 
@@ -47,5 +47,5 @@ int PlugBoard::swap(int key) const {
     if (key < 0 || key >= TRANSFORMER_SIZE) {
         return key; 
     }
-    return mapping[key];
+    return mapping.at(key);
 }

@@ -1,27 +1,36 @@
 #include <iostream>
 #include <string>
+#include <stdexcept>
 
 #include "RotorBox.hpp"
 #include "Reflector.hpp"
 #include "Rotor.hpp"
 
+/**
+ * @details Initializes a standard 3-rotor configuration with default assets.
+ * All rotors are set to their initial '0' position.
+ */
 RotorBox::RotorBox(){
     nRotorCount = 3;
     for(int i = 0; i < nRotorCount; i++){
         rotorPositions.push_back(0);
     }
-    if (initTransformerVec(nRotorCount, std::vector<std::string> {assetsDir + "Rotor1.toml", 
+    
+    // Will throw if initialization fails
+    initTransformerVec(nRotorCount, std::vector<std::string> {assetsDir + "Rotor1.toml", 
                                          assetsDir + "Rotor2.toml", 
                                          assetsDir + "Rotor3.toml", 
-                                         assetsDir + "Reflector.toml"}) != 0) {
-        std::cerr << "Error: Failed to initialize default transformers in RotorBox." << std::endl;
-    }
+                                         assetsDir + "Reflector.toml"});
 }
 
+/**
+ * @details Initializes a custom rotor configuration.
+ * Validates that the number of provided positions matches the rotor count before 
+ * proceeding with transformer initialization and position setting.
+ */
 RotorBox::RotorBox(int nRotorCount, const std::vector<int> &rotorPositions, const std::vector<std::string> &rotorFiles){
-    if (nRotorCount != rotorPositions.size()){
-        std::cerr << "Error: Number of rotors and number of rotor positions do not match." << std::endl;
-        return;
+    if (nRotorCount != (int)rotorPositions.size()){
+        throw std::invalid_argument("Error: Number of rotors and number of rotor positions do not match.");
     }
     
     this->nRotorCount = nRotorCount;
@@ -29,27 +38,38 @@ RotorBox::RotorBox(int nRotorCount, const std::vector<int> &rotorPositions, cons
         this->rotorPositions.push_back(position);
     }
     
-    if (initTransformerVec(nRotorCount, rotorFiles) != 0) {
-        std::cerr << "Error: Failed to initialize transformers in RotorBox." << std::endl;
-        return;
-    }
+    // Will throw if initialization fails
+    initTransformerVec(nRotorCount, rotorFiles);
 
     for(int i = 0; i < nRotorCount; i++){
-        transformerVec[i]->setPosition(this->rotorPositions[i]);
+        transformerVec.at(i)->setPosition(this->rotorPositions.at(i));
     }
 }
 
 RotorBox::~RotorBox(){}
 
-int RotorBox::initTransformerVec(int nRotorCount, const std::vector<std::string> &rotorFiles){
+/**
+ * @details Populates the internal transformer vector with unique pointers to Rotor and Reflector objects.
+ * 
+ * @internal This method enforces the architectural constraint that the transformer vector 
+ * must contain exactly nRotorCount rotors followed by one reflector at the end. 
+ * Memory is managed via std::unique_ptr to ensure proper cleanup.
+ */
+void RotorBox::initTransformerVec(int nRotorCount, const std::vector<std::string> &rotorFiles){
+    transformerVec.clear();
+    transformerVec.reserve(nRotorCount + 1);
+
+    // Validate input size: n Rotors + 1 Reflector
+    if (rotorFiles.size() < (size_t)(nRotorCount + 1)) {
+        throw std::runtime_error("Error: Insufficient configuration files for rotors and reflector.");
+    }
+
     int index = 0;
     while(index < nRotorCount){
         transformerVec.push_back(std::make_unique<Rotor>(rotorFiles[index]));
         index++;
     };
     transformerVec.push_back(std::make_unique<Reflector>(rotorFiles[nRotorCount]));
-
-    return 0;
 }
 
 void RotorBox::printTransformerVec(){
@@ -72,16 +92,16 @@ int RotorBox::keyTransform(int input){
     bool reverse = false;
     int newPosition = input;
     for(int i = 0; i < nRotorCount; i++){
-        newPosition = transformerVec[i]->transform(newPosition, reverse);
+        newPosition = transformerVec.at(i)->transform(newPosition, reverse);
     }
 
     // reflector
-    newPosition = transformerVec[nRotorCount]->transform(newPosition, reverse);
+    newPosition = transformerVec.at(nRotorCount)->transform(newPosition, reverse);
 
     // transform through rotors in reverse
     reverse = true;
     for(int i = nRotorCount - 1; i >= 0; i--){ 
-        newPosition = transformerVec[i]->transform(newPosition, reverse);
+        newPosition = transformerVec.at(i)->transform(newPosition, reverse);
     }
 
     return newPosition;
@@ -95,14 +115,12 @@ int RotorBox::keyTransform(int input){
  * @internal This is a simplified linear stepping. Real Enigma "double stepping" 
  * is not implemented here to favor modularity over exact historical fidelity in this version.
  */
-int RotorBox::updateRotors(){
+void RotorBox::updateRotors(){
     int rotorIx = 0;
     int isNotch = 0;
     
     do{
-        isNotch = transformerVec[rotorIx]->rotate();
+        isNotch = transformerVec.at(rotorIx)->rotate();
         rotorIx++;
     } while (rotorIx < nRotorCount && isNotch == 1);
-
-    return 0;
 }

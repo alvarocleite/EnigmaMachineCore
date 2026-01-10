@@ -51,12 +51,12 @@ EnigmaMachine::parseConfig(const std::string& fileName) {
     std::array<Pair_t, PLUGBOARD_MAX_PAIRS> plugBoardPairs;
     int i;
     for (i = 0; i < plugsCount; i++) {
-        plugBoardPairs[i].a = toml::find<int>(plugBoardArr[i], "from");
-        plugBoardPairs[i].b = toml::find<int>(plugBoardArr[i], "to");
+        plugBoardPairs.at(i).a = toml::find<int>(plugBoardArr.at(i), "from");
+        plugBoardPairs.at(i).b = toml::find<int>(plugBoardArr.at(i), "to");
     }
     while (i < PLUGBOARD_MAX_PAIRS) {
-        plugBoardPairs[i].a = -1; // Mark unused pairs
-        plugBoardPairs[i].b = -1;
+        plugBoardPairs.at(i).a = -1; // Mark unused pairs
+        plugBoardPairs.at(i).b = -1;
         i++;
     }
     
