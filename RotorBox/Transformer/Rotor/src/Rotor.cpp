@@ -2,6 +2,8 @@
 
 #include <algorithm>
 #include <string>
+#include <iostream>
+#include <toml.hpp>
 
 Rotor::Rotor(std::string fileName){
     notchPosition = 0;
@@ -15,26 +17,49 @@ Rotor::~Rotor(){}
 
 /**
  * @details Initializes the rotor's wiring configuration.
- * This function orchestrates the initialization process. It first loads the 
- * forward transformation table and notch position from the configuration file, 
- * and then triggers the generation of the reverse transformation table.
+ * This function orchestrates the initialization process by delegating the 
+ * configuration parsing to parseConfig and the inverse table generation 
+ * to initReverseTransformLUT.
  */
 bool Rotor::initTransformLUT(std::string fileName){
-    bool canBeInitialized = true;
-    int notchPosition = 0;
+    if (!parseConfig(fileName)) {
+        return false;
+    }
+    return initReverseTransformLUT();
+}
 
-    notchPosition = initForwardTransformLUT(fileName);
-    
-    if (notchPosition > -1 && notchPosition < TRANSFORMER_SIZE){
-        this->notchPosition = notchPosition;
-    } else { 
-        return false; 
+/**
+ * @details Parses the rotor's wiring and notch position from a TOML file.
+ * @internal This method enforces strict size and type checking to ensure 
+ * the configuration matches the expected transformer size and type.
+ */
+bool Rotor::parseConfig(std::string fileName){
+    toml::value data;
+    if (!parseBasicConfig(fileName, "rotor", data)) {
+        return false;
     }
 
-    canBeInitialized = initReverseTransformLUT();
+    try {
+        this->notchPosition = toml::find<int>(data, "rotor", "notchPosition");
+        
+        auto arr = toml::find<std::vector<int>>(data, "rotor", "forward");
+        if(arr.size() != TRANSFORMER_SIZE) {
+            std::cerr << "TOML array size mismatch" << std::endl;
+            return false;
+        }
 
-    return canBeInitialized;
+        for(size_t i = 0; i < arr.size(); ++i) {
+            setTransformValue(0, i, arr[i]);
+        }
+
+        return true;
+
+    } catch(const std::exception& e) {
+        std::cerr << "TOML parse error: " << e.what() << std::endl;
+        return false;
+    }
 }
+
 
 /**
  * @details Generates the mathematical inverse of the forward wiring to handle the return signal.
@@ -44,8 +69,7 @@ bool Rotor::initTransformLUT(std::string fileName){
  */
 bool Rotor::initReverseTransformLUT(){
     bool canBeInitialized = true;
-    const auto& forwardRow = transformLUT.at(0); 
-    auto& reverseRow       = transformLUT.at(1);
+    const auto& forwardRow = getTransformRow(0); 
 
     for (int forwardValue = 0; forwardValue < TRANSFORMER_SIZE; forwardValue++){
         auto it = std::find_if(forwardRow.begin(), forwardRow.end(), 
@@ -53,9 +77,10 @@ bool Rotor::initReverseTransformLUT(){
         );
 
         if (it != forwardRow.end()){
-            reverseRow.at(forwardValue) = std::distance(forwardRow.begin(), it);
+            int reverseIndex = std::distance(forwardRow.begin(), it);
+            setTransformValue(1, forwardValue, reverseIndex);
         } else {
-            reverseRow.at(forwardValue) = -1;
+            setTransformValue(1, forwardValue, -1);
             canBeInitialized = false;
         }
     }
@@ -83,7 +108,7 @@ inline bool Rotor::isNotchPosition(int position){
  */
 int Rotor::transform(int position, bool reverse){
     position = (position + rotorRotationCount) % TRANSFORMER_SIZE; 
-    position = transformLUT.at((int)reverse).at(position);
+    position = getTransformValue((int)reverse, position);
     position = (position - rotorRotationCount + TRANSFORMER_SIZE) % TRANSFORMER_SIZE;
 
     return position;

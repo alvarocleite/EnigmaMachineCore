@@ -4,91 +4,78 @@
 #include <iostream>
 #include <string>
 
-#include <toml.hpp> 
-
 Transformer::Transformer(){
     type = TransformerType::NotDefined;
 }
 
 Transformer::~Transformer(){}
 
-int Transformer::sizeOfTransformLUT(){
+int Transformer::sizeOfTransformLUT() const{
     return transformLUT.size() * transformLUT[0].size();
 }
 
-TransformerType Transformer::getType(){
+TransformerType Transformer::getType() const{
     return type;
 }
 
 /**
- * @details Parses the component's wiring from a TOML file.
- * The logic differentiates between "rotor" and "reflector" types to ensure 
- * correct array mapping and notch initialization.
+ * @details Performs the foundational parsing and validation for all transformer components.
+ * 1. Attempts to parse the TOML file.
+ * 2. Validates that the 'size' field matches the global TRANSFORMER_SIZE (usually 26).
+ * 3. Validates that the component 'type' matches the expected derived class type.
  * 
- * @internal This method enforces strict size checking against TRANSFORMER_SIZE.
- * It uses polymorphic checks to ensure a rotor config isn't loaded into a reflector object.
+ * @internal This method centralizes file I/O and common metadata validation to ensure 
+ * that malformed or mismatched configuration files are caught before component-specific 
+ * parsing begins. Errors are logged to std::cerr and return false to signal failure.
  */
-int Transformer::initForwardTransformLUT(std::string fileName){
-    int notchPosition = 0;
+bool Transformer::parseBasicConfig(std::string fileName, std::string expectedType, toml::value& outData){
     try {
-        auto data = toml::parse(fileName);
-        auto typeStr = toml::find<std::string>(data, "type");
-
-        auto size = toml::find<int>(data, "size");
+        outData = toml::parse(fileName);
+        
+        auto size = toml::find<int>(outData, "size");
         if (size != TRANSFORMER_SIZE) {
             std::cerr << "Transformer size mismatch: expected " << TRANSFORMER_SIZE << ", got " << size << std::endl;
-            return -1;
+            return false;
         }
 
-        if (typeStr == "rotor") {
-            if (this->type != TransformerType::Rotor) {
-                std::cerr << "Wrong config file: expected rotor" << std::endl;
-                return -1;
-            }
-            
-            auto notch = toml::find<int>(data, "rotor", "notchPosition");
-            notchPosition = notch;
-            
-            auto arr = toml::find<std::vector<int>>(data, "rotor", "forward");
-
-            if(arr.size() != TRANSFORMER_SIZE) {
-                std::cerr << "TOML array size mismatch" << std::endl;
-                return -1;
-            }
-
-            for(size_t i = 0; i < arr.size(); ++i) {
-                transformLUT.at(0).at(i) = arr[i];
-            }
-        }
-        else if (typeStr == "reflector") {
-            if (this->type != TransformerType::Reflector) {
-                std::cerr << "Wrong config file: expected reflector" << std::endl;
-                return -1;
-            }
-
-            auto arr = toml::find<std::vector<int>>(data, "reflector", "map");
-
-            if(arr.size() != TRANSFORMER_SIZE) {
-                std::cerr << "TOML array size mismatch" << std::endl;
-                return -1;
-            }
-
-            for(size_t i = 0; i < arr.size(); ++i) {
-                transformLUT.at(0).at(i) = arr[i];
-            }
-
-            notchPosition = TRANSFORMER_SIZE; 
-        }
-        else {
-            std::cerr << "Unknown transformer type: " << typeStr << std::endl;
-            return -1;
+        auto typeStr = toml::find<std::string>(outData, "type");
+        if (typeStr != expectedType) {
+            std::cerr << "Wrong config file: expected " << expectedType << ", got " << typeStr << std::endl;
+            return false;
         }
 
-    } 
-    catch(const std::exception& e) {
+        return true;
+    } catch(const std::exception& e) {
         std::cerr << "TOML parse error: " << e.what() << std::endl;
-        return -1;
+        return false;
     }
-
-    return notchPosition; 
 }
+
+/**
+ * @brief Sets a value in the transformation lookup table.
+ */
+void Transformer::setTransformValue(int row, int col, int value) {
+    transformLUT.at(row).at(col) = value;
+}
+
+/**
+ * @brief Gets a value from the transformation lookup table.
+ */
+int Transformer::getTransformValue(int row, int col) const {
+    return transformLUT.at(row).at(col);
+}
+
+/**
+ * @brief Fills a row of the transformation lookup table with a specific value.
+ */
+void Transformer::fillTransformRow(int row, int value) {
+    transformLUT.at(row).fill(value);
+}
+
+/**
+ * @brief Gets a read-only reference to a row in the transformation lookup table.
+ */
+const std::array<int, TRANSFORMER_SIZE>& Transformer::getTransformRow(int row) const {
+    return transformLUT.at(row);
+}
+

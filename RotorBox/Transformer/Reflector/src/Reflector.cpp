@@ -1,5 +1,7 @@
 
 #include "Reflector.hpp"
+#include <iostream>
+#include <toml.hpp>
 
 Reflector::Reflector(std::string fileName){
     type = TransformerType::Reflector;
@@ -10,25 +12,50 @@ Reflector::~Reflector(){}
 
 /**
  * @details Reflectors are symmetric components. 
- * While they only have one physical set of wirings, the system treats them as 
- * non-notching transformers with a static wiring map.
+ * This function orchestrates the initialization by delegating TOML parsing 
+ * to parseConfig and then initializing the reverse mapping.
  */
 bool Reflector::initTransformLUT(std::string fileName){
-    int notchPosition = 0;
-
-    notchPosition = initForwardTransformLUT(fileName);
-
-    if (notchPosition != TRANSFORMER_SIZE){
-        return false; 
+    if (!parseConfig(fileName)) {
+        return false;
     }
 
     // Initialize reverse transformation vector to -1.
-    // Conceptually, for a reflector, Forward == Reverse, but the signal 
-    // only ever passes through it once per key press.
-    transformLUT.at(1).fill(-1);
+    fillTransformRow(1, -1);
 
     return true;
 }
+
+/**
+ * @details Parses the reflector's wiring map from a TOML file.
+ * @internal This method enforces strict size and type checking to ensure 
+ * the configuration matches the expected transformer size and type.
+ */
+bool Reflector::parseConfig(std::string fileName){
+    toml::value data;
+    if (!parseBasicConfig(fileName, "reflector", data)) {
+        return false;
+    }
+
+    try {
+        auto arr = toml::find<std::vector<int>>(data, "reflector", "map");
+        if(arr.size() != TRANSFORMER_SIZE) {
+            std::cerr << "TOML array size mismatch" << std::endl;
+            return false;
+        }
+
+        for(size_t i = 0; i < arr.size(); ++i) {
+            setTransformValue(0, i, arr[i]);
+        }
+
+        return true;
+
+    } catch(const std::exception& e) {
+        std::cerr << "TOML parse error: " << e.what() << std::endl;
+        return false;
+    }
+}
+
 
 /**
  * @details Performs the signal reflection.
@@ -36,7 +63,7 @@ bool Reflector::initTransformLUT(std::string fileName){
  * occupy the 'turn-around' point in the signal path.
  */
 int Reflector::transform(int position, bool reverse){
-    int newPosition = transformLUT.at((int)reverse).at(position);
+    int newPosition = getTransformValue((int)reverse, position);
     // transformLUT[reverse][position] = -1,  when reverse is true 
     return newPosition;
 }

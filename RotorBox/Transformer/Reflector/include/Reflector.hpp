@@ -17,6 +17,14 @@ private:
      * @return bool Returns true if the initialization is successful, false otherwise.
      */
     bool initTransformLUT(std::string fileName);
+
+    /**
+     * @brief Parses the reflector configuration from a TOML file.
+     * 
+     * @param fileName The path to the configuration file.
+     * @return bool Returns true if parsing is successful, false otherwise.
+     */
+    bool parseConfig(std::string fileName);
 public:
     /**
      * @brief Constructor for the Reflector class.

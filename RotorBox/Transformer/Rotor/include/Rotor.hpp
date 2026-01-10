@@ -30,6 +30,14 @@ private:
     bool initReverseTransformLUT();
 
     /**
+     * @brief Parses the rotor configuration from a TOML file.
+     * 
+     * @param fileName The path to the configuration file.
+     * @return bool Returns true if parsing is successful, false otherwise.
+     */
+    bool parseConfig(std::string fileName);
+
+    /**
      * @brief Initializes the rotor position.
      * This function sets the initial position of the rotor based on the provided offset.
      * 
