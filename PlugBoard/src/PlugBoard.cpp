@@ -2,10 +2,6 @@
 #include "config.hpp"
 #include <iostream>
 
-/**
- * @brief Constructor for the PlugBoard class.
- * Initializes an empty plugboard with no pairs (identity mapping).
- */
 PlugBoard::PlugBoard() {
     for (int i = 0; i < TRANSFORMER_SIZE; ++i) {
         mapping[i] = i;
@@ -13,11 +9,10 @@ PlugBoard::PlugBoard() {
 }
 
 /**
- * @brief Constructor for the PlugBoard class.
- * Initializes the plugboard with a given array of pairs.
- * Validates that ports are not already used before connecting.
- * 
- * @param pairs An array of pairs to initialize the plugboard with.
+ * @details Validates the provided pairs before mapping them.
+ * A port is 'unused' if it maps to itself.
+ * If either port 'a' or 'b' is already mapped to something else, a conflict is reported 
+ * because a socket cannot have two plugs.
  */
 PlugBoard::PlugBoard(std::array<Pair_t, PLUGBOARD_MAX_PAIRS> pairs) : PlugBoard() {
     for (const auto& pair : pairs) {
@@ -45,11 +40,8 @@ PlugBoard::PlugBoard(std::array<Pair_t, PLUGBOARD_MAX_PAIRS> pairs) : PlugBoard(
 PlugBoard::~PlugBoard() {}
 
 /**
- * @brief Swaps the input key based on the plugboard pairs.
- * Uses a direct lookup table for O(1) performance.
- * 
- * @param key The input key to be swapped.
- * @return int The swapped key.
+ * @details Performs a character swap using the pre-calculated mapping table.
+ * @internal This operation is O(1) and is performed twice for every key press in the EnigmaMachine.
  */
 int PlugBoard::swap(int key) const {
     if (key < 0 || key >= TRANSFORMER_SIZE) {

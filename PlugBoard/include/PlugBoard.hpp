@@ -15,9 +15,27 @@ private:
     std::array<int, TRANSFORMER_SIZE> mapping; // Direct mapping: mapping[Input] = Output
 
 public:
+    /**
+     * @brief Constructor for the PlugBoard class.
+     * Initializes an empty plugboard with no pairs (identity mapping).
+     */
     PlugBoard();
+
+    /**
+     * @brief Constructor for the PlugBoard class.
+     * Initializes the plugboard with a given array of pairs.
+     * Validates that ports are not already used before connecting.
+     * 
+     * @param pairs An array of pairs to initialize the plugboard with.
+     */
     PlugBoard(std::array<Pair_t, PLUGBOARD_MAX_PAIRS> pairs);
     ~PlugBoard();
 
+    /**
+     * @brief Swaps the input key based on the plugboard pairs.
+     * 
+     * @param key The input key to be swapped.
+     * @return int The swapped key.
+     */
     int swap(int key) const;
 };
