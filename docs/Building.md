@@ -13,11 +13,15 @@ To build and run this project, you will need the following tools and libraries:
 *   **Git:** Required for version control and to manage the project's submodules.
 
 ### Libraries
-*   **[toml11](https://github.com/ToruNiina/toml11):** A powerful C++11 header-only library for TOML. *Note: This is included as a git submodule in the `external/` directory.*
+*   **[toml11](https://github.com/ToruNiina/toml11):** A powerful C++11 header-only library for TOML.
+*   **[CLI11](https://github.com/CLIUtils/CLI11):** Command line parser for C++11. 
+  
+*Note: These are included as git submodules in the `external/` directory.*
 
 ### Testing Tools
 *   **[GoogleTest (gTest)](https://github.com/google/googletest):** Used for unit testing the core logic.
-    *   *Note: You do NOT need to install GoogleTest on your machine. The build system (CMake) automatically downloads and configures it during the first build (requires internet connection for the initial configuration).*
+
+*Note: You do NOT need to install GoogleTest on your machine. The build system (CMake) automatically downloads and configures it during the first build (requires internet connection for the initial configuration).*
 
 ### Documentation & Visualization (Optional)
 *   **[Doxygen](https://www.doxygen.nl/):** Used for generating the HTML/XML API documentation.
@@ -103,8 +107,20 @@ ctest --output-on-failure
 
 ### Running the Application
 ```bash
-./build/release/EnigmaMachineCore
+# Basic usage (Round-trip: Encode then Decode)
+./build/release/EnigmaMachineCore -m "SECRET"
+
+# Encode only
+./build/release/EnigmaMachineCore -m "SECRET" --encode
+
+# Decode only (Symmetric operation)
+./build/release/EnigmaMachineCore -m "NMRGDU" --decode
+
+# Custom assets directory and Debug output
+./build/release/EnigmaMachineCore -m "HELLO" --assets ./my_assets --debug
 ```
+
+*Note: By default, the application looks for assets in the `assets/` directory relative to the executable (automatically copied by the build system).*
 
 ---
 

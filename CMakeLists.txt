@@ -65,6 +65,9 @@ endif()
 add_subdirectory(external/toml11)
 target_link_libraries(EnigmaCore PUBLIC toml11::toml11)
 
+# Initialize and link CLI11 library
+add_subdirectory(external/CLI11)
+
 # --- Main Executable Target ---
 # The EnigmaMachineCore application executable, which is just a wrapper around the EnigmaCore
 add_executable(${PROJECT_NAME}
@@ -72,7 +75,7 @@ add_executable(${PROJECT_NAME}
 )
 
 # Link the core library logic to the executable
-target_link_libraries(${PROJECT_NAME} PRIVATE EnigmaCore)
+target_link_libraries(${PROJECT_NAME} PRIVATE EnigmaCore CLI11::CLI11)
 
 # --- Asset Handling ---
 # Copy assets to build directory after build

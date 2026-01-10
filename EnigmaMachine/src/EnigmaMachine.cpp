@@ -26,7 +26,7 @@ EnigmaMachine::EnigmaMachine(int nRotorCount, const std::vector<int> &rotorPosit
 {}
 
 std::tuple<int, std::vector<int>, std::vector<std::string>, std::array<Pair_t, PLUGBOARD_MAX_PAIRS>>
-EnigmaMachine::parseConfig(const std::string& fileName) {
+EnigmaMachine::parseConfig(const std::string& fileName, const std::string& assetPath) {
     auto data = toml::parse(fileName);
     int nRotorCount = toml::find<int>(data, "rotors", "RotorCount");
     auto rotorPositions = toml::find<std::vector<int>>(data, "rotors", "RotorPositions");
@@ -34,11 +34,17 @@ EnigmaMachine::parseConfig(const std::string& fileName) {
     if (static_cast<size_t>(nRotorCount) != rotorPositions.size() || static_cast<size_t>(nRotorCount) != rotorFiles.size()) {
         throw std::runtime_error("Error: Number of rotors, positions, and files do not match.");
     }
-    for (auto& rotorFile : rotorFiles) {
-        rotorFile = assetsDir + rotorFile; // Ensure full path is used
+    
+    std::string prefix = assetPath;
+    if (!prefix.empty() && prefix.back() != '/') {
+        prefix += "/";
     }
 
-    auto reflectorFile = assetsDir + toml::find<std::string>(data, "ReflectorFile");
+    for (auto& rotorFile : rotorFiles) {
+        rotorFile = prefix + rotorFile; // Ensure full path is used
+    }
+
+    auto reflectorFile = prefix + toml::find<std::string>(data, "ReflectorFile");
     rotorFiles.push_back(reflectorFile);
     auto plugsCount = toml::find<int>(data, "plugboard", "PlugCount");
     if (plugsCount > PLUGBOARD_MAX_PAIRS) {
@@ -67,8 +73,8 @@ EnigmaMachine::EnigmaMachine(std::tuple<int, std::vector<int>, std::vector<std::
     : EnigmaMachine(std::get<0>(config), std::get<1>(config), std::get<2>(config), std::get<3>(config))
 {}
 
-EnigmaMachine::EnigmaMachine(std::string fileName)
-    : EnigmaMachine(parseConfig(fileName))
+EnigmaMachine::EnigmaMachine(std::string fileName, std::string assetPath)
+    : EnigmaMachine(parseConfig(fileName, assetPath))
 {}
 
 EnigmaMachine::~EnigmaMachine(){}

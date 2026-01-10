@@ -29,10 +29,11 @@ private:
      * Parses the configuration file to extract the number of rotors, their positions, files, and plugboard pairs.
      * 
      * @param fileName The name of the configuration file containing the settings for the Enigma machine.
+     * @param assetPath Optional base directory to prepend to relative paths found in the config.
      * @return A tuple containing the number of rotors, their positions, files, and plugboard pairs.
      * @throws std::runtime_error if the configuration file is invalid or if the number of rotors, positions, and files do not match.
      */
-    static std::tuple<int, std::vector<int>, std::vector<std::string>, std::array<Pair_t, PLUGBOARD_MAX_PAIRS>> parseConfig(const std::string& fileName);
+    static std::tuple<int, std::vector<int>, std::vector<std::string>, std::array<Pair_t, PLUGBOARD_MAX_PAIRS>> parseConfig(const std::string& fileName, const std::string& assetPath = "");
 
 public:
     /**
@@ -81,9 +82,10 @@ public:
      * initialization to the main parameterized constructor.
      *
      * @param fileName The path to the TOML configuration file.
+     * @param assetPath Optional base directory for assets (rotors/reflectors).
      * @throws std::runtime_error If the file cannot be parsed or contains invalid configuration data.
      */
-    EnigmaMachine(std::string fileName);
+    EnigmaMachine(std::string fileName, std::string assetPath = "");
     ~EnigmaMachine();
 
     /**

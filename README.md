@@ -32,6 +32,10 @@ cmake --build build
 
 # 3. Run Tests
 cd build && ctest --output-on-failure
+
+# 4. Run the Application
+./EnigmaMachineCore --help
+./EnigmaMachineCore -m "HELLO" --debug
 ```
 
 For more detailed build configurations and VS Code integration, see [docs/Building.md](docs/Building.md).
@@ -53,12 +57,12 @@ If you have Doxygen installed, you can generate the project documentation.
 
 **Using the modern CMake CLI:**
 ```bash
-cmake --build build/debug --target doxygen
+cmake --build build --target doxygen
 ```
 
 **Using the traditional Makefile approach:**
 ```bash
-cd build/debug
+cd build
 make doxygen     # Generate only the documentation
 ```
 
@@ -67,6 +71,8 @@ HTML documentation is generated in: `docs/doxygen-gen-files/html/index.html`
 ## Customization
 
 Rotors and Reflectors can be created and customized. Use the `assets` directory to place your customized components.
+
+Alternatively, you can specify a custom assets directory at runtime using the `--assets` command-line option.
 
 ***Note:** The build system automatically copies the `assets/` folder to the binary directory after each build, ensuring the executable always has access to the latest configuration files.*
 

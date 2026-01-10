@@ -22,24 +22,24 @@ protected:
 
 TEST_F(EnigmaMachineTests, Initialization) {
     EXPECT_NO_THROW({
-        EnigmaMachine machine(configPath);
+        EnigmaMachine machine(configPath, assetsDir);
     });
 }
 
 TEST_F(EnigmaMachineTests, BasicEncryption) {
-    EnigmaMachine machine(configPath);
+    EnigmaMachine machine(configPath, assetsDir);
     int res = machine.keyTransform(0); // 'A'
     EXPECT_GE(res, 0);
     EXPECT_LT(res, 26);
     // Deterministic check:
     // With current Config1 (Rotors 1,2,3 at 6,18,1, Plugs 4-7...), 'A' maps to something specific.
     // Let's just ensure it's consistent.
-    EnigmaMachine m2(configPath);
+    EnigmaMachine m2(configPath, assetsDir);
     EXPECT_EQ(m2.keyTransform(0), res); 
 }
 
 TEST_F(EnigmaMachineTests, StringEncryption) {
-    EnigmaMachine machine(configPath);
+    EnigmaMachine machine(configPath, assetsDir);
     std::string input = "AAAAA";
     std::string output = encryptString(machine, input);
     
@@ -58,11 +58,11 @@ TEST_F(EnigmaMachineTests, Reciprocity) {
     std::string plain = "HELLOWORLD";
     
     // 1. Encrypt
-    EnigmaMachine mEnc(configPath);
+    EnigmaMachine mEnc(configPath, assetsDir);
     std::string cipher = encryptString(mEnc, plain);
     
     // 2. Decrypt (New machine with same initial state)
-    EnigmaMachine mDec(configPath);
+    EnigmaMachine mDec(configPath, assetsDir);
     std::string recovered = encryptString(mDec, cipher);
     
     EXPECT_EQ(recovered, plain) << "Decryption failed to recover plaintext.";
@@ -70,7 +70,7 @@ TEST_F(EnigmaMachineTests, Reciprocity) {
 
 TEST_F(EnigmaMachineTests, PlugBoardEffect) {
     // 1. Machine WITH Plugboard (from file)
-    EnigmaMachine mWithPlugs(configPath);
+    EnigmaMachine mWithPlugs(configPath, assetsDir);
     
     // 2. Machine WITHOUT Plugboard (manual construction)
     // Need to match the file's rotor config: Rotors 1,2,3, Positions 6,18,1
