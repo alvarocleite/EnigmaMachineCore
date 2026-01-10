@@ -11,6 +11,7 @@
 | :--- | :--- | :--- |
 | **InitializationAndType** | Verifies correct object creation. | Checks that `getType()` returns `TransformerType::Rotor`. |
 | **BasicTransformation** | Verifies wiring logic against `assets/Rotor1.toml`. | Checks forward mapping `0 -> 3` and reverse mapping `3 -> 0`. |
+| **Reciprocity** | Verifies the integrity of the Reverse Look-Up Table. | Checks that `Reverse(Forward(x)) == x` for all 26 possible inputs. |
 | **RotationEffect** | Verifies that the component is dynamic. | Calls `rotate()` and asserts that the transformation of a static input (`0`) changes after the rotation. |
 | **FullRotationCycle** | Verifies the cyclic nature of the Rotor. | Confirms that 26 calls to `rotate()` return the rotor to its initial state. |
 | **SetPosition** | Verifies manual position control. | Ensures `setPosition(5)` produces the same transformation state as starting at `0` and calling `rotate()` 5 times. |
@@ -29,6 +30,15 @@
 *   **Goal:** Verify that the wiring (Lookup Table) is loaded and functioning for both directions.
 *   **Forward Check:** Validates against `assets/Rotor1.toml` where input `0` maps to `3`.
 *   **Reverse Check:** Validates the mathematical inverse property where input `3` (which is the output of the forward pass) maps back to `0`.
+
+### Test Case: `Reciprocity`
+*   **Goal:** comprehensively verify `initReverseTransformLUT`.
+*   **Verification:**
+    *   Iterate `i` from 0 to 25.
+    *   Calculate `y = transform(i, false)` (Forward).
+    *   Calculate `x = transform(y, true)` (Reverse).
+    *   Assert `x == i`.
+    *   This ensures the Reverse LUT is correctly generated as the inverse of the Forward LUT for the entire domain.
 
 ### Test Case: `RotationEffect`
 *   **Goal:** Verify that the Rotor moves and that movement affects the signal path.

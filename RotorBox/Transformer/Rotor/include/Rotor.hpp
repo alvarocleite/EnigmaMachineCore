@@ -23,6 +23,13 @@ private:
     bool initTransformLUT(std::string fileName);
 
     /**
+     * @brief Generates the reverse transformation lookup table.
+     * 
+     * @return bool Returns true if the reverse table was successfully generated, false otherwise.
+     */
+    bool initReverseTransformLUT();
+
+    /**
      * @brief Initializes the rotor position.
      * This function sets the initial position of the rotor based on the provided offset.
      * 

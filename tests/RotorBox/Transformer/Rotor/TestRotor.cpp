@@ -23,6 +23,19 @@ TEST_F(RotorTests, BasicTransformation) {
     EXPECT_EQ(rotor.transform(3, true), 0);
 }
 
+TEST_F(RotorTests, Reciprocity) {
+    Rotor rotor(configPath);
+    rotor.setPosition(0);
+
+    // Verify that the Reverse LUT is the exact inverse of the Forward LUT
+    // This explicitly tests the logic in initReverseTransformLUT()
+    for(int i = 0; i < 26; i++) {
+        int forward = rotor.transform(i, false);
+        int reverse = rotor.transform(forward, true);
+        EXPECT_EQ(reverse, i) << "Reciprocity failed at input " << i;
+    }
+}
+
 TEST_F(RotorTests, RotationEffect) {
     Rotor rotor(configPath);
     rotor.setPosition(0);

@@ -14,38 +14,53 @@ Rotor::Rotor(std::string fileName){
 Rotor::~Rotor(){}
 
 /**
- * @details Generates the mathematical inverse of the forward wiring to handle the return signal.
- * @internal If Forward(X) = Y, then Reverse(Y) = X. This allows the signal to pass 
- * back through the rotors after hitting the reflector.
+ * @details Initializes the rotor's wiring configuration.
+ * This function orchestrates the initialization process. It first loads the 
+ * forward transformation table and notch position from the configuration file, 
+ * and then triggers the generation of the reverse transformation table.
  */
 bool Rotor::initTransformLUT(std::string fileName){
     bool canBeInitialized = true;
     int notchPosition = 0;
-    
-    notchPosition = initForwardTransformLUT(fileName);
 
+    notchPosition = initForwardTransformLUT(fileName);
+    
     if (notchPosition > -1 && notchPosition < TRANSFORMER_SIZE){
         this->notchPosition = notchPosition;
     } else { 
         return false; 
     }
 
-    for (int fv = 0; fv < TRANSFORMER_SIZE; fv++){
-        auto it = std::find_if(&transformLUT[0][0], &transformLUT[0][TRANSFORMER_SIZE-1], 
-        [fv] (int value){
-            return value == fv;
-        });
+    canBeInitialized = initReverseTransformLUT();
 
-        if (it != &transformLUT[1][TRANSFORMER_SIZE-1] + TRANSFORMER_SIZE){
-            transformLUT[1][fv] = it - &transformLUT[0][0];
+    return canBeInitialized;
+}
+
+/**
+ * @details Generates the mathematical inverse of the forward wiring to handle the return signal.
+ * @internal If Forward(X) = Y, then Reverse(Y) = X. This ensures the signal can traverse 
+ * back through the rotors after being reflected. It iterates through the forward LUT 
+ * to map outputs back to inputs.
+ */
+bool Rotor::initReverseTransformLUT(){
+    bool canBeInitialized = true;
+    int* forwardBegin = &transformLUT[0][0];
+    int* forwardEnd = forwardBegin + TRANSFORMER_SIZE; 
+
+    for (int forwardValue = 0; forwardValue < TRANSFORMER_SIZE; forwardValue++){
+        auto it = std::find_if(forwardBegin, forwardEnd, 
+            [forwardValue] (int value){ return value == forwardValue; }
+        );
+
+        if (it != forwardEnd){
+            transformLUT[1][forwardValue] = static_cast<int>(it - forwardBegin);
         } else {
-            transformLUT[1][fv] = -1;
+            transformLUT[1][forwardValue] = -1;
             canBeInitialized = false;
         }
     }
 
     return canBeInitialized;
-
 }
 
 int Rotor::initRotorPosition(int offset){
