@@ -86,7 +86,7 @@ public:
      * Initializes the transformer type to NotDefined.
      */
     Transformer();
-    virtual ~Transformer();
+    virtual ~Transformer() = default;
 
     virtual int transform(int position, bool reverse = false) = 0;
     virtual int rotate() = 0;

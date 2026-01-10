@@ -59,7 +59,7 @@ public:
      * Initializes the rotor with a transformation lookup table (LUT) from a file.
      */
     Rotor(std::string fileName);
-    ~Rotor();
+    ~Rotor() = default;
 
     /**
      * @brief Transforms the given position based on the transformation lookup table (LUT).

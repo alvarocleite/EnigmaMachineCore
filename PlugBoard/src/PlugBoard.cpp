@@ -37,8 +37,6 @@ PlugBoard::PlugBoard(std::array<Pair_t, PLUGBOARD_MAX_PAIRS> pairs) : PlugBoard(
     }
 }
 
-PlugBoard::~PlugBoard() {}
-
 /**
  * @details Performs a character swap using the pre-calculated mapping table.
  * @internal This operation is O(1) and is performed twice for every key press in the EnigmaMachine.

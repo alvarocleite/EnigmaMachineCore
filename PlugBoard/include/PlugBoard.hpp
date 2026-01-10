@@ -29,7 +29,7 @@ public:
      * @param pairs An array of pairs to initialize the plugboard with.
      */
     PlugBoard(std::array<Pair_t, PLUGBOARD_MAX_PAIRS> pairs);
-    ~PlugBoard();
+    ~PlugBoard() = default;
 
     /**
      * @brief Swaps the input key based on the plugboard pairs.

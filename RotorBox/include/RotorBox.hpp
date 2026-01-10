@@ -51,7 +51,7 @@ public:
      * @throws std::runtime_error If initialization of transformers fails or file count is insufficient.
      */
     RotorBox(int nRotorCount, const std::vector<int> &rotorPositions, const std::vector<std::string> &rotorFiles);
-    ~RotorBox();
+    ~RotorBox() = default;
 
     /**
      * @brief Prints the types of transformers in the transformer vector.

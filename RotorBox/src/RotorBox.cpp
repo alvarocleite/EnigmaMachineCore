@@ -46,8 +46,6 @@ RotorBox::RotorBox(int nRotorCount, const std::vector<int> &rotorPositions, cons
     }
 }
 
-RotorBox::~RotorBox(){}
-
 /**
  * @details Populates the internal transformer vector with unique pointers to Rotor and Reflector objects.
  * 

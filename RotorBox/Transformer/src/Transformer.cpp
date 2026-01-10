@@ -9,8 +9,6 @@ Transformer::Transformer(){
     type = TransformerType::NotDefined;
 }
 
-Transformer::~Transformer(){}
-
 int Transformer::sizeOfTransformLUT() const{
     return transformLUT.size() * transformLUT[0].size();
 }

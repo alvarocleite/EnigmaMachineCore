@@ -77,8 +77,6 @@ EnigmaMachine::EnigmaMachine(std::string fileName, std::string assetPath)
     : EnigmaMachine(parseConfig(fileName, assetPath))
 {}
 
-EnigmaMachine::~EnigmaMachine(){}
-
 /**
  * @details The transformation follows the historic Enigma signal path:
  * 1. Pass through Plugboard (Forward).

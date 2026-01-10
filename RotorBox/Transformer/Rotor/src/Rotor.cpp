@@ -14,8 +14,6 @@ Rotor::Rotor(std::string fileName){
     initRotorPosition();
 }
 
-Rotor::~Rotor(){}
-
 /**
  * @details Initializes the rotor's wiring configuration.
  * This function orchestrates the initialization process by delegating the 

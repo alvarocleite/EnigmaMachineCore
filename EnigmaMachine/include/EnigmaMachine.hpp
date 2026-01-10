@@ -86,7 +86,7 @@ public:
      * @throws std::runtime_error If the file cannot be parsed or contains invalid configuration data.
      */
     EnigmaMachine(std::string fileName, std::string assetPath = "");
-    ~EnigmaMachine();
+    ~EnigmaMachine() = default;
 
     /**
      * @brief Transforms the input key through the rotor box.

@@ -9,8 +9,6 @@ Reflector::Reflector(std::string fileName){
     initTransformLUT(fileName);
 }
 
-Reflector::~Reflector(){}
-
 /**
  * @details Reflectors are symmetric components. 
  * This function orchestrates the initialization by delegating TOML parsing 

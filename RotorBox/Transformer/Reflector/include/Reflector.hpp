@@ -32,7 +32,7 @@ public:
      * Sets the type of the transformer to Reflector.
      */
     Reflector(std::string fileName);
-    ~Reflector();
+    ~Reflector() = default;
 
     /**
      * @brief Transforms the given position using the reflector's transformation lookup table (LUT).
