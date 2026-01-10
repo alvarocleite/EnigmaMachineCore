@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <array>
 
 #include "config.hpp"
 
@@ -20,7 +21,7 @@ enum class TransformerType {
 class Transformer{
 protected:
     TransformerType type;
-    int transformLUT[2][TRANSFORMER_SIZE] = {0};
+    std::array<std::array<int, TRANSFORMER_SIZE>, 2> transformLUT;
     virtual bool initTransformLUT(std::string fileName) = 0;
 
     /**

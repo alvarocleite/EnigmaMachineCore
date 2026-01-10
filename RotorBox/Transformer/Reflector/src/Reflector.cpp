@@ -25,9 +25,7 @@ bool Reflector::initTransformLUT(std::string fileName){
     // Initialize reverse transformation vector to -1.
     // Conceptually, for a reflector, Forward == Reverse, but the signal 
     // only ever passes through it once per key press.
-    for (int i = 0; i < TRANSFORMER_SIZE; i++){
-        transformLUT[1][i] = -1;
-    }
+    transformLUT.at(1).fill(-1);
 
     return true;
 }
@@ -38,7 +36,7 @@ bool Reflector::initTransformLUT(std::string fileName){
  * occupy the 'turn-around' point in the signal path.
  */
 int Reflector::transform(int position, bool reverse){
-    int newPosition = transformLUT[(int)reverse][position];
+    int newPosition = transformLUT.at((int)reverse).at(position);
     // transformLUT[reverse][position] = -1,  when reverse is true 
     return newPosition;
 }

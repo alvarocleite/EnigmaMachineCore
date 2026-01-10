@@ -44,18 +44,18 @@ bool Rotor::initTransformLUT(std::string fileName){
  */
 bool Rotor::initReverseTransformLUT(){
     bool canBeInitialized = true;
-    int* forwardBegin = &transformLUT[0][0];
-    int* forwardEnd = forwardBegin + TRANSFORMER_SIZE; 
+    const auto& forwardRow = transformLUT.at(0); 
+    auto& reverseRow       = transformLUT.at(1);
 
     for (int forwardValue = 0; forwardValue < TRANSFORMER_SIZE; forwardValue++){
-        auto it = std::find_if(forwardBegin, forwardEnd, 
+        auto it = std::find_if(forwardRow.begin(), forwardRow.end(), 
             [forwardValue] (int value){ return value == forwardValue; }
         );
 
-        if (it != forwardEnd){
-            transformLUT[1][forwardValue] = static_cast<int>(it - forwardBegin);
+        if (it != forwardRow.end()){
+            reverseRow.at(forwardValue) = std::distance(forwardRow.begin(), it);
         } else {
-            transformLUT[1][forwardValue] = -1;
+            reverseRow.at(forwardValue) = -1;
             canBeInitialized = false;
         }
     }
@@ -83,7 +83,7 @@ inline bool Rotor::isNotchPosition(int position){
  */
 int Rotor::transform(int position, bool reverse){
     position = (position + rotorRotationCount) % TRANSFORMER_SIZE; 
-    position = transformLUT[(int)reverse][position];
+    position = transformLUT.at((int)reverse).at(position);
     position = (position - rotorRotationCount + TRANSFORMER_SIZE) % TRANSFORMER_SIZE;
 
     return position;

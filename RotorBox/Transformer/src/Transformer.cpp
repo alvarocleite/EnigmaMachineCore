@@ -13,7 +13,7 @@ Transformer::Transformer(){
 Transformer::~Transformer(){}
 
 int Transformer::sizeOfTransformLUT(){
-    return sizeof(transformLUT) / sizeof(transformLUT[0][0]);
+    return transformLUT.size() * transformLUT[0].size();
 }
 
 TransformerType Transformer::getType(){
@@ -57,7 +57,7 @@ int Transformer::initForwardTransformLUT(std::string fileName){
             }
 
             for(size_t i = 0; i < arr.size(); ++i) {
-                transformLUT[0][i] = arr[i];
+                transformLUT.at(0).at(i) = arr[i];
             }
         }
         else if (typeStr == "reflector") {
@@ -74,7 +74,7 @@ int Transformer::initForwardTransformLUT(std::string fileName){
             }
 
             for(size_t i = 0; i < arr.size(); ++i) {
-                transformLUT[0][i] = arr[i];
+                transformLUT.at(0).at(i) = arr[i];
             }
 
             notchPosition = TRANSFORMER_SIZE; 
