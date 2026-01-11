@@ -12,6 +12,7 @@ To build and run this project, you will need the following tools and libraries:
 *   **[GDB](https://www.sourceware.org/gdb/):** Essential for debugging logic on Linux environments.
 *   **Git:** Required for version control and to manage the project's submodules.
 *   **[clang-format](https://clang.llvm.org/docs/ClangFormat.html):** Recommended for maintaining consistent code style.
+*   **[clang-tidy](https://clang.llvm.org/extra/clang-tidy/):** Used for static analysis during the build process.
 
 ### Libraries
 *   **[toml11](https://github.com/ToruNiina/toml11):** A powerful C++11 header-only library for TOML.
@@ -135,6 +136,20 @@ cmake --build build --target format
 ```
 
 This will automatically format all source and header files in the project.
+
+---
+
+## Static Analysis
+
+Static analysis is performed using **clang-tidy** and is integrated into the CMake build system.
+
+*   **How to Enable:** By default, static analysis is disabled to ensure fast build times. To enable it, use the `ENABLE_CLANG_TIDY` flag during configuration:
+    ```bash
+    cmake -DENABLE_CLANG_TIDY=ON -S . -B build
+    ```
+*   **Execution:** Once enabled, clang-tidy will run on every source file during compilation (`make`).
+*   **Identifying Issues:** Clang-tidy output is interleaved with compiler output. You can distinguish them by the bracketed check name at the end of the line (e.g., `[modernize-use-auto]`). Standard compiler warnings typically start with `-W`.
+*   **Configuration:** The list of active checks is defined in `CMakeLists.txt`.
 
 ---
 

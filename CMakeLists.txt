@@ -60,6 +60,27 @@ else()
     target_compile_options(EnigmaCore PRIVATE -Wall -Wextra -Wpedantic)
 endif()
 
+# --- Static Analysis (clang-tidy) ---
+option(ENABLE_CLANG_TIDY "Enable static analysis with clang-tidy" OFF)
+
+if(ENABLE_CLANG_TIDY)
+    find_program(CLANG_TIDY_EXE clang-tidy)
+    if(CLANG_TIDY_EXE)
+        message(STATUS "clang-tidy found: ${CLANG_TIDY_EXE}")
+        set(CLANG_TIDY_CHECKS
+            "-*,bugprone-*,modernize-*,performance-*,readability-*"
+            "-modernize-use-trailing-return-type"
+        )
+        string(REPLACE ";" "," CLANG_TIDY_CHECKS_STR "${CLANG_TIDY_CHECKS}")
+        
+        set_target_properties(EnigmaCore PROPERTIES
+            CXX_CLANG_TIDY "${CLANG_TIDY_EXE};-checks=${CLANG_TIDY_CHECKS_STR}"
+        )
+    else()
+        message(WARNING "clang-tidy not found. Static analysis will not be run.")
+    endif()
+endif()
+
 # --- External Dependencies ---
 # Initialize and link toml11 library (header-only submodule)
 add_subdirectory(external/toml11)

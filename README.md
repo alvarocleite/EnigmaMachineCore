@@ -77,6 +77,13 @@ This project uses `clang-format` to maintain a consistent coding style. To forma
 cmake --build build --target format
 ```
 
+### Static Analysis
+The project integrates `clang-tidy` to detect bugs and enforce modern C++ practices. This check is optional and can be enabled during configuration:
+
+```bash
+cmake -DENABLE_CLANG_TIDY=ON ..
+```
+
 ## Customization
 
 Rotors and Reflectors can be created and customized. Use the `assets` directory to place your customized components.
