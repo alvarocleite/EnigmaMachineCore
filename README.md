@@ -68,6 +68,15 @@ make doxygen     # Generate only the documentation
 
 HTML documentation is generated in: `docs/doxygen-gen-files/html/index.html`
 
+## Development
+
+### Code Formatting
+This project uses `clang-format` to maintain a consistent coding style. To format all source files:
+
+```bash
+cmake --build build --target format
+```
+
 ## Customization
 
 Rotors and Reflectors can be created and customized. Use the `assets` directory to place your customized components.

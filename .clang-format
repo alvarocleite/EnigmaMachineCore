@@ -1,0 +1,8 @@
+Language:        Cpp
+BasedOnStyle:    Google
+Standard:        c++20
+IndentWidth:     4
+ColumnLimit:     120
+AccessModifierOffset: -4
+SortIncludes:    true
+IncludeBlocks:   Preserve

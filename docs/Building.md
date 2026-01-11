@@ -11,6 +11,7 @@ To build and run this project, you will need the following tools and libraries:
 *   **[CMake](https://cmake.org/):** Version 3.15 or higher is required to generate the build files.
 *   **[GDB](https://www.sourceware.org/gdb/):** Essential for debugging logic on Linux environments.
 *   **Git:** Required for version control and to manage the project's submodules.
+*   **[clang-format](https://clang.llvm.org/docs/ClangFormat.html):** Recommended for maintaining consistent code style.
 
 ### Libraries
 *   **[toml11](https://github.com/ToruNiina/toml11):** A powerful C++11 header-only library for TOML.
@@ -121,6 +122,19 @@ ctest --output-on-failure
 ```
 
 *Note: By default, the application looks for assets in the `assets/` directory relative to the executable (automatically copied by the build system).*
+
+---
+
+## Code Formatting
+
+To ensure a consistent style, the project uses `clang-format` based on the Google C++ style guide. 
+
+### To format the source code:
+```bash
+cmake --build build --target format
+```
+
+This will automatically format all source and header files in the project.
 
 ---
 

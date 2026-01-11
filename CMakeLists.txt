@@ -102,3 +102,23 @@ FetchContent_MakeAvailable(googletest)
 
 enable_testing()
 add_subdirectory(tests)
+
+# --- Code Formatting (clang-format) ---
+find_program(CLANG_FORMAT_EXE clang-format)
+if(CLANG_FORMAT_EXE)
+    file(GLOB_RECURSE ALL_SOURCES
+        "EnigmaMachine/*.cpp" "EnigmaMachine/*.hpp"
+        "PlugBoard/*.cpp" "PlugBoard/*.hpp"
+        "RotorBox/*.cpp" "RotorBox/*.hpp"
+        "tests/*.cpp"
+    )
+    list(APPEND ALL_SOURCES "main.cpp" "config/config.hpp")
+    
+    add_custom_target(format
+        COMMAND ${CLANG_FORMAT_EXE} -i -style=file ${ALL_SOURCES}
+        COMMENT "Formatting source code with clang-format"
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    )
+else()
+    message(WARNING "clang-format not found. The 'format' target will not be available.")
+endif()
