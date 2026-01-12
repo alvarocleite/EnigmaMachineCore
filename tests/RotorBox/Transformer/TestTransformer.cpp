@@ -7,11 +7,11 @@
 class ConcreteTransformer : public Transformer {
 public:
     ConcreteTransformer() : Transformer() {}
-    
+
     // Minimal implementations of pure virtual methods
     int transform(int position, bool reverse = false) override { return position; }
     int rotate() override { return 0; }
-    void initTransformLUT(std::string fileName) override { }
+    void initTransformLUT(std::string fileName) override {}
 };
 
 TEST(TransformerTests, DefaultInitialization) {

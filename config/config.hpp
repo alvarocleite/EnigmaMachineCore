@@ -9,4 +9,3 @@
 
 /* assets base directory */
 const std::string assetsDir = "assets/";
-

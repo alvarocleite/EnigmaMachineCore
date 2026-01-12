@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
+#include <array>
 #include "PlugBoard.hpp"
 #include "config.hpp"
-#include <array>
 
 class PlugBoardTests : public ::testing::Test {
 protected:
@@ -13,7 +13,7 @@ protected:
         for (auto& p : pairs) {
             p = {0, 0};
         }
-        
+
         size_t i = 0;
         for (const auto& item : init) {
             if (i < pairs.size()) {
@@ -43,8 +43,8 @@ TEST_F(PlugBoardTests, CustomConfiguration) {
     EXPECT_EQ(pb.swap(4), 1);
 
     // Check unconnected
-    EXPECT_EQ(pb.swap(2), 2); // C
-    EXPECT_EQ(pb.swap(5), 5); // F
+    EXPECT_EQ(pb.swap(2), 2);  // C
+    EXPECT_EQ(pb.swap(5), 5);  // F
 }
 
 TEST_F(PlugBoardTests, Reciprocity) {
@@ -69,7 +69,7 @@ TEST_F(PlugBoardTests, ConflictHandling) {
     EXPECT_EQ(pb.swap(1), 0);
 
     // 2 should NOT map to 0. It should be unconnected (identity)
-    EXPECT_EQ(pb.swap(2), 2); 
+    EXPECT_EQ(pb.swap(2), 2);
 }
 
 TEST_F(PlugBoardTests, SelfLoop) {

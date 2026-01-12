@@ -1,8 +1,8 @@
 
+#include <CLI/CLI.hpp>
+#include <cctype>
 #include <iostream>
 #include <string>
-#include <cctype>
-#include <CLI/CLI.hpp>
 #include "./EnigmaMachine/include/EnigmaMachine.hpp"
 
 #include "config/config.hpp"
@@ -24,12 +24,12 @@ std::string processMessage(EnigmaMachine& machine, const std::string& input, boo
     std::string output = "";
     for (char c : input) {
         if (!std::isalpha(c)) {
-            continue; // Skip non-alphabetic characters
+            continue;  // Skip non-alphabetic characters
         }
         char upperC = std::toupper(c);
         char res = machine.keyTransform(upperC - 'A') + 'A';
         output += res;
-        
+
         if (debug) {
             std::cout << "Input: " << upperC << ", Output: " << res << std::endl;
         }
@@ -84,14 +84,15 @@ void runApplication(const AppConfig& config) {
         std::cout << "Decoding message: " << currentMessage << std::endl;
         std::string decoded = processMessage(decodeMachine, currentMessage, config.debug);
         std::cout << "Result (Plaintext): " << decoded << std::endl;
-        
+
         if (config.encode) {
             // Verify round-trip success against normalized input
             std::string cleanOriginal = "";
-            for(char c : config.message) if(std::isalpha(c)) cleanOriginal += std::toupper(c);
-            
+            for (char c : config.message)
+                if (std::isalpha(c)) cleanOriginal += std::toupper(c);
+
             if (decoded == cleanOriginal) {
-                    std::cout << "Success: Decoded message matches original!" << std::endl;
+                std::cout << "Success: Decoded message matches original!" << std::endl;
             } else {
                 std::cout << "Failure: Decoded message mismatch." << std::endl;
             }
@@ -102,7 +103,7 @@ void runApplication(const AppConfig& config) {
 /**
  * @brief Main entry point.
  */
-int main(int argc, char** argv){
+int main(int argc, char** argv) {
     try {
         AppConfig config = parseArguments(argc, argv);
         runApplication(config);

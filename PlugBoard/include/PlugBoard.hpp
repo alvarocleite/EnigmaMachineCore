@@ -9,10 +9,9 @@ struct Pair_t {
     int b;
 };
 
-class PlugBoard
-{
+class PlugBoard {
 private:
-    std::array<int, TRANSFORMER_SIZE> mapping; // Direct mapping: mapping[Input] = Output
+    std::array<int, TRANSFORMER_SIZE> mapping;  // Direct mapping: mapping[Input] = Output
 
 public:
     /**
@@ -25,7 +24,7 @@ public:
      * @brief Constructor for the PlugBoard class.
      * Initializes the plugboard with a given array of pairs.
      * Validates that ports are not already used before connecting.
-     * 
+     *
      * @param pairs An array of pairs to initialize the plugboard with.
      */
     PlugBoard(std::array<Pair_t, PLUGBOARD_MAX_PAIRS> pairs);
@@ -33,7 +32,7 @@ public:
 
     /**
      * @brief Swaps the input key based on the plugboard pairs.
-     * 
+     *
      * @param key The input key to be swapped.
      * @return int The swapped key.
      */

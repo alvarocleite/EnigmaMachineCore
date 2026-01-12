@@ -1,18 +1,18 @@
 #pragma once
 
 #include <tuple>
-#include "RotorBox.hpp"
 #include "PlugBoard.hpp"
+#include "RotorBox.hpp"
 
 /**
  * @brief Class representing the Enigma machine.
  * This class encapsulates the functionality of the Enigma machine, including the rotor box
  * and the transformation of input keys through the rotors and reflector.
  */
-class EnigmaMachine{
+class EnigmaMachine {
 private:
     RotorBox rotorBox;
-    PlugBoard plugBoard; // Optional: if you want to include a plugboard for additional transformations
+    PlugBoard plugBoard;  // Optional: if you want to include a plugboard for additional transformations
 
     /**
      * @brief Private Delegating Constructor.
@@ -22,18 +22,21 @@ private:
      *
      * @param config A tuple containing: {RotorCount, RotorPositions, RotorFiles, PlugBoardPairs}.
      */
-    EnigmaMachine(std::tuple<int, std::vector<int>, std::vector<std::string>, std::array<Pair_t, PLUGBOARD_MAX_PAIRS>> config);
+    EnigmaMachine(
+        std::tuple<int, std::vector<int>, std::vector<std::string>, std::array<Pair_t, PLUGBOARD_MAX_PAIRS>> config);
 
     /**
      * @brief Function used by fileName Constructor for the EnigmaMachine class.
      * Parses the configuration file to extract the number of rotors, their positions, files, and plugboard pairs.
-     * 
+     *
      * @param fileName The name of the configuration file containing the settings for the Enigma machine.
      * @param assetPath Optional base directory to prepend to relative paths found in the config.
      * @return A tuple containing the number of rotors, their positions, files, and plugboard pairs.
-     * @throws std::runtime_error if the configuration file is invalid or if the number of rotors, positions, and files do not match.
+     * @throws std::runtime_error if the configuration file is invalid or if the number of rotors, positions, and files
+     * do not match.
      */
-    static std::tuple<int, std::vector<int>, std::vector<std::string>, std::array<Pair_t, PLUGBOARD_MAX_PAIRS>> parseConfig(const std::string& fileName, const std::string& assetPath = "");
+    static std::tuple<int, std::vector<int>, std::vector<std::string>, std::array<Pair_t, PLUGBOARD_MAX_PAIRS>>
+    parseConfig(const std::string& fileName, const std::string& assetPath = "");
 
 public:
     /**
@@ -58,7 +61,8 @@ public:
      * @param rotorFiles A vector of file paths defining the wiring for each rotor and the reflector.
      *                   The last file in the list is expected to be the Reflector.
      */
-    EnigmaMachine(int nRotorCount, const std::vector<int> &rotorPositions, const std::vector<std::string> &transformerFiles);
+    EnigmaMachine(int nRotorCount, const std::vector<int>& rotorPositions,
+                  const std::vector<std::string>& transformerFiles);
 
     /**
      * @brief Parameterized Constructor for the EnigmaMachine class (With PlugBoard).
@@ -71,7 +75,9 @@ public:
      *                   The last file in the list is expected to be the Reflector.
      * @param plugBoardPairs An array of `Pair_t` defining the swaps to be configured on the PlugBoard.
      */
-    EnigmaMachine(int nRotorCount, const std::vector<int> &rotorPositions, const std::vector<std::string> &transformerFiles, const std::array<Pair_t, PLUGBOARD_MAX_PAIRS> &plugBoardPairs);
+    EnigmaMachine(int nRotorCount, const std::vector<int>& rotorPositions,
+                  const std::vector<std::string>& transformerFiles,
+                  const std::array<Pair_t, PLUGBOARD_MAX_PAIRS>& plugBoardPairs);
 
     /**
      * @brief File-based Constructor for the EnigmaMachine class.
@@ -90,7 +96,7 @@ public:
 
     /**
      * @brief Transforms the input key through the rotor box.
-     * 
+     *
      * @param input The input key to be transformed.
      * @return int The transformed output key.
      */

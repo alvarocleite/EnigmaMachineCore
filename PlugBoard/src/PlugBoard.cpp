@@ -1,6 +1,6 @@
 #include "PlugBoard.hpp"
-#include "config.hpp"
 #include <iostream>
+#include "config.hpp"
 
 PlugBoard::PlugBoard() {
     for (int i = 0; i < TRANSFORMER_SIZE; ++i) {
@@ -11,7 +11,7 @@ PlugBoard::PlugBoard() {
 /**
  * @details Validates the provided pairs before mapping them.
  * A port is 'unused' if it maps to itself.
- * If either port 'a' or 'b' is already mapped to something else, a conflict is reported 
+ * If either port 'a' or 'b' is already mapped to something else, a conflict is reported
  * because a socket cannot have two plugs.
  */
 PlugBoard::PlugBoard(std::array<Pair_t, PLUGBOARD_MAX_PAIRS> pairs) : PlugBoard() {
@@ -43,7 +43,7 @@ PlugBoard::PlugBoard(std::array<Pair_t, PLUGBOARD_MAX_PAIRS> pairs) : PlugBoard(
  */
 int PlugBoard::swap(int key) const {
     if (key < 0 || key >= TRANSFORMER_SIZE) {
-        return key; 
+        return key;
     }
     return mapping.at(key);
 }

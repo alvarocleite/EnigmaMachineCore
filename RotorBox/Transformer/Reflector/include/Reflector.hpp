@@ -10,9 +10,9 @@
  */
 class Reflector : public Transformer {
 private:
-    /** 
+    /**
      * @brief Initializes the transformation lookup table (LUT) for the reflector.
-     * 
+     *
      * @param fileName The name of the file containing the transformation data.
      * @throws std::runtime_error If initialization fails.
      */
@@ -20,11 +20,12 @@ private:
 
     /**
      * @brief Parses the reflector configuration from a TOML file.
-     * 
+     *
      * @param fileName The path to the configuration file.
      * @throws std::runtime_error If parsing fails.
      */
     void parseConfig(std::string fileName);
+
 public:
     /**
      * @brief Constructor for the Reflector class.
@@ -36,7 +37,7 @@ public:
 
     /**
      * @brief Transforms the given position using the reflector's transformation lookup table (LUT).
-     * 
+     *
      * @param position The input position to be transformed.
      * @param reverse It should not be set to true.
      * @return int The transformed position. Returns "-1" if the position is not found in the LUT when reverse is true.
@@ -45,7 +46,7 @@ public:
 
     /**
      * @brief Reflector does not rotate.
-     * 
+     *
      * @return int Always returns 0.
      */
     int rotate() override { return 0; }
