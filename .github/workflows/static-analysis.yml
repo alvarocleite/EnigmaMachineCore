@@ -1,0 +1,36 @@
+name: Static Analysis
+
+on:
+  push:
+    branches: [ "main", "development" ]
+  pull_request:
+    branches: [ "main", "development" ]
+
+jobs:
+  clang-tidy:
+    name: Clang-Tidy Analysis
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: recursive
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y clang-tidy
+
+    - name: Configure CMake
+      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=Debug -DENABLE_CLANG_TIDY=ON
+
+    - name: Run Analysis
+      # Building the target triggers clang-tidy as configured in CMakeLists.txt
+      run: cmake --build ${{github.workspace}}/build 2>&1 | tee static-analysis.log
+
+    - name: Upload Analysis Log
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: static-analysis-log
+        path: static-analysis.log
