@@ -1,0 +1,38 @@
+name: Clang-Format Check
+
+on:
+  pull_request:
+    branches: [ "main", "development" ]
+
+jobs:
+  format-check:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install clang-format
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y clang-format
+
+    - name: Run clang-format
+      run: |
+        # Find all source files excluding external/ and build/
+        # Matches the patterns in CMakeLists.txt
+        find EnigmaMachine PlugBoard RotorBox config tests -name '*.cpp' -o -name '*.hpp' | xargs clang-format -i -style=file
+        clang-format -i -style=file main.cpp
+
+    - name: Check for changes
+      run: |
+        if ! git diff --exit-code; then
+          git diff > format_fixes.patch
+          exit 1
+        fi
+
+    - name: Upload Format Patch
+      if: failure()
+      uses: actions/upload-artifact@v4
+      with:
+        name: format-fixes
+        path: format_fixes.patch
