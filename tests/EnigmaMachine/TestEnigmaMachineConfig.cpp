@@ -13,7 +13,7 @@ TEST_F(EnigmaMachineConfigTests, LoadValidConfig) {
     EXPECT_NO_THROW({ config = EnigmaMachineConfig::load(validConfigPath, assetsDir); });
 
     EXPECT_EQ(config.getRotorCount(), 3);
-    
+
     std::vector<int> expectedPositions = {6, 18, 1};
     EXPECT_EQ(config.getRotorPositions(), expectedPositions);
 
@@ -26,7 +26,7 @@ TEST_F(EnigmaMachineConfigTests, LoadValidConfig) {
     // { from = 18, to = 20 }
     bool foundFirst = false;
     bool foundSecond = false;
-    
+
     // Note: The array size is PLUGBOARD_MAX_PAIRS. Unused are (-1, -1).
     for (const auto& p : pairs) {
         if (p.a == 4 && p.b == 7) foundFirst = true;
@@ -44,7 +44,7 @@ TEST_F(EnigmaMachineConfigTests, RotorConfigProperties) {
     EnigmaMachineConfig config = EnigmaMachineConfig::load(validConfigPath, assetsDir);
     const auto& rotors = config.getRotors();
     ASSERT_FALSE(rotors.empty());
-    
+
     // Check properties of the first loaded rotor (Rotor1)
     // We expect size 26
     EXPECT_EQ(rotors[0].wiring.size(), 26);
