@@ -19,6 +19,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 # Group core logic files for the library
 set(CORE_SOURCES
     EnigmaMachine/src/EnigmaMachine.cpp
+    EnigmaMachine/src/EnigmaMachineConfig.cpp
     PlugBoard/src/PlugBoard.cpp
     RotorBox/src/RotorBox.cpp
     RotorBox/Transformer/src/Transformer.cpp
