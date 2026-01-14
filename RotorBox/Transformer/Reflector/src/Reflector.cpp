@@ -1,48 +1,29 @@
+/**
+ * @file
+ * @brief Implementation of the Reflector class.
+ */
 
 #include "Reflector.hpp"
 #include <iostream>
 #include <stdexcept>
-#include <toml.hpp>
+#include <vector>
 
-Reflector::Reflector(std::string fileName) {
+Reflector::Reflector(const ReflectorConfig& config) {
     type = TransformerType::Reflector;
-    initTransformLUT(fileName);
-}
 
-/**
- * @details Reflectors are symmetric components.
- * This function orchestrates the initialization by delegating TOML parsing
- * to parseConfig and then initializing the reverse mapping.
- */
-void Reflector::initTransformLUT(std::string fileName) {
-    parseConfig(fileName);
+    if (config.wiring.size() != TRANSFORMER_SIZE) {
+        throw std::runtime_error("Reflector wiring size mismatch");
+    }
+
+    for (size_t i = 0; i < config.wiring.size(); ++i) {
+        setTransformValue(0, i, config.wiring[i]);
+    }
 
     // Initialize reverse transformation vector to -1.
+    // Reflectors are typically symmetric, but the Transformer base class supports separate reverse path.
+    // For a reflector, the return path is usually implicit in the map itself if symmetric.
+    // However, keeping consistent with the old code:
     fillTransformRow(1, -1);
-}
-
-/**
- * @details Parses the reflector's wiring map from a TOML file.
- * @internal This method enforces strict size and type checking to ensure
- * the configuration matches the expected transformer size and type.
- */
-void Reflector::parseConfig(std::string fileName) {
-    toml::value data;
-    parseBasicConfig(fileName, "reflector", data);
-
-    try {
-        auto arr = toml::find<std::vector<int>>(data, "reflector", "map");
-        if (arr.size() != TRANSFORMER_SIZE) {
-            throw std::runtime_error("TOML array size mismatch");
-        }
-
-        for (size_t i = 0; i < arr.size(); ++i) {
-            setTransformValue(0, i, arr[i]);
-        }
-
-    } catch (const std::exception& e) {
-        throw std::runtime_error("TOML parse error: " + std::string(e.what()));
-    }
 }
 
 /**

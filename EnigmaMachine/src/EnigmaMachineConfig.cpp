@@ -60,16 +60,16 @@ EnigmaMachineConfig::EnigmaMachineConfig() {
  * The `wiring` vector is explicitly checked to ensure it has the correct size
  * defined by `TRANSFORMER_SIZE`.
  */
-RotorConfig EnigmaMachineConfig::loadRotor(const std::string& fileName) {
-    auto rotorData = toml::parse(fileName);
-    validateTransformerConfig(rotorData, "rotor", fileName);
+RotorConfig EnigmaMachineConfig::loadRotor(std::string_view fileName) {
+    auto rotorData = toml::parse(std::string(fileName));
+    validateTransformerConfig(rotorData, "rotor", std::string(fileName));
 
     RotorConfig rotorConfig;
     rotorConfig.notchPosition = toml::find<int>(rotorData, "rotor", "notchPosition");
     rotorConfig.wiring = toml::find<std::vector<int>>(rotorData, "rotor", "forward");
 
     if (rotorConfig.wiring.size() != TRANSFORMER_SIZE) {
-        throw std::runtime_error("Error: Rotor wiring size mismatch in " + fileName);
+        throw std::runtime_error("Error: Rotor wiring size mismatch in " + std::string(fileName));
     }
     return rotorConfig;
 }
@@ -79,14 +79,14 @@ RotorConfig EnigmaMachineConfig::loadRotor(const std::string& fileName) {
  * Similar to `loadRotor`, this function uses `toml::parse` and `validateTransformerConfig`.
  * It extracts the reflection map and ensures it adheres to the `TRANSFORMER_SIZE`.
  */
-ReflectorConfig EnigmaMachineConfig::loadReflector(const std::string& fileName) {
-    auto reflectorData = toml::parse(fileName);
-    validateTransformerConfig(reflectorData, "reflector", fileName);
+ReflectorConfig EnigmaMachineConfig::loadReflector(std::string_view fileName) {
+    auto reflectorData = toml::parse(std::string(fileName));
+    validateTransformerConfig(reflectorData, "reflector", std::string(fileName));
 
     ReflectorConfig reflectorConfig;
     reflectorConfig.wiring = toml::find<std::vector<int>>(reflectorData, "reflector", "map");
     if (reflectorConfig.wiring.size() != TRANSFORMER_SIZE) {
-        throw std::runtime_error("Error: Reflector wiring size mismatch in " + fileName);
+        throw std::runtime_error("Error: Reflector wiring size mismatch in " + std::string(fileName));
     }
     return reflectorConfig;
 }
@@ -103,9 +103,9 @@ ReflectorConfig EnigmaMachineConfig::loadReflector(const std::string& fileName) 
  * 5. Loads the reflector using `loadReflector`.
  * 6. Parses and populates the plugboard pairs, ensuring the count does not exceed `PLUGBOARD_MAX_PAIRS`.
  */
-EnigmaMachineConfig EnigmaMachineConfig::load(const std::string& fileName, const std::string& assetPath) {
+EnigmaMachineConfig EnigmaMachineConfig::load(std::string_view fileName, std::string_view assetPath) {
     EnigmaMachineConfig config;
-    auto data = toml::parse(fileName);
+    auto data = toml::parse(std::string(fileName));
 
     config.rotorCount = toml::find<int>(data, "rotors", "RotorCount");
     config.rotorPositions = toml::find<std::vector<int>>(data, "rotors", "RotorPositions");
@@ -116,7 +116,7 @@ EnigmaMachineConfig EnigmaMachineConfig::load(const std::string& fileName, const
         throw std::runtime_error("Error: Number of rotors, positions, and files do not match.");
     }
 
-    std::string prefix = assetPath;
+    std::string prefix = std::string(assetPath);
     if (!prefix.empty() && prefix.back() != '/') {
         prefix += "/";
     }

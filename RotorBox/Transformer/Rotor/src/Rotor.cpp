@@ -1,54 +1,40 @@
+/**
+ * @file Rotor.cpp
+ * @brief Implementation of the Rotor class.
+ */
+
 #include "Rotor.hpp"
 
 #include <algorithm>
 #include <iostream>
 #include <stdexcept>
-#include <string>
-#include <toml.hpp>
+#include <vector>
 
-Rotor::Rotor(std::string fileName) {
-    notchPosition = 0;
+/**
+ * @details Initializes the Rotor by:
+ * 1. Setting the notch position and initial rotation count.
+ * 2. Validating the wiring size against TRANSFORMER_SIZE.
+ * 3. Populating the forward transformation table.
+ * 4. Generating the reverse transformation table via `initReverseTransformLUT`.
+ *
+ * @throws std::runtime_error If the wiring size in the config is incorrect.
+ */
+Rotor::Rotor(const RotorConfig& config) {
+    notchPosition = config.notchPosition;
     rotorRotationCount = 0;
     type = TransformerType::Rotor;
-    initTransformLUT(fileName);
-    initRotorPosition();
-}
 
-/**
- * @details Initializes the rotor's wiring configuration.
- * This function orchestrates the initialization process by delegating the
- * configuration parsing to parseConfig and the inverse table generation
- * to initReverseTransformLUT.
- */
-void Rotor::initTransformLUT(std::string fileName) {
-    parseConfig(fileName);
-    initReverseTransformLUT();
-}
-
-/**
- * @details Parses the rotor's wiring and notch position from a TOML file.
- * @internal This method enforces strict size and type checking to ensure
- * the configuration matches the expected transformer size and type.
- */
-void Rotor::parseConfig(std::string fileName) {
-    toml::value data;
-    parseBasicConfig(fileName, "rotor", data);
-
-    try {
-        this->notchPosition = toml::find<int>(data, "rotor", "notchPosition");
-
-        auto arr = toml::find<std::vector<int>>(data, "rotor", "forward");
-        if (arr.size() != TRANSFORMER_SIZE) {
-            throw std::runtime_error("TOML array size mismatch");
-        }
-
-        for (size_t i = 0; i < arr.size(); ++i) {
-            setTransformValue(0, i, arr[i]);
-        }
-
-    } catch (const std::exception& e) {
-        throw std::runtime_error("TOML parse error: " + std::string(e.what()));
+    // Set forward wiring from config
+    if (config.wiring.size() != TRANSFORMER_SIZE) {
+        throw std::runtime_error("Rotor wiring size mismatch");
     }
+
+    for (size_t i = 0; i < config.wiring.size(); ++i) {
+        setTransformValue(0, i, config.wiring[i]);
+    }
+
+    initReverseTransformLUT();
+    initRotorPosition();
 }
 
 /**
@@ -75,6 +61,11 @@ void Rotor::initReverseTransformLUT() {
     }
 }
 
+/**
+ * @details Sets the internal rotation counter to the specified offset.
+ * @param offset The starting position (0-25).
+ * @return 0 (Success).
+ */
 int Rotor::initRotorPosition(int offset) {
     rotorRotationCount = offset;
     return 0;
@@ -99,9 +90,19 @@ int Rotor::transform(int position, bool reverse) {
     return position;
 }
 
+/**
+ * @details Increments the rotor's position by one step (modulo TRANSFORMER_SIZE).
+ * Checks if the new position corresponds to the notch position.
+ *
+ * @return 1 if the rotor is now at the notch position (triggering a carry), 0 otherwise.
+ */
 int Rotor::rotate() {
     rotorRotationCount = (rotorRotationCount + 1) % TRANSFORMER_SIZE;
     return isNotchPosition(rotorRotationCount) ? 1 : 0;
 }
 
+/**
+ * @details Manually sets the current rotational position of the rotor.
+ * This is used for setting up the initial machine state key.
+ */
 void Rotor::setPosition(int position) { rotorRotationCount = position; }

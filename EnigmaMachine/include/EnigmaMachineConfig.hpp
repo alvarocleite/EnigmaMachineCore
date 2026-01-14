@@ -2,6 +2,7 @@
 
 #include <array>
 #include <string>
+#include <string_view>
 #include <vector>
 #include "PlugBoard.hpp"  // For Pair_t and PLUGBOARD_MAX_PAIRS
 #include "config.hpp"     // For TRANSFORMER_SIZE
@@ -61,7 +62,7 @@ public:
      * @return EnigmaMachineConfig A fully populated configuration object.
      * @throws std::runtime_error If parsing fails, file not found, or validation checks (e.g., size mismatches) fail.
      */
-    static EnigmaMachineConfig load(const std::string& fileName, const std::string& assetPath = "");
+    static EnigmaMachineConfig load(std::string_view fileName, std::string_view assetPath = "");
 
     /**
      * @brief Loads a single rotor configuration from a TOML file.
@@ -70,7 +71,7 @@ public:
      * @return RotorConfig The parsed rotor configuration containing notch and wiring.
      * @throws std::runtime_error If the file format is invalid or wiring size is incorrect.
      */
-    static RotorConfig loadRotor(const std::string& fileName);
+    static RotorConfig loadRotor(std::string_view fileName);
 
     /**
      * @brief Loads a single reflector configuration from a TOML file.
@@ -79,7 +80,7 @@ public:
      * @return ReflectorConfig The parsed reflector configuration containing the wiring map.
      * @throws std::runtime_error If the file format is invalid or wiring size is incorrect.
      */
-    static ReflectorConfig loadReflector(const std::string& fileName);
+    static ReflectorConfig loadReflector(std::string_view fileName);
 
     // Getters
 

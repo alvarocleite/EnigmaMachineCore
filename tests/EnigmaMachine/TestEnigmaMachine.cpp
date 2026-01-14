@@ -74,8 +74,9 @@ TEST_F(EnigmaMachineTests, PlugBoardEffect) {
     // Need to match the file's rotor config: Rotors 1,2,3, Positions 6,18,1
     // Note: Config has positions [6, 18, 1]
     std::vector<int> positions = {6, 18, 1};
-    std::vector<std::string> files = {assetsDir + "Rotor1.toml", assetsDir + "Rotor2.toml", assetsDir + "Rotor3.toml",
-                                      assetsDir + "Reflector.toml"};
+    std::vector<std::string> files = {std::string(assetsDir) + "Rotor1.toml", std::string(assetsDir) + "Rotor2.toml",
+                                      std::string(assetsDir) + "Rotor3.toml",
+                                      std::string(assetsDir) + "Reflector.toml"};
 
     EnigmaMachine mNoPlugs(3, positions, files);
 
