@@ -23,25 +23,6 @@ protected:
     TransformerType type;
 
     /**
-     * @brief Pure virtual function to initialize the transformation lookup table (LUT).
-     * This must be implemented by derived classes to handle specific configuration loading.
-     *
-     * @param fileName The path to the configuration file.
-     * @throws std::runtime_error If initialization fails.
-     */
-    virtual void initTransformLUT(std::string fileName) = 0;
-
-    /**
-     * @brief Parses the common configuration from a TOML file (size and type checks).
-     *
-     * @param fileName The path to the configuration file.
-     * @param expectedType The expected type string ("rotor" or "reflector").
-     * @param outData Reference to store the parsed TOML data if successful.
-     * @throws std::runtime_error If parsing fails or checks fail.
-     */
-    void parseBasicConfig(std::string fileName, std::string expectedType, toml::value& outData);
-
-    /**
      * @brief Sets a value in the transformation lookup table.
      *
      * @param row The row index (0 for forward, 1 for reverse).

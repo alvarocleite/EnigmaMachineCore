@@ -1,5 +1,11 @@
+/**
+ * @file
+ * @brief Implementation of the PlugBoard class.
+ */
+
 #include "PlugBoard.hpp"
 #include <iostream>
+#include <stdexcept>
 #include "config.hpp"
 
 PlugBoard::PlugBoard() {
@@ -13,14 +19,22 @@ PlugBoard::PlugBoard() {
  * A port is 'unused' if it maps to itself.
  * If either port 'a' or 'b' is already mapped to something else, a conflict is reported
  * because a socket cannot have two plugs.
+ *
+ * @throws std::invalid_argument If a port index is out of range or if there is a mapping conflict.
  */
 PlugBoard::PlugBoard(std::array<Pair_t, PLUGBOARD_MAX_PAIRS> pairs) : PlugBoard() {
     for (const auto& pair : pairs) {
         int a = pair.a;
         int b = pair.b;
 
-        if (a < 0 || a >= TRANSFORMER_SIZE || b < 0 || b >= TRANSFORMER_SIZE) {
+        // Skip uninitialized/empty pairs
+        if (a == -1 || b == -1) {
             continue;
+        }
+
+        if (a < 0 || a >= TRANSFORMER_SIZE || b < 0 || b >= TRANSFORMER_SIZE) {
+            throw std::invalid_argument("PlugBoard error: Port index out of range (" + std::to_string(a) + ", " +
+                                        std::to_string(b) + ").");
         }
 
         if (a == b) {
@@ -28,8 +42,8 @@ PlugBoard::PlugBoard(std::array<Pair_t, PLUGBOARD_MAX_PAIRS> pairs) : PlugBoard(
         }
 
         if (mapping.at(a) != a || mapping.at(b) != b) {
-            std::cerr << "Warning: PlugBoard conflict for pair (" << a << ", " << b << "). Skipping." << std::endl;
-            continue;
+            throw std::invalid_argument("PlugBoard error: Conflict for pair (" + std::to_string(a) + ", " +
+                                        std::to_string(b) + "). Port already in use.");
         }
 
         mapping.at(a) = b;

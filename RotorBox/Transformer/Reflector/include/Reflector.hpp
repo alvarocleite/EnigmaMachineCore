@@ -1,5 +1,11 @@
+/**
+ * @file
+ * @brief Header file for the Reflector class.
+ */
+
 #pragma once
 
+#include "EnigmaMachineConfig.hpp"  // For ReflectorConfig
 #include "Transformer.hpp"
 
 /**
@@ -9,30 +15,15 @@
  * Reflectors do not rotate, so the rotate function always returns 0.
  */
 class Reflector : public Transformer {
-private:
-    /**
-     * @brief Initializes the transformation lookup table (LUT) for the reflector.
-     *
-     * @param fileName The name of the file containing the transformation data.
-     * @throws std::runtime_error If initialization fails.
-     */
-    void initTransformLUT(std::string fileName);
-
-    /**
-     * @brief Parses the reflector configuration from a TOML file.
-     *
-     * @param fileName The path to the configuration file.
-     * @throws std::runtime_error If parsing fails.
-     */
-    void parseConfig(std::string fileName);
-
 public:
     /**
      * @brief Constructor for the Reflector class.
-     * Initializes the reflector with a transformation lookup table (LUT) from a file.
+     * Initializes the reflector with a configuration.
      * Sets the type of the transformer to Reflector.
+     *
+     * @param config The ReflectorConfig structure containing the wiring map.
      */
-    Reflector(std::string fileName);
+    Reflector(const ReflectorConfig& config);
     ~Reflector() = default;
 
     /**

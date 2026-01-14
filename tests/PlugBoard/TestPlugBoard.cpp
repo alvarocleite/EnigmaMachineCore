@@ -60,16 +60,9 @@ TEST_F(PlugBoardTests, Reciprocity) {
 
 TEST_F(PlugBoardTests, ConflictHandling) {
     // Attempt to connect A(0) to B(1), then A(0) to C(2)
-    // The second pair involving '0' should be ignored
+    // This should now throw an exception instead of being silently ignored.
     auto pairs = createPairs({{0, 1}, {0, 2}});
-    PlugBoard pb(pairs);
-
-    // 0 should map to 1 (first pair)
-    EXPECT_EQ(pb.swap(0), 1);
-    EXPECT_EQ(pb.swap(1), 0);
-
-    // 2 should NOT map to 0. It should be unconnected (identity)
-    EXPECT_EQ(pb.swap(2), 2);
+    EXPECT_THROW({ PlugBoard pb(pairs); }, std::invalid_argument);
 }
 
 TEST_F(PlugBoardTests, SelfLoop) {

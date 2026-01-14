@@ -1,3 +1,8 @@
+/**
+ * @file
+ * @brief Implementation of the RotorBox class.
+ */
+
 #include <iostream>
 #include <stdexcept>
 #include <string>
@@ -5,29 +10,21 @@
 #include "Reflector.hpp"
 #include "Rotor.hpp"
 #include "RotorBox.hpp"
+#include "config.hpp"
 
 /**
- * @details Initializes a standard 3-rotor configuration with default assets.
- * All rotors are set to their initial '0' position.
+ * @details Initializes a standard 3-rotor configuration with empty/default wiring.
+ * Note: usage of this constructor is discouraged without subsequent initialization.
  */
-RotorBox::RotorBox() {
-    nRotorCount = 3;
-    for (int i = 0; i < nRotorCount; i++) {
-        rotorPositions.push_back(0);
-    }
-
-    // Will throw if initialization fails
-    initTransformerVec(nRotorCount, std::vector<std::string>{assetsDir + "Rotor1.toml", assetsDir + "Rotor2.toml",
-                                                             assetsDir + "Rotor3.toml", assetsDir + "Reflector.toml"});
-}
+RotorBox::RotorBox() { nRotorCount = 0; }
 
 /**
  * @details Initializes a custom rotor configuration.
  * Validates that the number of provided positions matches the rotor count before
  * proceeding with transformer initialization and position setting.
  */
-RotorBox::RotorBox(int nRotorCount, const std::vector<int>& rotorPositions,
-                   const std::vector<std::string>& rotorFiles) {
+RotorBox::RotorBox(int nRotorCount, const std::vector<int>& rotorPositions, const std::vector<RotorConfig>& rotors,
+                   const ReflectorConfig& reflector) {
     if (nRotorCount != (int)rotorPositions.size()) {
         throw std::invalid_argument("Error: Number of rotors and number of rotor positions do not match.");
     }
@@ -38,7 +35,7 @@ RotorBox::RotorBox(int nRotorCount, const std::vector<int>& rotorPositions,
     }
 
     // Will throw if initialization fails
-    initTransformerVec(nRotorCount, rotorFiles);
+    initTransformerVec(nRotorCount, rotors, reflector);
 
     for (int i = 0; i < nRotorCount; i++) {
         transformerVec.at(i)->setPosition(this->rotorPositions.at(i));
@@ -52,26 +49,27 @@ RotorBox::RotorBox(int nRotorCount, const std::vector<int>& rotorPositions,
  * must contain exactly nRotorCount rotors followed by one reflector at the end.
  * Memory is managed via std::unique_ptr to ensure proper cleanup.
  */
-void RotorBox::initTransformerVec(int nRotorCount, const std::vector<std::string>& rotorFiles) {
+void RotorBox::initTransformerVec(int nRotorCount, const std::vector<RotorConfig>& rotors,
+                                  const ReflectorConfig& reflector) {
     transformerVec.clear();
     transformerVec.reserve(nRotorCount + 1);
 
-    // Validate input size: n Rotors + 1 Reflector
-    if (rotorFiles.size() < (size_t)(nRotorCount + 1)) {
-        throw std::runtime_error("Error: Insufficient configuration files for rotors and reflector.");
+    // Validate input size: n Rotors
+    if (rotors.size() != (size_t)nRotorCount) {
+        throw std::runtime_error("Error: Mismatch between rotor count and provided configurations.");
     }
 
     int index = 0;
     while (index < nRotorCount) {
-        transformerVec.push_back(std::make_unique<Rotor>(rotorFiles[index]));
+        transformerVec.push_back(std::make_unique<Rotor>(rotors[index]));
         index++;
     };
-    transformerVec.push_back(std::make_unique<Reflector>(rotorFiles[nRotorCount]));
+    transformerVec.push_back(std::make_unique<Reflector>(reflector));
 }
 
 void RotorBox::printTransformerVec() {
     for (auto& transformer : transformerVec) {
-        std::cout << "Transformer Type: " << static_cast<int>(transformer->getType()) << std::endl;
+        std::cout << "Transformer Type: " << static_cast<int>(transformer->getType()) << "\n";
     }
 }
 

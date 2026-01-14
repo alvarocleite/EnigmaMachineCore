@@ -1,77 +1,82 @@
+/**
+ * @file
+ * @brief Implementation of the EnigmaMachine class.
+ */
+
 #include <iostream>
+#include <stdexcept>
 #include <vector>
 
 #include "EnigmaMachine.hpp"
 #include "config.hpp"
 
-#include <toml.hpp>
+/**
+ * @details Loads default configuration files (Rotor1, Rotor2, Rotor3, Reflector)
+ * from the global assets directory defined in `config.hpp`.
+ */
+EnigmaMachine::EnigmaMachine() {
+    try {
+        std::vector<RotorConfig> rotors;
+        rotors.push_back(EnigmaMachineConfig::loadRotor(std::string(assetsDir) + "Rotor1.toml"));
+        rotors.push_back(EnigmaMachineConfig::loadRotor(std::string(assetsDir) + "Rotor2.toml"));
+        rotors.push_back(EnigmaMachineConfig::loadRotor(std::string(assetsDir) + "Rotor3.toml"));
 
-EnigmaMachine::EnigmaMachine()
-    : rotorBox(3, std::vector<int>{0, 0, 0},
-               std::vector<std::string>{assetsDir + "Rotor1.toml", assetsDir + "Rotor2.toml", assetsDir + "Rotor3.toml",
-                                        assetsDir + "Reflector.toml"}),
-      plugBoard() {}
+        ReflectorConfig reflector = EnigmaMachineConfig::loadReflector(std::string(assetsDir) + "Reflector.toml");
 
-EnigmaMachine::EnigmaMachine(int nRotorCount, const std::vector<int>& rotorPositions,
-                             const std::vector<std::string>& rotorFiles)
-    : rotorBox(nRotorCount, rotorPositions, rotorFiles), plugBoard() {}
-
-EnigmaMachine::EnigmaMachine(int nRotorCount, const std::vector<int>& rotorPositions,
-                             const std::vector<std::string>& rotorFiles,
-                             const std::array<Pair_t, PLUGBOARD_MAX_PAIRS>& plugBoardPairs)
-    : rotorBox(nRotorCount, rotorPositions, rotorFiles), plugBoard(plugBoardPairs) {}
-
-std::tuple<int, std::vector<int>, std::vector<std::string>, std::array<Pair_t, PLUGBOARD_MAX_PAIRS>>
-EnigmaMachine::parseConfig(const std::string& fileName, const std::string& assetPath) {
-    auto data = toml::parse(fileName);
-    int nRotorCount = toml::find<int>(data, "rotors", "RotorCount");
-    auto rotorPositions = toml::find<std::vector<int>>(data, "rotors", "RotorPositions");
-    auto rotorFiles = toml::find<std::vector<std::string>>(data, "rotors", "RotorFiles");
-    if (static_cast<size_t>(nRotorCount) != rotorPositions.size() ||
-        static_cast<size_t>(nRotorCount) != rotorFiles.size()) {
-        throw std::runtime_error("Error: Number of rotors, positions, and files do not match.");
+        rotorBox = RotorBox(3, {0, 0, 0}, rotors, reflector);
+    } catch (const std::exception& e) {
+        std::cerr << "Failed to initialize default EnigmaMachine: " << e.what() << "\n";
+        throw;
     }
-
-    std::string prefix = assetPath;
-    if (!prefix.empty() && prefix.back() != '/') {
-        prefix += "/";
-    }
-
-    for (auto& rotorFile : rotorFiles) {
-        rotorFile = prefix + rotorFile;  // Ensure full path is used
-    }
-
-    auto reflectorFile = prefix + toml::find<std::string>(data, "ReflectorFile");
-    rotorFiles.push_back(reflectorFile);
-    auto plugsCount = toml::find<int>(data, "plugboard", "PlugCount");
-    if (plugsCount > PLUGBOARD_MAX_PAIRS) {
-        throw std::runtime_error("Error: Plugboard pairs exceed maximum allowed.");
-    }
-    auto plugBoardArr = toml::find<std::vector<toml::value>>(data, "plugboard", "PlugBoardPairs");
-    if (plugBoardArr.size() != static_cast<size_t>(plugsCount)) {
-        throw std::runtime_error("Error: Plugboard pairs count does not match specified count.");
-    }
-    std::array<Pair_t, PLUGBOARD_MAX_PAIRS> plugBoardPairs;
-    int i;
-    for (i = 0; i < plugsCount; i++) {
-        plugBoardPairs.at(i).a = toml::find<int>(plugBoardArr.at(i), "from");
-        plugBoardPairs.at(i).b = toml::find<int>(plugBoardArr.at(i), "to");
-    }
-    while (i < PLUGBOARD_MAX_PAIRS) {
-        plugBoardPairs.at(i).a = -1;  // Mark unused pairs
-        plugBoardPairs.at(i).b = -1;
-        i++;
-    }
-
-    return {nRotorCount, rotorPositions, rotorFiles, plugBoardPairs};
 }
 
-EnigmaMachine::EnigmaMachine(
-    std::tuple<int, std::vector<int>, std::vector<std::string>, std::array<Pair_t, PLUGBOARD_MAX_PAIRS>> config)
-    : EnigmaMachine(std::get<0>(config), std::get<1>(config), std::get<2>(config), std::get<3>(config)) {}
+/**
+ * @details Validates that the number of transformer files matches `nRotorCount + 1` (for the reflector).
+ * Loads each rotor and reflector configuration from the provided file paths before initializing the RotorBox.
+ */
+EnigmaMachine::EnigmaMachine(int nRotorCount, const std::vector<int>& rotorPositions,
+                             const std::vector<std::string>& transformerFiles)
+    : plugBoard() {
+    if (transformerFiles.size() != static_cast<size_t>(nRotorCount + 1)) {
+        throw std::invalid_argument("Error: Number of transformer files must be nRotorCount + 1 (Reflector).");
+    }
 
-EnigmaMachine::EnigmaMachine(std::string fileName, std::string assetPath)
-    : EnigmaMachine(parseConfig(fileName, assetPath)) {}
+    std::vector<RotorConfig> rotors;
+    for (int i = 0; i < nRotorCount; ++i) {
+        rotors.push_back(EnigmaMachineConfig::loadRotor(transformerFiles[i]));
+    }
+    ReflectorConfig reflector = EnigmaMachineConfig::loadReflector(transformerFiles[nRotorCount]);
+
+    rotorBox = RotorBox(nRotorCount, rotorPositions, rotors, reflector);
+}
+
+/**
+ * @details Similar to the standard parameterized constructor, but also initializes the PlugBoard
+ * with the provided pairs.
+ */
+EnigmaMachine::EnigmaMachine(int nRotorCount, const std::vector<int>& rotorPositions,
+                             const std::vector<std::string>& transformerFiles,
+                             const std::array<Pair_t, PLUGBOARD_MAX_PAIRS>& plugBoardPairs)
+    : plugBoard(plugBoardPairs) {
+    if (transformerFiles.size() != static_cast<size_t>(nRotorCount + 1)) {
+        throw std::invalid_argument("Error: Number of transformer files must be nRotorCount + 1 (Reflector).");
+    }
+
+    std::vector<RotorConfig> rotors;
+    for (int i = 0; i < nRotorCount; ++i) {
+        rotors.push_back(EnigmaMachineConfig::loadRotor(transformerFiles[i]));
+    }
+    ReflectorConfig reflector = EnigmaMachineConfig::loadReflector(transformerFiles[nRotorCount]);
+
+    rotorBox = RotorBox(nRotorCount, rotorPositions, rotors, reflector);
+}
+
+EnigmaMachine::EnigmaMachine(const EnigmaMachineConfig& config)
+    : rotorBox(config.getRotorCount(), config.getRotorPositions(), config.getRotors(), config.getReflector()),
+      plugBoard(config.getPlugBoardPairs()) {}
+
+EnigmaMachine::EnigmaMachine(std::string_view fileName, std::string_view assetPath)
+    : EnigmaMachine(EnigmaMachineConfig::load(fileName, assetPath)) {}
 
 /**
  * @details The transformation follows the historic Enigma signal path:

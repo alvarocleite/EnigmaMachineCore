@@ -1,19 +1,23 @@
 #include <gtest/gtest.h>
+#include "EnigmaMachineConfig.hpp"
 #include "Reflector.hpp"
 
 class ReflectorTests : public ::testing::Test {
 protected:
     // Path to the asset file copied by CMake
     const std::string configPath = "assets/Reflector.toml";
+    ReflectorConfig config;
+
+    void SetUp() override { config = EnigmaMachineConfig::loadReflector(configPath); }
 };
 
 TEST_F(ReflectorTests, InitializationAndType) {
-    Reflector reflector(configPath);
+    Reflector reflector(config);
     EXPECT_EQ(reflector.getType(), TransformerType::Reflector);
 }
 
 TEST_F(ReflectorTests, ForwardTransformation) {
-    Reflector reflector(configPath);
+    Reflector reflector(config);
 
     // Based on Reflector.toml: 0 maps to 3
     EXPECT_EQ(reflector.transform(0), 3);
@@ -23,7 +27,7 @@ TEST_F(ReflectorTests, ForwardTransformation) {
 }
 
 TEST_F(ReflectorTests, Reciprocity) {
-    Reflector reflector(configPath);
+    Reflector reflector(config);
 
     // If A -> D, then D -> A
     int input = 0;
@@ -39,7 +43,7 @@ TEST_F(ReflectorTests, Reciprocity) {
 }
 
 TEST_F(ReflectorTests, NoRotation) {
-    Reflector reflector(configPath);
+    Reflector reflector(config);
 
     // Reflectors are static, rotate() should return 0 (no carry)
     EXPECT_EQ(reflector.rotate(), 0);
