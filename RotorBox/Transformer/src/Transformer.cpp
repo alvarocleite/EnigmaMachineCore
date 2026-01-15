@@ -11,7 +11,9 @@
 
 Transformer::Transformer() { type = TransformerType::NotDefined; }
 
-int Transformer::sizeOfTransformLUT() const { return transformLUT.size() * transformLUT[0].size(); }
+int Transformer::sizeOfTransformLUT() const {
+    return static_cast<int>(transformLUT.size()) * static_cast<int>(transformLUT[0].size());
+}
 
 TransformerType Transformer::getType() const { return type; }
 

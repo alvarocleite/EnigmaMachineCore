@@ -16,7 +16,7 @@ Reflector::Reflector(const ReflectorConfig& config) {
     }
 
     for (size_t i = 0; i < config.wiring.size(); ++i) {
-        setTransformValue(0, i, config.wiring[i]);
+        setTransformValue(0, static_cast<int>(i), config.wiring[i]);
     }
 
     // Initialize reverse transformation vector to -1.

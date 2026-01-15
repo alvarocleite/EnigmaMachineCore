@@ -30,7 +30,7 @@ Rotor::Rotor(const RotorConfig& config) {
     }
 
     for (size_t i = 0; i < config.wiring.size(); ++i) {
-        setTransformValue(0, i, config.wiring[i]);
+        setTransformValue(0, static_cast<int>(i), config.wiring[i]);
     }
 
     initReverseTransformLUT();
@@ -47,8 +47,8 @@ void Rotor::initReverseTransformLUT() {
     const auto& forwardRow = getTransformRow(0);
 
     for (int forwardValue = 0; forwardValue < TRANSFORMER_SIZE; forwardValue++) {
-        auto it = std::find_if(forwardRow.begin(), forwardRow.end(),
-                               [forwardValue](int value) { return value == forwardValue; });
+        const auto* it = std::find_if(forwardRow.begin(), forwardRow.end(),
+                                      [forwardValue](int value) { return value == forwardValue; });
 
         if (it != forwardRow.end()) {
             int reverseIndex = std::distance(forwardRow.begin(), it);

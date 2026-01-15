@@ -6,6 +6,7 @@
 #include <iostream>
 #include <stdexcept>
 #include <string>
+#include <utility>
 
 #include "Reflector.hpp"
 #include "Rotor.hpp"
@@ -25,12 +26,12 @@ RotorBox::RotorBox() { nRotorCount = 0; }
  */
 RotorBox::RotorBox(int nRotorCount, const std::vector<int>& rotorPositions, const std::vector<RotorConfig>& rotors,
                    const ReflectorConfig& reflector) {
-    if (nRotorCount != (int)rotorPositions.size()) {
+    if (std::cmp_not_equal(nRotorCount, rotorPositions.size())) {
         throw std::invalid_argument("Error: Number of rotors and number of rotor positions do not match.");
     }
 
     this->nRotorCount = nRotorCount;
-    for (auto& position : rotorPositions) {
+    for (const auto& position : rotorPositions) {
         this->rotorPositions.push_back(position);
     }
 
