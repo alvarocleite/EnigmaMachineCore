@@ -84,6 +84,13 @@ The project integrates `clang-tidy` to detect bugs and enforce modern C++ practi
 cmake -DENABLE_CLANG_TIDY=ON ..
 ```
 
+## Contributing
+
+We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details on:
+- Our branching strategy (`main`, `development`, `feature/*`).
+- How to submit Pull Requests using our standardized template.
+- Coding standards and testing requirements.
+
 ## Customization
 
 Rotors and Reflectors can be created and customized. Use the `assets` directory to place your customized components.
