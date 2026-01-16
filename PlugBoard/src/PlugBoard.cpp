@@ -6,6 +6,7 @@
 #include "PlugBoard.hpp"
 #include <iostream>
 #include <stdexcept>
+#include <string>
 #include "config.hpp"
 
 PlugBoard::PlugBoard() {
