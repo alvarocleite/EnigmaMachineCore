@@ -47,8 +47,8 @@ void Rotor::initReverseTransformLUT() {
     const auto& forwardRow = getTransformRow(0);
 
     for (int forwardValue = 0; forwardValue < TRANSFORMER_SIZE; forwardValue++) {
-        const auto* it = std::find_if(forwardRow.begin(), forwardRow.end(),
-                                      [forwardValue](int value) { return value == forwardValue; });
+        const auto it = std::find_if(forwardRow.begin(), forwardRow.end(),
+                                     [forwardValue](int value) { return value == forwardValue; });
 
         if (it != forwardRow.end()) {
             int reverseIndex = std::distance(forwardRow.begin(), it);
