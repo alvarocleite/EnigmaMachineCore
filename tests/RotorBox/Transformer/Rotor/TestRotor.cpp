@@ -1,18 +1,22 @@
 #include <gtest/gtest.h>
+#include "EnigmaMachineConfig.hpp"
 #include "Rotor.hpp"
 
 class RotorTests : public ::testing::Test {
 protected:
     const std::string configPath = "assets/Rotor1.toml";
+    RotorConfig config;
+
+    void SetUp() override { config = EnigmaMachineConfig::loadRotor(configPath); }
 };
 
 TEST_F(RotorTests, InitializationAndType) {
-    Rotor rotor(configPath);
+    Rotor rotor(config);
     EXPECT_EQ(rotor.getType(), TransformerType::Rotor);
 }
 
 TEST_F(RotorTests, BasicTransformation) {
-    Rotor rotor(configPath);
+    Rotor rotor(config);
     // Ensure initial position is 0
     rotor.setPosition(0);
 
@@ -24,7 +28,7 @@ TEST_F(RotorTests, BasicTransformation) {
 }
 
 TEST_F(RotorTests, Reciprocity) {
-    Rotor rotor(configPath);
+    Rotor rotor(config);
     rotor.setPosition(0);
 
     // Verify that the Reverse LUT is the exact inverse of the Forward LUT
@@ -37,7 +41,7 @@ TEST_F(RotorTests, Reciprocity) {
 }
 
 TEST_F(RotorTests, RotationEffect) {
-    Rotor rotor(configPath);
+    Rotor rotor(config);
     rotor.setPosition(0);
 
     // Initial: 0 -> 3
@@ -55,7 +59,7 @@ TEST_F(RotorTests, RotationEffect) {
 }
 
 TEST_F(RotorTests, FullRotationCycle) {
-    Rotor rotor(configPath);
+    Rotor rotor(config);
     rotor.setPosition(0);
 
     int startVal = rotor.transform(0, false);
@@ -69,7 +73,7 @@ TEST_F(RotorTests, FullRotationCycle) {
 }
 
 TEST_F(RotorTests, SetPosition) {
-    Rotor rotor(configPath);
+    Rotor rotor(config);
 
     rotor.setPosition(5);
     int valAt5 = rotor.transform(0, false);

@@ -8,8 +8,8 @@
 #include "config/config.hpp"
 
 struct AppConfig {
-    std::string configPath = assetsDir + "EnigmaMachineConfig1.toml";
-    std::string assetPath = assetsDir;
+    std::string configPath = std::string(assetsDir) + "EnigmaMachineConfig1.toml";
+    std::string assetPath = std::string(assetsDir);
     std::string message = "HELLOWORLD";
     bool debug = false;
     bool encode = false;
@@ -31,7 +31,7 @@ std::string processMessage(EnigmaMachine& machine, const std::string& input, boo
         output += res;
 
         if (debug) {
-            std::cout << "Input: " << upperC << ", Output: " << res << std::endl;
+            std::cout << "Input: " << upperC << ", Output: " << res << "\n";
         }
     }
     return output;
@@ -72,18 +72,18 @@ void runApplication(const AppConfig& config) {
     std::string currentMessage = config.message;
 
     if (config.encode) {
-        std::cout << "Encoding message: " << currentMessage << std::endl;
+        std::cout << "Encoding message: " << currentMessage << "\n";
         currentMessage = processMessage(machine, currentMessage, config.debug);
-        std::cout << "Result (Ciphertext): " << currentMessage << std::endl;
+        std::cout << "Result (Ciphertext): " << currentMessage << "\n";
     }
 
     if (config.decode) {
         // Re-initialize for decryption (symmetric cipher starting from same state)
         EnigmaMachine decodeMachine(config.configPath, config.assetPath);
 
-        std::cout << "Decoding message: " << currentMessage << std::endl;
+        std::cout << "Decoding message: " << currentMessage << "\n";
         std::string decoded = processMessage(decodeMachine, currentMessage, config.debug);
-        std::cout << "Result (Plaintext): " << decoded << std::endl;
+        std::cout << "Result (Plaintext): " << decoded << "\n";
 
         if (config.encode) {
             // Verify round-trip success against normalized input
@@ -92,9 +92,9 @@ void runApplication(const AppConfig& config) {
                 if (std::isalpha(c)) cleanOriginal += std::toupper(c);
 
             if (decoded == cleanOriginal) {
-                std::cout << "Success: Decoded message matches original!" << std::endl;
+                std::cout << "Success: Decoded message matches original!" << "\n";
             } else {
-                std::cout << "Failure: Decoded message mismatch." << std::endl;
+                std::cout << "Failure: Decoded message mismatch." << "\n";
             }
         }
     }
@@ -108,10 +108,10 @@ int main(int argc, char** argv) {
         AppConfig config = parseArguments(argc, argv);
         runApplication(config);
     } catch (const std::exception& e) {
-        std::cerr << "Error: " << e.what() << std::endl;
+        std::cerr << "Error: " << e.what() << "\n";
         return 1;
     }
 
-    std::cout << "End of program." << std::endl;
+    std::cout << "End of program." << "\n";
     return 0;
 }

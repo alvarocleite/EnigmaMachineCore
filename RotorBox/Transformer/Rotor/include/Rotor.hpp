@@ -1,7 +1,12 @@
 #pragma once
 
-#include <string>
+#include "EnigmaMachineConfig.hpp"  // For RotorConfig
 #include "Transformer.hpp"
+
+/**
+ * @file Rotor.hpp
+ * @brief Defines the Rotor class, a concrete implementation of the Transformer interface.
+ */
 
 /**
  * @brief Class representing a rotor in the Enigma machine.
@@ -15,26 +20,10 @@ private:
     int rotorRotationCount;
 
     /**
-     * @brief Initializes the Rotor transformation lookup tables (LUT).
-     *
-     * @param fileName The name of the file containing the transformation data.
-     * @throws std::runtime_error If initialization fails.
-     */
-    void initTransformLUT(std::string fileName);
-
-    /**
      * @brief Generates the reverse transformation lookup table.
      * @throws std::runtime_error If reverse mapping generation fails.
      */
     void initReverseTransformLUT();
-
-    /**
-     * @brief Parses the rotor configuration from a TOML file.
-     *
-     * @param fileName The path to the configuration file.
-     * @throws std::runtime_error If parsing fails.
-     */
-    void parseConfig(std::string fileName);
 
     /**
      * @brief Initializes the rotor position.
@@ -56,9 +45,11 @@ private:
 public:
     /**
      * @brief Constructor for the Rotor class.
-     * Initializes the rotor with a transformation lookup table (LUT) from a file.
+     * Initializes the rotor with a configuration.
+     *
+     * @param config The RotorConfig structure containing wiring and notch info.
      */
-    Rotor(std::string fileName);
+    Rotor(const RotorConfig& config);
     ~Rotor() = default;
 
     /**

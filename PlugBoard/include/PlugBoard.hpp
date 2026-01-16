@@ -1,3 +1,8 @@
+/**
+ * @file
+ * @brief Header file for the PlugBoard class.
+ */
+
 #pragma once
 
 #include <array>
@@ -26,6 +31,7 @@ public:
      * Validates that ports are not already used before connecting.
      *
      * @param pairs An array of pairs to initialize the plugboard with.
+     * @throws std::invalid_argument If a port index is out of range or if there is a mapping conflict.
      */
     PlugBoard(std::array<Pair_t, PLUGBOARD_MAX_PAIRS> pairs);
     ~PlugBoard() = default;

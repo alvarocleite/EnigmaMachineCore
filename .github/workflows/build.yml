@@ -1,0 +1,69 @@
+name: Build and Test
+
+on:
+  push:
+    branches: [ "main", "development" ]
+  pull_request:
+    branches: [ "main", "development" ]
+
+jobs:
+  build:
+    name: ${{ matrix.os }} - ${{ matrix.build_type }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Linux: Debug Build
+          - os: ubuntu-latest
+            build_type: Debug
+
+          # Linux: Release Build
+          - os: ubuntu-latest
+            build_type: Release
+
+          # Windows: Release Only
+          - os: windows-latest
+            build_type: Release
+
+          # macOS: Release Only
+          - os: macos-latest
+            build_type: Release
+
+    steps:
+    - uses: actions/checkout@v4
+      if: matrix.os == 'ubuntu-latest' || (github.ref != 'refs/heads/development' && github.base_ref != 'development')
+      with:
+        submodules: recursive
+
+    - name: Configure CMake
+      if: matrix.os == 'ubuntu-latest' || (github.ref != 'refs/heads/development' && github.base_ref != 'development')
+      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.build_type}}
+
+    - name: Build
+      if: matrix.os == 'ubuntu-latest' || (github.ref != 'refs/heads/development' && github.base_ref != 'development')
+      run: cmake --build ${{github.workspace}}/build --config ${{matrix.build_type}}
+
+    - name: Test
+      if: matrix.os == 'ubuntu-latest' || (github.ref != 'refs/heads/development' && github.base_ref != 'development')
+      working-directory: ${{github.workspace}}/build
+      run: ctest -C ${{matrix.build_type}} --output-on-failure --output-junit test_results.xml
+
+    - name: Upload Test Results
+      if: (matrix.os == 'ubuntu-latest' || (github.ref != 'refs/heads/development' && github.base_ref != 'development')) && always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: test-results-${{ matrix.os }}-${{ matrix.build_type }}
+        path: ${{github.workspace}}/build/test_results.xml
+
+    - name: Upload Build Artifacts
+      if: (matrix.os == 'ubuntu-latest' || (github.ref != 'refs/heads/development' && github.base_ref != 'development')) && success()
+      uses: actions/upload-artifact@v4
+      with:
+        name: build-artifacts-${{ matrix.os }}-${{ matrix.build_type }}
+        path: |
+          ${{github.workspace}}/build/**/EnigmaMachineCore*
+          !${{github.workspace}}/build/**/*.o
+          !${{github.workspace}}/build/**/*.obj
+          !${{github.workspace}}/build/**/*.tlog
+          !${{github.workspace}}/build/**/*.log
