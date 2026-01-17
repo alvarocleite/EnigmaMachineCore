@@ -1,5 +1,7 @@
 #include <gtest/gtest.h>
 #include "EnigmaMachineConfig.hpp"
+#include "EnigmaConfigLoader.hpp"
+#include "FileAssetProvider.hpp"
 #include "Rotor.hpp"
 
 class RotorTests : public ::testing::Test {
@@ -7,7 +9,10 @@ protected:
     const std::string configPath = "assets/Rotor1.toml";
     RotorConfig config;
 
-    void SetUp() override { config = EnigmaMachineConfig::loadRotor(configPath); }
+    void SetUp() override {
+        FileAssetProvider provider;
+        config = EnigmaConfigLoader::loadRotor(provider, configPath);
+    }
 };
 
 TEST_F(RotorTests, InitializationAndType) {
@@ -87,4 +92,20 @@ TEST_F(RotorTests, SetPosition) {
     // Now effectively at 5
 
     EXPECT_EQ(rotor.transform(0, false), valAt5);
+}
+
+TEST_F(RotorTests, NotchSignaling) {
+    Rotor rotor(config);
+    
+    // Rotor1 notch is at 0 (from config)
+    // We want to step INTO the notch.
+    // If we are at 25, next step is 0 (Notch).
+    
+    rotor.setPosition(25);
+    int signal = rotor.rotate(); // Becomes 0
+    EXPECT_EQ(signal, 1) << "Rotor should signal notch when stepping into position 0";
+    
+    // Step again (to 1)
+    signal = rotor.rotate();
+    EXPECT_EQ(signal, 0) << "Rotor should not signal notch when stepping out of 0";
 }

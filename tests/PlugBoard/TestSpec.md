@@ -11,7 +11,7 @@
 | **DefaultInitialization** | Verifies default state (Identity). | Checks that an empty PlugBoard maps every character to itself. |
 | **CustomConfiguration** | Verifies logic with explicit pairs. | Configures pairs like (A, Z), (B, Y) and verifies `swap('A') == 'Z'` etc. |
 | **Reciprocity** | Verifies the "Self-Inverse" property. | Ensures `swap(swap(x)) == x` for both plugged and unplugged characters. |
-| **ConflictHandling** | Verifies robustness against invalid configs. | Attempts to connect one port to multiple destinations (e.g., A-B, A-C). The second pair should be ignored. |
+| **ConflictHandling** | Verifies robustness against invalid configs. | Attempts to connect one port to multiple destinations (e.g., A-B, A-C). Should throw `std::invalid_argument`. |
 | **SelfLoop** | Verifies robustness against self-connections. | Attempts to connect a port to itself (e.g., A-A). Should be ignored or treated as identity. |
 | **OutOfBounds** | Verifies handling of invalid inputs. | Inputs < 0 or >= 26 should be returned unchanged. |
 
@@ -42,8 +42,8 @@
 ### Test Case: `ConflictHandling`
 *   **Goal:** Ensure physical impossibility is handled (one plug cannot go to two places).
 *   **Setup:** Pairs `{{0, 1}, {0, 2}}` (A-B, A-C).
-*   **Expectation:** First pair (A-B) is accepted. Second pair (A-C) is rejected/ignored.
-*   **Check:** `swap(0)` -> 1, `swap(2)` -> 2.
+*   **Expectation:** Construction throws `std::invalid_argument`.
+*   **Check:** Verify exception is thrown.
 
 ### Test Case: `SelfLoop`
 *   **Goal:** Ensure plugging a letter to itself is safe (or ignored).

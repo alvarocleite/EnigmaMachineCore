@@ -2,6 +2,8 @@
 #include <string>
 #include <vector>
 #include "EnigmaMachineConfig.hpp"
+#include "EnigmaConfigLoader.hpp"
+#include "FileAssetProvider.hpp"
 #include "RotorBox.hpp"
 #include "config.hpp"
 
@@ -15,10 +17,11 @@ protected:
     ReflectorConfig reflector;
 
     void SetUp() override {
-        rotors.push_back(EnigmaMachineConfig::loadRotor(rotorFiles[0]));
-        rotors.push_back(EnigmaMachineConfig::loadRotor(rotorFiles[1]));
-        rotors.push_back(EnigmaMachineConfig::loadRotor(rotorFiles[2]));
-        reflector = EnigmaMachineConfig::loadReflector(rotorFiles[3]);
+        FileAssetProvider provider;
+        rotors.push_back(EnigmaConfigLoader::loadRotor(provider, rotorFiles[0]));
+        rotors.push_back(EnigmaConfigLoader::loadRotor(provider, rotorFiles[1]));
+        rotors.push_back(EnigmaConfigLoader::loadRotor(provider, rotorFiles[2]));
+        reflector = EnigmaConfigLoader::loadReflector(provider, rotorFiles[3]);
     }
 };
 

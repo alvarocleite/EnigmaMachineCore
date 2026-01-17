@@ -1,0 +1,37 @@
+@startuml Enigma_Rotor_State_Machine
+
+skinparam monochrome true
+skinparam state {
+    BackgroundColor White
+    BorderColor Black
+}
+
+title Rotor State Machine (Stepping Logic)
+
+[*] --> Idle
+
+state Idle {
+    note "Waiting for Signal" as N1
+}
+
+state "Check Position" as CheckPos {
+    note "Is current position == Notch?" as N2
+}
+
+state "Engage Notch" as Notch {
+    note "Trigger next rotor's rotation" as N3
+}
+
+state "Rotate" as Rotate {
+    note "Increment Position (Mod 26)" as N4
+}
+
+Idle --> CheckPos : Input Signal (Before Encrypting)
+
+CheckPos --> Rotate : Position != Notch
+CheckPos --> Notch : Position == Notch
+
+Notch --> Rotate : Trigger Sent
+Rotate --> Idle : Update Complete
+
+@enduml

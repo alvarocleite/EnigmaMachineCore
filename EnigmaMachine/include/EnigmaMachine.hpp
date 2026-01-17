@@ -5,9 +5,11 @@
 
 #pragma once
 
+#include <memory>
 #include <string_view>
 #include <tuple>
 #include "EnigmaMachineConfig.hpp"
+#include "IAssetProvider.hpp"
 #include "PlugBoard.hpp"
 #include "RotorBox.hpp"
 
@@ -75,9 +77,19 @@ public:
     EnigmaMachine(const EnigmaMachineConfig& config);
 
     /**
+     * @brief File-based Constructor using a specific Asset Provider.
+     *
+     * @param provider The asset provider to use for loading configuration and components.
+     * @param fileName The path to the TOML configuration file.
+     * @param assetPath Optional base directory for assets.
+     */
+    EnigmaMachine(IAssetProvider& provider, std::string_view fileName, std::string_view assetPath = "");
+
+    /**
      * @brief File-based Constructor for the EnigmaMachine class.
      *
-     * Initializes the machine by parsing a TOML configuration file.
+     * Initializes the machine by parsing a TOML configuration file from the filesystem.
+     * Uses FileAssetProvider internally.
      *
      * This constructor delegates the parsing logic to `parseConfig` and then delegates
      * initialization to the main parameterized constructor.
