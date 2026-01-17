@@ -1,0 +1,134 @@
+@startuml EnigmaMachineCore_Class_Diagram
+
+' Styling
+skinparam classAttributeIconSize 0
+skinparam monochrome true
+skinparam linetype ortho
+
+' Enums and Structs
+enum TransformerType {
+    NotDefined
+    Rotor
+    Reflector
+}
+
+class Pair_t <<struct>> {
+    + int a
+    + int b
+}
+
+class RotorConfig <<struct>> {
+    + notchPosition : int
+    + wiring : std::vector<int>
+}
+
+class ReflectorConfig <<struct>> {
+    + wiring : std::vector<int>
+}
+
+' Classes
+class EnigmaMachineConfig {
+    - rotorCount : int
+    - rotorPositions : std::vector<int>
+    - rotors : std::vector<RotorConfig>
+    - reflector : ReflectorConfig
+    - plugBoardPairs : std::array<Pair_t, PLUGBOARD_MAX_PAIRS>
+    + EnigmaMachineConfig()
+    + {static} load(fileName: std::string_view, assetPath: std::string_view) : EnigmaMachineConfig
+    + {static} loadRotor(fileName: std::string_view) : RotorConfig
+    + {static} loadReflector(fileName: std::string_view) : ReflectorConfig
+    + getRotorCount() : int
+    + getRotorPositions() : std::vector<int>
+    + getRotors() : std::vector<RotorConfig>
+    + getReflector() : ReflectorConfig
+    + getPlugBoardPairs() : std::array<Pair_t, PLUGBOARD_MAX_PAIRS>
+}
+
+class EnigmaMachine {
+    - rotorBox : RotorBox
+    - plugBoard : PlugBoard
+    + EnigmaMachine()
+    + EnigmaMachine(nRotorCount: int, rotorPositions: std::vector<int>, transformerFiles: std::vector<std::string>)
+    + EnigmaMachine(nRotorCount: int, rotorPositions: std::vector<int>, transformerFiles: std::vector<std::string>, plugBoardPairs: std::array<Pair_t, PLUGBOARD_MAX_PAIRS>)
+    + EnigmaMachine(config: EnigmaMachineConfig)
+    + EnigmaMachine(fileName: std::string_view, assetPath: std::string_view)
+    + ~EnigmaMachine()
+    + keyTransform(input: int) : int
+}
+
+class PlugBoard {
+    - mapping : std::array<int, TRANSFORMER_SIZE>
+    + PlugBoard()
+    + PlugBoard(pairs: std::array<Pair_t, PLUGBOARD_MAX_PAIRS>)
+    + ~PlugBoard()
+    + swap(key: int) : int
+}
+
+class RotorBox {
+    - nRotorCount : int
+    - rotorPositions : std::vector<int>
+    - transformerVec : std::vector<std::unique_ptr<Transformer>>
+    - initTransformerVec(nRotorCount: int, rotors: std::vector<RotorConfig>, reflector: ReflectorConfig) : void
+    - updateRotors() : void
+    + RotorBox()
+    + RotorBox(nRotorCount: int, rotorPositions: std::vector<int>, rotors: std::vector<RotorConfig>, reflector: ReflectorConfig)
+    + ~RotorBox()
+    + printTransformerVec() : void
+    + keyTransform(input: int) : int
+}
+
+abstract class Transformer {
+    - transformLUT : std::array<std::array<int, TRANSFORMER_SIZE>, 2>
+    # type : TransformerType
+    # setTransformValue(row: int, col: int, value: int) : void
+    # getTransformValue(row: int, col: int) : int
+    # fillTransformRow(row: int, value: int) : void
+    # getTransformRow(row: int) : const std::array<int, TRANSFORMER_SIZE>&
+    + Transformer()
+    + {abstract} ~Transformer()
+    + {abstract} transform(position: int, reverse: bool) : int
+    + {abstract} rotate() : int
+    + {abstract} setPosition(position: int) : void
+    + sizeOfTransformLUT() : int
+    + getType() : TransformerType
+}
+
+class Rotor {
+    - notchPosition : int
+    - rotorRotationCount : int
+    - initReverseTransformLUT() : void
+    - isNotchPosition(position: int) : bool
+    + Rotor(config: RotorConfig)
+    + ~Rotor()
+    + transform(position: int, reverse: bool) : int
+    + rotate() : int
+    + setPosition(position: int) : void
+}
+
+class Reflector {
+    + Reflector(config: ReflectorConfig)
+    + ~Reflector()
+    + transform(position: int, reverse: bool) : int
+    + rotate() : int
+}
+
+' Relationships
+EnigmaMachineConfig ..> RotorConfig
+EnigmaMachineConfig ..> ReflectorConfig
+EnigmaMachineConfig ..> Pair_t
+
+EnigmaMachine ..> EnigmaMachineConfig : uses
+EnigmaMachine *-- RotorBox
+EnigmaMachine *-- PlugBoard
+
+PlugBoard ..> Pair_t
+
+RotorBox o-- Transformer
+RotorBox ..> RotorConfig
+RotorBox ..> ReflectorConfig
+
+Transformer <|-- Rotor
+Transformer <|-- Reflector
+Transformer ..> TransformerType
+
+@enduml
