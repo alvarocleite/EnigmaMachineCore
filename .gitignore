@@ -35,5 +35,6 @@
 build/*
 !build/
 
-# Documentation (Generated)
+# Documentation
 docs/doxygen-gen-files/
+docs/diagrams/output/

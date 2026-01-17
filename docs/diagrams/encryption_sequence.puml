@@ -1,0 +1,72 @@
+@startuml Enigma_Encryption_Sequence_Diagram
+
+skinparam monochrome true
+skinparam responseMessageBelowArrow true
+
+actor User
+participant "EnigmaMachine" as EM
+participant "RotorBox" as RB
+participant "PlugBoard" as PB
+participant "Rotor (0)" as R0
+participant "Rotor (1)" as R1
+participant "Rotor (2)" as R2
+participant "Reflector" as REF
+
+User -> EM: keyTransform(inputChar)
+activate EM
+
+    note right of EM: 1. Electrical Signal Path (Plugboard Entry)
+    EM -> PB: swap(inputChar)
+    activate PB
+    PB --> EM: swappedChar
+    deactivate PB
+
+    note right of EM: 2. RotorBox Processing
+    EM -> RB: keyTransform(swappedChar)
+    activate RB
+
+        note right of RB: 2.1 Mechanical Step (Before Encrypting)
+        RB -> RB: updateRotors()
+        activate RB
+            RB -> R0: rotate()
+            alt notch hit
+                RB -> R1: rotate()
+                alt notch hit
+                    RB -> R2: rotate()
+                end
+            end
+        deactivate RB
+        
+        note right of RB: 2.2 Forward Pass (0 -> 1 -> 2)
+        RB -> R0: transform(char, reverse=false)
+        R0 --> RB: c1
+        RB -> R1: transform(c1, reverse=false)
+        R1 --> RB: c2
+        RB -> R2: transform(c2, reverse=false)
+        R2 --> RB: c3
+
+        note right of RB: 2.3 Reflection
+        RB -> REF: transform(c3)
+        REF --> RB: c4
+
+        note right of RB: 2.4 Reverse Pass (2 -> 1 -> 0)
+        RB -> R2: transform(c4, reverse=true)
+        R2 --> RB: c5
+        RB -> R1: transform(c5, reverse=true)
+        R1 --> RB: c6
+        RB -> R0: transform(c6, reverse=true)
+        R0 --> RB: c7
+
+    RB --> EM: outputChar
+    deactivate RB
+
+    note right of EM: 3. Electrical Signal Path (Plugboard Exit)
+    EM -> PB: swap(outputChar)
+    activate PB
+    PB --> EM: finalChar
+    deactivate PB
+
+EM --> User: finalChar
+deactivate EM
+
+@enduml

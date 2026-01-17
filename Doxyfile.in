@@ -31,6 +31,7 @@ WARN_NO_PARAMDOC       = YES
 
 # Input files configuration
 INPUT                  = README.md \
+                         ./docs \
                          ./EnigmaMachine \
                          ./RotorBox \
                          ./PlugBoard \
@@ -40,6 +41,7 @@ RECURSIVE              = YES
 EXCLUDE                = build/ external/ .git/
 EXCLUDE_PATTERNS       = */.git/* */build/* */external/*
 USE_MDFILE_AS_MAINPAGE = README.md
+IMAGE_PATH             = docs/diagrams
 
 # Source browsing
 SOURCE_BROWSER         = YES
@@ -88,6 +90,6 @@ DIRECTORY_GRAPH        = YES
 
 # PlantUML
 PLANTUML_JAR_PATH      = @PLANTUML_PATH@
-PLANTUML_INCLUDE_PATH  = ./docs
+PLANTUML_INCLUDE_PATH  = @CMAKE_CURRENT_SOURCE_DIR@/docs/diagrams
 
 

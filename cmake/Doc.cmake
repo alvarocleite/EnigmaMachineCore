@@ -1,11 +1,40 @@
 # Generation of Documentation
 find_package(Doxygen)
-find_program(PLANTUML_PATH NAMES plantuml plantuml.jar PATHS /usr/bin /usr/share/plantuml /usr/local/bin)
+find_package(Java REQUIRED)
+
+# Look for the JAR file specifically because Doxygen expects to run it with 'java -jar'
+find_file(PLANTUML_PATH 
+    NAMES plantuml.jar 
+    PATHS 
+    /usr/share/java/plantuml
+    /usr/share/plantuml
+    /usr/local/share/plantuml
+    /usr/local/bin
+    /opt/plantuml
+    DOC "Path to plantuml.jar"
+)
 
 if (PLANTUML_PATH)
-    message(STATUS "Found PlantUML: ${PLANTUML_PATH}")
+    message(STATUS "Found PlantUML JAR: ${PLANTUML_PATH}")
+
+    # --- Automatic Diagram Generation ---
+    # Find all .puml files in docs/diagrams
+    file(GLOB PUML_FILES "${CMAKE_CURRENT_SOURCE_DIR}/docs/diagrams/*.puml")
+    
+    # Define the output directory for generated diagrams
+    set(DIAGRAM_GEN_DIR "${CMAKE_CURRENT_SOURCE_DIR}/docs/diagrams/output")
+
+    # Create a custom target to generate SVGs
+    # We use batch mode which automatically respects the filename defined in @startuml <name>
+    add_custom_target(generate_diagrams
+        COMMAND ${Java_JAVA_EXECUTABLE} -jar ${PLANTUML_PATH} -tsvg "${CMAKE_CURRENT_SOURCE_DIR}/docs/diagrams/*.puml" -o "${DIAGRAM_GEN_DIR}"
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+        COMMENT "Generating SVG diagrams with PlantUML..."
+        VERBATIM
+    )
+
 else()
-    message(STATUS "PlantUML not found. Diagrams in documentation might fail to generate.")
+    message(STATUS "PlantUML JAR not found. Diagrams in documentation might fail to generate.")
 endif()
 
 if (DOXYGEN_FOUND)
@@ -15,6 +44,11 @@ if (DOXYGEN_FOUND)
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
         COMMENT "Generating API documentation with Doxygen"
         VERBATIM)
+    
+    # Make Doxygen depend on the diagrams being generated first
+    if (PLANTUML_PATH)
+        add_dependencies(doxygen generate_diagrams)
+    endif()
     
     # Target to run everything (Build + Docs)
     add_custom_target(full_build)
