@@ -20,7 +20,8 @@ public:
      * @return EnigmaMachineConfig A fully populated configuration object.
      * @throws std::runtime_error If parsing fails or validation checks fail.
      */
-    static EnigmaMachineConfig load(IAssetProvider& provider, std::string_view fileName, std::string_view assetPath = "");
+    static EnigmaMachineConfig load(IAssetProvider& provider, std::string_view fileName,
+                                    std::string_view assetPath = "");
 
     /**
      * @brief Loads a single rotor configuration from a TOML file.

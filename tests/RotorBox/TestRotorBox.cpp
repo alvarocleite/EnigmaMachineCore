@@ -1,8 +1,8 @@
 #include <gtest/gtest.h>
 #include <string>
 #include <vector>
-#include "EnigmaMachineConfig.hpp"
 #include "EnigmaConfigLoader.hpp"
+#include "EnigmaMachineConfig.hpp"
 #include "FileAssetProvider.hpp"
 #include "RotorBox.hpp"
 #include "config.hpp"

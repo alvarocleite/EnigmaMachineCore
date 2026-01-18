@@ -60,11 +60,9 @@ void RotorBox::initTransformerVec(int nRotorCount, const std::vector<RotorConfig
         throw std::runtime_error("Error: Mismatch between rotor count and provided configurations.");
     }
 
-    int index = 0;
-    while (index < nRotorCount) {
-        transformerVec.push_back(std::make_unique<Rotor>(rotors[index]));
-        index++;
-    };
+    for (const auto& rotorConfig : rotors) {
+        transformerVec.push_back(std::make_unique<Rotor>(rotorConfig));
+    }
     transformerVec.push_back(std::make_unique<Reflector>(reflector));
 }
 

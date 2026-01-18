@@ -14,3 +14,9 @@ inline constexpr int PLUGBOARD_MAX_PAIRS = 10;
 
 /** @brief Default assets base directory. */
 inline constexpr std::string_view assetsDir = "assets/";
+
+/** @brief Default configuration files. */
+inline constexpr std::string_view defaultRotor1File = "Rotor1.toml";
+inline constexpr std::string_view defaultRotor2File = "Rotor2.toml";
+inline constexpr std::string_view defaultRotor3File = "Rotor3.toml";
+inline constexpr std::string_view defaultReflectorFile = "Reflector.toml";

@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
-#include "EnigmaMachineConfig.hpp"
 #include "EnigmaConfigLoader.hpp"
+#include "EnigmaMachineConfig.hpp"
 #include "FileAssetProvider.hpp"
 #include "Rotor.hpp"
 
@@ -96,15 +96,15 @@ TEST_F(RotorTests, SetPosition) {
 
 TEST_F(RotorTests, NotchSignaling) {
     Rotor rotor(config);
-    
+
     // Rotor1 notch is at 0 (from config)
     // We want to step INTO the notch.
     // If we are at 25, next step is 0 (Notch).
-    
+
     rotor.setPosition(25);
-    int signal = rotor.rotate(); // Becomes 0
+    int signal = rotor.rotate();  // Becomes 0
     EXPECT_EQ(signal, 1) << "Rotor should signal notch when stepping into position 0";
-    
+
     // Step again (to 1)
     signal = rotor.rotate();
     EXPECT_EQ(signal, 0) << "Rotor should not signal notch when stepping out of 0";

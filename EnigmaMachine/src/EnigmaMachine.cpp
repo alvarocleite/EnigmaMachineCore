@@ -7,8 +7,8 @@
 #include <stdexcept>
 #include <vector>
 
-#include "EnigmaMachine.hpp"
 #include "EnigmaConfigLoader.hpp"
+#include "EnigmaMachine.hpp"
 #include "FileAssetProvider.hpp"
 #include "config.hpp"
 
@@ -20,11 +20,15 @@ EnigmaMachine::EnigmaMachine() {
     FileAssetProvider provider;
     try {
         std::vector<RotorConfig> rotors;
-        rotors.push_back(EnigmaConfigLoader::loadRotor(provider, std::string(assetsDir) + "Rotor1.toml"));
-        rotors.push_back(EnigmaConfigLoader::loadRotor(provider, std::string(assetsDir) + "Rotor2.toml"));
-        rotors.push_back(EnigmaConfigLoader::loadRotor(provider, std::string(assetsDir) + "Rotor3.toml"));
+        rotors.push_back(
+            EnigmaConfigLoader::loadRotor(provider, std::string(assetsDir) + std::string(defaultRotor1File)));
+        rotors.push_back(
+            EnigmaConfigLoader::loadRotor(provider, std::string(assetsDir) + std::string(defaultRotor2File)));
+        rotors.push_back(
+            EnigmaConfigLoader::loadRotor(provider, std::string(assetsDir) + std::string(defaultRotor3File)));
 
-        ReflectorConfig reflector = EnigmaConfigLoader::loadReflector(provider, std::string(assetsDir) + "Reflector.toml");
+        ReflectorConfig reflector =
+            EnigmaConfigLoader::loadReflector(provider, std::string(assetsDir) + std::string(defaultReflectorFile));
 
         rotorBox = RotorBox(3, {0, 0, 0}, rotors, reflector);
     } catch (const std::exception& e) {

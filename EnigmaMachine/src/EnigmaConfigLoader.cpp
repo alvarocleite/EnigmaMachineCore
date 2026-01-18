@@ -74,27 +74,6 @@ EnigmaMachineConfig EnigmaConfigLoader::load(IAssetProvider& provider, std::stri
     std::istringstream stream(content);
     auto data = toml::parse(stream, std::string(fileName));
 
-    // Accessors needed for EnigmaMachineConfig or make it a struct/friend?
-    // Since EnigmaMachineConfig currently has private members and no setters,
-    // I need to either add setters, make members public, or make EnigmaConfigLoader a friend.
-    // Making it a friend is a good interim step, but making it a struct is the goal.
-    
-    // NOTE: For now, EnigmaMachineConfig is a class. I will need to refactor EnigmaMachineConfig first
-    // to allow setting these values.
-    
-    // Let's assume EnigmaMachineConfig will become a struct or have setters.
-    // Since I am doing step 2 (Simplify EnigmaMachineConfig) next, I will make it a struct there.
-    // But EnigmaConfigLoader depends on EnigmaMachineConfig structure.
-    
-    // I will write this implementation assuming EnigmaMachineConfig members are accessible 
-    // (e.g. it's a struct or friend).
-    // I'll define it fully here, but it might fail to compile until I update EnigmaMachineConfig.hpp.
-    
-    // However, I cannot access private members yet.
-    // I will postpone writing the full `load` implementation or comment it out until I modify EnigmaMachineConfig.
-    
-    // Actually, I'll write the code assuming access and fix EnigmaMachineConfig immediately after.
-    
     int rotorCount = toml::find<int>(data, "rotors", "RotorCount");
     std::vector<int> rotorPositions = toml::find<std::vector<int>>(data, "rotors", "RotorPositions");
     auto rotorFilePaths = toml::find<std::vector<std::string>>(data, "rotors", "RotorFiles");
@@ -129,24 +108,22 @@ EnigmaMachineConfig EnigmaConfigLoader::load(IAssetProvider& provider, std::stri
 
     std::array<Pair_t, PLUGBOARD_MAX_PAIRS> plugBoardPairs;
     // Initialize pairs
-    for(auto& p : plugBoardPairs) { p.a = -1; p.b = -1; }
+    for (auto& p : plugBoardPairs) {
+        p.a = -1;
+        p.b = -1;
+    }
 
     for (int i = 0; i < plugsCount; i++) {
         plugBoardPairs.at(i).a = toml::find<int>(plugBoardArr.at(i), "from");
         plugBoardPairs.at(i).b = toml::find<int>(plugBoardArr.at(i), "to");
     }
-    
-    // Construct EnigmaMachineConfig
-    // I'll need a constructor or direct access.
-    // I'll change EnigmaMachineConfig to struct.
-    
+
     EnigmaMachineConfig newConfig;
-    // Direct access if struct
     newConfig.rotorCount = rotorCount;
     newConfig.rotorPositions = rotorPositions;
     newConfig.rotors = rotors;
     newConfig.reflector = reflector;
     newConfig.plugBoardPairs = plugBoardPairs;
-    
+
     return newConfig;
 }

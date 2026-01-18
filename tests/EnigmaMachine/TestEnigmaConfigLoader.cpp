@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
-#include "EnigmaMachineConfig.hpp"
 #include "EnigmaConfigLoader.hpp"
+#include "EnigmaMachineConfig.hpp"
 #include "FileAssetProvider.hpp"
 #include "config.hpp"
 
