@@ -1,0 +1,15 @@
+#include "FileAssetProvider.hpp"
+#include <fstream>
+#include <sstream>
+#include <stdexcept>
+
+std::string FileAssetProvider::loadAsset(std::string_view assetName) {
+    std::ifstream file(std::string(assetName), std::ios::in | std::ios::binary);
+    if (!file) {
+        throw std::runtime_error("FileAssetProvider: Could not open file " + std::string(assetName));
+    }
+
+    std::ostringstream ss;
+    ss << file.rdbuf();
+    return ss.str();
+}

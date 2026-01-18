@@ -14,18 +14,27 @@ The project follows a "centralized mirror" strategy:
 ```text
 tests/
 ├── CMakeLists.txt
+├── AssetProvider/
+│   ├── TestFileAssetProvider.cpp
+│   └── TestSpec.md
 ├── EnigmaMachine/
-│   └── TestEnigmaMachine.cpp
+│   ├── TestEnigmaConfigLoader.cpp
+│   ├── TestEnigmaMachine.cpp
+│   ├── TestSpec.md
+│   └── TestSpecLoader.md
 ├── PlugBoard/
-│   └── TestPlugBoard.cpp
+│   ├── TestPlugBoard.cpp
+│   └── TestSpec.md
 └── RotorBox/
     ├── TestRotorBox.cpp
+    ├── TestSpec.md
     └── Transformer/
         ├── TestTransformer.cpp
         ├── Reflector/
         │   └── TestReflector.cpp
         └── Rotor/
-            └── TestRotor.cpp
+            ├── TestRotor.cpp
+            └── TestSpec.md
 ```
 
 ## How to Run Tests

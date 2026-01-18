@@ -1,0 +1,39 @@
+@startuml EnigmaMachineCore_Component_Diagram
+
+skinparam monochrome true
+skinparam componentStyle uml2
+
+package "EnigmaMachineCore (Executable)" {
+    [Main App] as App
+}
+
+package "EnigmaCore (Static Library)" {
+    component [EnigmaMachine] as EM
+    component [RotorBox] as RB
+    component [PlugBoard] as PB
+    component [Configuration] as Config
+    
+    interface "IAssetProvider" as IAP
+}
+
+package "External Dependencies" {
+    [CLI11]
+    [toml11]
+}
+
+' Application Dependencies
+App ..> EM : uses
+App ..> Config : uses
+App ..> CLI11 : uses
+
+' Core Internal Dependencies
+EM ..> RB : owns
+EM ..> PB : owns
+EM ..> IAP : uses
+Config ..> IAP : uses
+RB ..> Config : uses (RotorConfig)
+
+' External Lib Usage
+Config ..> toml11 : uses
+
+@enduml

@@ -1,5 +1,7 @@
 #include <gtest/gtest.h>
+#include "EnigmaConfigLoader.hpp"
 #include "EnigmaMachineConfig.hpp"
+#include "FileAssetProvider.hpp"
 #include "Reflector.hpp"
 
 class ReflectorTests : public ::testing::Test {
@@ -8,7 +10,10 @@ protected:
     const std::string configPath = "assets/Reflector.toml";
     ReflectorConfig config;
 
-    void SetUp() override { config = EnigmaMachineConfig::loadReflector(configPath); }
+    void SetUp() override {
+        FileAssetProvider provider;
+        config = EnigmaConfigLoader::loadReflector(provider, configPath);
+    }
 };
 
 TEST_F(ReflectorTests, InitializationAndType) {

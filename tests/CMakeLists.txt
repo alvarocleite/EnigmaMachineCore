@@ -1,6 +1,7 @@
 add_executable(EnigmaTests
+    AssetProvider/TestFileAssetProvider.cpp
     EnigmaMachine/TestEnigmaMachine.cpp
-    EnigmaMachine/TestEnigmaMachineConfig.cpp
+    EnigmaMachine/TestEnigmaConfigLoader.cpp
     PlugBoard/TestPlugBoard.cpp
     RotorBox/TestRotorBox.cpp
     RotorBox/Transformer/TestTransformer.cpp

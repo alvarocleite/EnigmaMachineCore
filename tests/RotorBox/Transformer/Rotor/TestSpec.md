@@ -15,6 +15,7 @@
 | **RotationEffect** | Verifies that the component is dynamic. | Calls `rotate()` and asserts that the transformation of a static input (`0`) changes after the rotation. |
 | **FullRotationCycle** | Verifies the cyclic nature of the Rotor. | Confirms that 26 calls to `rotate()` return the rotor to its initial state. |
 | **SetPosition** | Verifies manual position control. | Ensures `setPosition(5)` produces the same transformation state as starting at `0` and calling `rotate()` 5 times. |
+| **NotchSignaling** | Verifies the carry mechanism. | Checks that `rotate()` returns 1 only when the rotor hits the configured notch position. |
 
 ## Detailed Logic Breakdown
 
@@ -61,3 +62,12 @@
     1.  Test A: `setPosition(5)` -> Measure output.
     2.  Test B: `setPosition(0)` -> `rotate()` x 5 -> Measure output.
     3.  Assert Output A equals Output B.
+
+### Test Case: `NotchSignaling`
+*   **Goal:** Verify correct turnover signaling.
+*   **Verification:**
+    1.  Set position to `Notch - 1` (e.g., 25 if Notch is 0).
+    2.  Call `rotate()`.
+    3.  Assert return value is 1.
+    4.  Call `rotate()` again.
+    5.  Assert return value is 0.
