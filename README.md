@@ -10,6 +10,7 @@ This project provides a modular and extensive implementation of Enigma's core co
 - **Faithful Simulation:** Accurately simulates the rotor stepping, wiring, and reflector logic of the Enigma machine.
 - **Configurable Transformers:** Load rotor and reflector configurations from TOML files for easy customization.
 - **Modular Design:** Clean separation of components (rotors, reflectors, RotorBox logic) for extensibility and testing.
+- **Advanced Architecture:** Uses Dependency Injection and DTOs to separate data, logic, and IO access.
 - **C++20 and CMake:** Modern C++ codebase with cross-platform build support.
 
 ## Getting Started

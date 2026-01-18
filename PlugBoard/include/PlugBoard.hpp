@@ -9,8 +9,13 @@
 
 #include "config.hpp"
 
+/**
+ * @brief Represents a pair of characters connected on the plugboard.
+ */
 struct Pair_t {
+    /** @brief The first port index (0 - (TRANSFORMER_SIZE - 1)). */
     int a;
+    /** @brief The second port index (0 - (TRANSFORMER_SIZE - 1)). */
     int b;
 };
 

@@ -7,7 +7,9 @@
 #include <stdexcept>
 #include <vector>
 
+#include "EnigmaConfigLoader.hpp"
 #include "EnigmaMachine.hpp"
+#include "FileAssetProvider.hpp"
 #include "config.hpp"
 
 /**
@@ -15,13 +17,18 @@
  * from the global assets directory defined in `config.hpp`.
  */
 EnigmaMachine::EnigmaMachine() {
+    FileAssetProvider provider;
     try {
         std::vector<RotorConfig> rotors;
-        rotors.push_back(EnigmaMachineConfig::loadRotor(std::string(assetsDir) + "Rotor1.toml"));
-        rotors.push_back(EnigmaMachineConfig::loadRotor(std::string(assetsDir) + "Rotor2.toml"));
-        rotors.push_back(EnigmaMachineConfig::loadRotor(std::string(assetsDir) + "Rotor3.toml"));
+        rotors.push_back(
+            EnigmaConfigLoader::loadRotor(provider, std::string(assetsDir) + std::string(defaultRotor1File)));
+        rotors.push_back(
+            EnigmaConfigLoader::loadRotor(provider, std::string(assetsDir) + std::string(defaultRotor2File)));
+        rotors.push_back(
+            EnigmaConfigLoader::loadRotor(provider, std::string(assetsDir) + std::string(defaultRotor3File)));
 
-        ReflectorConfig reflector = EnigmaMachineConfig::loadReflector(std::string(assetsDir) + "Reflector.toml");
+        ReflectorConfig reflector =
+            EnigmaConfigLoader::loadReflector(provider, std::string(assetsDir) + std::string(defaultReflectorFile));
 
         rotorBox = RotorBox(3, {0, 0, 0}, rotors, reflector);
     } catch (const std::exception& e) {
@@ -41,11 +48,12 @@ EnigmaMachine::EnigmaMachine(int nRotorCount, const std::vector<int>& rotorPosit
         throw std::invalid_argument("Error: Number of transformer files must be nRotorCount + 1 (Reflector).");
     }
 
+    FileAssetProvider provider;
     std::vector<RotorConfig> rotors;
     for (int i = 0; i < nRotorCount; ++i) {
-        rotors.push_back(EnigmaMachineConfig::loadRotor(transformerFiles[i]));
+        rotors.push_back(EnigmaConfigLoader::loadRotor(provider, transformerFiles[i]));
     }
-    ReflectorConfig reflector = EnigmaMachineConfig::loadReflector(transformerFiles[nRotorCount]);
+    ReflectorConfig reflector = EnigmaConfigLoader::loadReflector(provider, transformerFiles[nRotorCount]);
 
     rotorBox = RotorBox(nRotorCount, rotorPositions, rotors, reflector);
 }
@@ -62,21 +70,28 @@ EnigmaMachine::EnigmaMachine(int nRotorCount, const std::vector<int>& rotorPosit
         throw std::invalid_argument("Error: Number of transformer files must be nRotorCount + 1 (Reflector).");
     }
 
+    FileAssetProvider provider;
     std::vector<RotorConfig> rotors;
     for (int i = 0; i < nRotorCount; ++i) {
-        rotors.push_back(EnigmaMachineConfig::loadRotor(transformerFiles[i]));
+        rotors.push_back(EnigmaConfigLoader::loadRotor(provider, transformerFiles[i]));
     }
-    ReflectorConfig reflector = EnigmaMachineConfig::loadReflector(transformerFiles[nRotorCount]);
+    ReflectorConfig reflector = EnigmaConfigLoader::loadReflector(provider, transformerFiles[nRotorCount]);
 
     rotorBox = RotorBox(nRotorCount, rotorPositions, rotors, reflector);
 }
 
+EnigmaMachine::EnigmaMachine(IAssetProvider& provider, std::string_view fileName, std::string_view assetPath)
+    : EnigmaMachine(EnigmaConfigLoader::load(provider, fileName, assetPath)) {}
+
 EnigmaMachine::EnigmaMachine(const EnigmaMachineConfig& config)
-    : rotorBox(config.getRotorCount(), config.getRotorPositions(), config.getRotors(), config.getReflector()),
-      plugBoard(config.getPlugBoardPairs()) {}
+    : rotorBox(config.rotorCount, config.rotorPositions, config.rotors, config.reflector),
+      plugBoard(config.plugBoardPairs) {}
 
 EnigmaMachine::EnigmaMachine(std::string_view fileName, std::string_view assetPath)
-    : EnigmaMachine(EnigmaMachineConfig::load(fileName, assetPath)) {}
+    : EnigmaMachine([&]() {
+          FileAssetProvider p;
+          return EnigmaConfigLoader::load(p, fileName, assetPath);
+      }()) {}
 
 /**
  * @details The transformation follows the historic Enigma signal path:
