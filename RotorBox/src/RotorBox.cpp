@@ -43,6 +43,13 @@ RotorBox::RotorBox(int nRotorCount, const std::vector<int>& rotorPositions, cons
     }
 }
 
+void RotorBox::registerObserver(IEnigmaObserver* observer) { observers.push_back(observer); }
+
+void RotorBox::removeObserver(IEnigmaObserver* observer) {
+    auto it = std::remove(observers.begin(), observers.end(), observer);
+    observers.erase(it, observers.end());
+}
+
 /**
  * @details Populates the internal transformer vector with unique pointers to Rotor and Reflector objects.
  *
@@ -115,6 +122,13 @@ void RotorBox::updateRotors() {
 
     do {
         isNotch = transformerVec.at(rotorIx)->rotate();
+
+        // Notify observers
+        int pos = transformerVec.at(rotorIx)->getPosition();
+        for (auto* obs : observers) {
+            obs->onRotorStepped(rotorIx, pos);
+        }
+
         rotorIx++;
     } while (rotorIx < nRotorCount && isNotch == 1);
 }

@@ -3,6 +3,7 @@
  * @brief Implementation of the EnigmaMachine class.
  */
 
+#include <algorithm>
 #include <iostream>
 #include <stdexcept>
 #include <vector>
@@ -103,7 +104,25 @@ EnigmaMachine::EnigmaMachine(std::string_view fileName, std::string_view assetPa
  * The mechanical stepping happens inside rotorBox.keyTransform() before the signal starts.
  */
 int EnigmaMachine::keyTransform(int input) {
+    int originalInput = input;
     input = plugBoard.swap(input);
     input = rotorBox.keyTransform(input);
-    return plugBoard.swap(input);
+    int output = plugBoard.swap(input);
+
+    for (auto* obs : observers) {
+        obs->onCharEncrypted(static_cast<char>('A' + originalInput), static_cast<char>('A' + output));
+    }
+
+    return output;
+}
+
+void EnigmaMachine::registerObserver(IEnigmaObserver* observer) {
+    observers.push_back(observer);
+    rotorBox.registerObserver(observer);
+}
+
+void EnigmaMachine::removeObserver(IEnigmaObserver* observer) {
+    auto it = std::remove(observers.begin(), observers.end(), observer);
+    observers.erase(it, observers.end());
+    rotorBox.removeObserver(observer);
 }

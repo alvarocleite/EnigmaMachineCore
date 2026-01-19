@@ -31,6 +31,11 @@ interface IAssetProvider {
     + {abstract} loadAsset(assetName: std::string_view) : std::string
 }
 
+interface IEnigmaObserver {
+    + {abstract} onRotorStepped(rotorIndex: int, position: int) : void
+    + {abstract} onCharEncrypted(input: char, output: char) : void
+}
+
 ' Classes
 class FileAssetProvider {
     + loadAsset(assetName: std::string_view) : std::string
@@ -54,6 +59,7 @@ class EnigmaConfigLoader {
 class EnigmaMachine {
     - rotorBox : RotorBox
     - plugBoard : PlugBoard
+    - observers : std::vector<IEnigmaObserver*>
     + EnigmaMachine()
     + EnigmaMachine(nRotorCount: int, rotorPositions: std::vector<int>, transformerFiles: std::vector<std::string>)
     + EnigmaMachine(nRotorCount: int, rotorPositions: std::vector<int>, transformerFiles: std::vector<std::string>, plugBoardPairs: std::array<Pair_t, PLUGBOARD_MAX_PAIRS>)
@@ -62,6 +68,8 @@ class EnigmaMachine {
     + EnigmaMachine(provider: IAssetProvider, fileName: std::string_view, assetPath: std::string_view)
     + ~EnigmaMachine()
     + keyTransform(input: int) : int
+    + registerObserver(observer: IEnigmaObserver*) : void
+    + removeObserver(observer: IEnigmaObserver*) : void
 }
 
 class PlugBoard {
@@ -76,6 +84,7 @@ class RotorBox {
     - nRotorCount : int
     - rotorPositions : std::vector<int>
     - transformerVec : std::vector<std::unique_ptr<Transformer>>
+    - observers : std::vector<IEnigmaObserver*>
     - initTransformerVec(nRotorCount: int, rotors: std::vector<RotorConfig>, reflector: ReflectorConfig) : void
     - updateRotors() : void
     + RotorBox()
@@ -83,6 +92,8 @@ class RotorBox {
     + ~RotorBox()
     + printTransformerVec() : void
     + keyTransform(input: int) : int
+    + registerObserver(observer: IEnigmaObserver*) : void
+    + removeObserver(observer: IEnigmaObserver*) : void
 }
 
 abstract class Transformer {
@@ -97,6 +108,7 @@ abstract class Transformer {
     + {abstract} transform(position: int, reverse: bool) : int
     + {abstract} rotate() : int
     + {abstract} setPosition(position: int) : void
+    + getPosition() : int
     + sizeOfTransformLUT() : int
     + getType() : TransformerType
 }
@@ -111,6 +123,7 @@ class Rotor {
     + transform(position: int, reverse: bool) : int
     + rotate() : int
     + setPosition(position: int) : void
+    + getPosition() : int
 }
 
 class Reflector {
@@ -129,7 +142,7 @@ EnigmaConfigLoader ..> RotorConfig : creates
 EnigmaConfigLoader ..> ReflectorConfig : creates
 
 EnigmaMachineConfig *-- RotorConfig
-EnigmaMachineConfig *--- ReflectorConfig
+EnigmaMachineConfig *-- ReflectorConfig
 EnigmaMachineConfig *-- Pair_t
 
 EnigmaMachine ..> EnigmaMachineConfig : uses
@@ -137,15 +150,18 @@ EnigmaMachine ..> EnigmaConfigLoader : uses
 EnigmaMachine ..> IAssetProvider : uses
 EnigmaMachine *-- RotorBox
 EnigmaMachine *-- PlugBoard
+EnigmaMachine o-- IEnigmaObserver : notifies
 
 PlugBoard ..> Pair_t
 
 RotorBox o-- Transformer
 RotorBox ..> RotorConfig
 RotorBox ..> ReflectorConfig
+RotorBox o-- IEnigmaObserver : notifies
 
 Transformer <|-- Rotor
 Transformer <|-- Reflector
 Transformer ..> TransformerType
+
 
 @enduml

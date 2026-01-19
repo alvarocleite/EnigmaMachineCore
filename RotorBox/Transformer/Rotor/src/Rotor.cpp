@@ -106,3 +106,5 @@ int Rotor::rotate() {
  * This is used for setting up the initial machine state key.
  */
 void Rotor::setPosition(int position) { rotorRotationCount = position; }
+
+int Rotor::getPosition() const { return rotorRotationCount; }
