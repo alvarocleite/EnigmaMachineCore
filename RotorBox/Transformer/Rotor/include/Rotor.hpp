@@ -76,4 +76,11 @@ public:
      * @param position The position to set the rotor to (0-25).
      */
     void setPosition(int position) override;
+
+    /**
+     * @brief Gets the current position of the rotor.
+     *
+     * @return int The current position (0-25).
+     */
+    int getPosition() const override;
 };

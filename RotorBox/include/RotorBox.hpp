@@ -9,6 +9,7 @@
 #include <vector>
 
 #include "EnigmaMachineConfig.hpp"
+#include "IEnigmaObserver.hpp"
 #include "Transformer.hpp"
 
 /**
@@ -21,6 +22,7 @@ private:
     int nRotorCount;
     std::vector<int> rotorPositions;
     std::vector<std::unique_ptr<Transformer>> transformerVec;
+    std::vector<IEnigmaObserver*> observers;
 
     /**
      * @brief Initializes the transformer vector with rotors and a reflector.
@@ -68,6 +70,18 @@ public:
     RotorBox& operator=(RotorBox&&) = default;
 
     ~RotorBox() = default;
+
+    /**
+     * @brief Registers an observer to receive notifications.
+     * @param observer The observer to register.
+     */
+    void registerObserver(IEnigmaObserver* observer);
+
+    /**
+     * @brief Removes an observer.
+     * @param observer The observer to remove.
+     */
+    void removeObserver(IEnigmaObserver* observer);
 
     /**
      * @brief Prints the types of transformers in the transformer vector.

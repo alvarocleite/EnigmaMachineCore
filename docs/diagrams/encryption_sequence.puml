@@ -11,6 +11,7 @@ participant "Rotor (0)" as R0
 participant "Rotor (1)" as R1
 participant "Rotor (2)" as R2
 participant "Reflector" as REF
+participant "IEnigmaObserver" as OBS
 
 User -> EM: keyTransform(inputChar)
 activate EM
@@ -34,6 +35,10 @@ activate EM
                 alt notch hit
                     RB -> R2: rotate()
                 end
+            end
+            
+            loop for each observer
+                RB -> OBS: onRotorStepped(rotorIndex, pos)
             end
         deactivate RB
         
@@ -66,7 +71,13 @@ activate EM
     PB --> EM: finalChar
     deactivate PB
 
+    note right of EM: 4. Notification
+    loop for each observer
+        EM -> OBS: onCharEncrypted(inputChar, finalChar)
+    end
+
 EM --> User: finalChar
 deactivate EM
+
 
 @enduml

@@ -43,6 +43,12 @@ The core engine does not access the filesystem directly.
 *   **RotorBox:** Manages the mechanical rules (rotor sequence, stepping logic).
 *   **Transformer:** Uses the **Strategy Pattern** to treat Rotors and Reflectors uniformly as signal transformers.
 
+### 3.4. Event Handling (Observer Pattern)
+To allow external systems (User Interfaces, Loggers) to react to internal state changes without coupling the core engine to them, the system implements the **Observer Pattern**.
+
+*   **IEnigmaObserver:** An abstract interface defining callbacks for key events (`onRotorStepped`, `onCharEncrypted`).
+*   **Decoupling:** The `EnigmaMachine` maintains a list of observers but knows nothing about their concrete implementation. This allows the CLI to print logs or a GUI to animate spinning rotors simply by implementing this interface.
+
 ## 4. Execution Flow
 
 The encryption logic follows the physical signal path of the historical machine:
