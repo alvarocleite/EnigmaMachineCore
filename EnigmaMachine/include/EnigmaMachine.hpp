@@ -8,8 +8,11 @@
 #include <memory>
 #include <string_view>
 #include <tuple>
+#include <vector>
+
 #include "EnigmaMachineConfig.hpp"
 #include "IAssetProvider.hpp"
+#include "IEnigmaObserver.hpp"
 #include "PlugBoard.hpp"
 #include "RotorBox.hpp"
 
@@ -22,6 +25,7 @@ class EnigmaMachine {
 private:
     RotorBox rotorBox;
     PlugBoard plugBoard;  // Optional: if you want to include a plugboard for additional transformations
+    std::vector<IEnigmaObserver*> observers;
 
 public:
     /**
@@ -108,4 +112,16 @@ public:
      * @return int The transformed output key.
      */
     int keyTransform(int input);
+
+    /**
+     * @brief Registers an observer to receive notifications.
+     * @param observer The observer to register.
+     */
+    void registerObserver(IEnigmaObserver* observer);
+
+    /**
+     * @brief Removes an observer.
+     * @param observer The observer to remove.
+     */
+    void removeObserver(IEnigmaObserver* observer);
 };
