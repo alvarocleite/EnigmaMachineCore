@@ -1,0 +1,44 @@
+@startuml EnigmaMachineCore_Deployment_View
+
+skinparam monochrome true
+skinparam componentStyle uml2
+
+node "Host System (Linux/Windows/macOS)" as Host {
+    
+    folder "Installation Directory" {
+        
+        artifact "EnigmaMachineCore (Executable)" as App
+        
+        folder "assets/" as Assets {
+            file "EnigmaMachineConfig.toml"
+            file "Rotor1.toml"
+            file "Rotor2.toml"
+            file "Reflector.toml"
+        }
+    }
+}
+
+node "Embedded System (MCU)" as Embedded {
+    artifact "Firmware" as FW
+    
+    folder "Flash Memory" {
+        file "Config Data (Serialized)"
+    }
+}
+
+App ..> Assets : Reads at Runtime (via IAssetProvider)
+FW ..> "Flash Memory" : Reads (via Custom AssetProvider)
+
+note right of App
+  Standard deployment uses
+  FileAssetProvider to read
+  TOML files from disk.
+end note
+
+note right of FW
+  Embedded deployment can implement
+  a Custom AssetProvider to read
+  configuration from Flash/EEPROM.
+end note
+
+@enduml

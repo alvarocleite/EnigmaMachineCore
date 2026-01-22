@@ -1,0 +1,71 @@
+@startuml Enigma_Config_Loading_Sequence
+
+skinparam monochrome true
+skinparam responseMessageBelowArrow true
+
+actor "Main App" as App
+participant "EnigmaConfigLoader" as Loader
+participant "IAssetProvider" as Assets
+participant "toml11" as TOML
+participant "EnigmaMachine" as EM
+participant "RotorBox" as RB
+participant "PlugBoard" as PB
+
+App -> Loader: load(provider, "config.toml")
+activate Loader
+
+    Loader -> Assets: loadAsset("config.toml")
+    activate Assets
+    Assets --> Loader: rawContent (string)
+    deactivate Assets
+
+    Loader -> TOML: parse(rawContent)
+    activate TOML
+    TOML --> Loader: toml::value
+    deactivate TOML
+
+    Loader -> Loader: parseRotorCount()
+    Loader -> Loader: parseRotorPositions()
+    
+    loop for each Rotor file defined
+        Loader -> Assets: loadAsset("RotorX.toml")
+        activate Assets
+        Assets --> Loader: rotorContent
+        deactivate Assets
+        
+        Loader -> TOML: parse(rotorContent)
+        TOML --> Loader: rotorData
+        Loader -> Loader: create RotorConfig
+    end
+
+    Loader -> Assets: loadAsset("Reflector.toml")
+    activate Assets
+    Assets --> Loader: reflectorContent
+    deactivate Assets
+    
+    Loader -> TOML: parse(reflectorContent)
+    TOML --> Loader: reflectorData
+    Loader -> Loader: create ReflectorConfig
+
+    Loader -> Loader: parsePlugBoardPairs()
+
+    create "EnigmaMachineConfig" as Config
+    Loader -> Config: create()
+    
+Loader --> App: EnigmaMachineConfig
+deactivate Loader
+
+App -> EM: EnigmaMachine(config)
+activate EM
+    
+    create RB
+    EM -> RB: RotorBox(config.rotors, config.reflector)
+    
+    create PB
+    EM -> PB: PlugBoard(config.plugBoardPairs)
+
+    EM -> EM: setupObservers()
+
+deactivate EM
+
+@enduml

@@ -4,10 +4,15 @@
 
 The **EnigmaMachineCore** is a C++20 implementation of the Enigma cipher. It separates the cryptographic "Business Logic" from the application layer and the physical storage layer.
 
-### 1.1. Physical Architecture
+### 1.1. Component Architecture
 The system is divided into a reusable Static Library (`EnigmaCore`) and a thin CLI Wrapper (`EnigmaMachineCore`).
 
 ![Component Diagram](diagrams/output/EnigmaMachineCore_Component_Diagram.svg)
+
+### 1.2. Deployment Architecture
+The system is designed for flexibility across different platforms. The deployment strategy varies between standard OS environments and embedded targets.
+
+![Deployment View](diagrams/output/EnigmaMachineCore_Deployment_View.svg)
 
 ## 2. Use Cases
 
@@ -48,6 +53,17 @@ To allow external systems (User Interfaces, Loggers) to react to internal state 
 
 *   **IEnigmaObserver:** An abstract interface defining callbacks for key events (`onRotorStepped`, `onCharEncrypted`).
 *   **Decoupling:** The `EnigmaMachine` maintains a list of observers but knows nothing about their concrete implementation. This allows the CLI to print logs or a GUI to animate spinning rotors simply by implementing this interface.
+
+### 3.5. Configuration Loading
+The initialization process orchestrates the `EnigmaConfigLoader`, `IAssetProvider`, and the underlying TOML parser to construct a valid machine state.
+
+![Configuration Loading Sequence](diagrams/output/Enigma_Config_Loading_Sequence.svg)
+
+### 3.6. Error Handling Strategy
+The system uses **Exceptions** rather than error codes to handle runtime failures.
+
+*   **std::runtime_error:** Thrown for recoverable errors such as missing configuration files, invalid TOML formats, or logical errors (e.g., misconfigured rotor wiring).
+*   **RAII (Resource Acquisition Is Initialization):** Constructors are responsible for establishing a valid state. If initialization fails (e.g., invalid arguments), the object is not created, preventing the system from entering an inconsistent state.
 
 ## 4. Execution Flow
 
