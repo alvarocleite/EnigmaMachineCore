@@ -7,20 +7,12 @@ The **EnigmaMachineCore** is a C++20 implementation of the Enigma cipher. It sep
 ### 1.1. Component Architecture
 The system is divided into a reusable Static Library (`EnigmaCore`) and a thin CLI Wrapper (`EnigmaMachineCore`).
 
-<div align="center">
-
 ![Component Diagram](diagrams/output/EnigmaMachineCore_Component_Diagram.svg)
-
-</div>
 
 ### 1.2. Deployment Architecture
 The system is designed for flexibility across different platforms. The deployment strategy varies between standard OS environments and embedded targets.
 
-<div align="center">
-
 ![Deployment View](diagrams/output/EnigmaMachineCore_Deployment_View.svg)
-
-</div>
 
 ## 2. Use Cases
 
@@ -28,21 +20,13 @@ The system serves two primary actors:
 *   **Operator:** Encrypts and decrypts messages.
 *   **Technician:** Configures the machine's state (Rotors, Plugs).
 
-<div align="center">
-
 ![Use Case Diagram](diagrams/output/EnigmaCore_Use_Case_Diagram.svg)
-
-</div>
 
 ## 3. Architectural Design
 
 The architecture is driven by **Separation of Concerns** and **Testability**, avoiding tight coupling between data, logic, and the filesystem.
 
-<div align="center">
-
 ![Class Diagram](diagrams/output/EnigmaMachineCore_Class_Diagram.svg)
-
-</div>
 
 ### 3.1. Data vs. Logic (SRP)
 The system strictly separates configuration data from the logic required to load it.
@@ -73,11 +57,7 @@ To allow external systems (User Interfaces, Loggers) to react to internal state 
 ### 3.5. Configuration Loading
 The initialization process orchestrates the `EnigmaConfigLoader`, `IAssetProvider`, and the underlying TOML parser to construct a valid machine state.
 
-<div align="center">
-
 ![Configuration Loading Sequence](diagrams/output/Enigma_Config_Loading_Sequence.svg)
-
-</div>
 
 ### 3.6. Error Handling Strategy
 The system uses **Exceptions** rather than error codes to handle runtime failures.
@@ -99,15 +79,7 @@ The encryption logic follows the physical signal path of the historical machine:
 ### 4.1. Rotor Stepping Logic
 The mechanical stepping is the most complex state transition in the system. A rotor rotates when the *previous* rotor passes its notch.
 
-<div align="center">
-
 ![State Machine](diagrams/output/Enigma_Rotor_State_Machine.svg)
 
-</div>
-
 ### 4.2. Signal Path Sequence
-<div align="center">
-
 ![Encryption Sequence](diagrams/output/Enigma_Encryption_Sequence_Diagram.svg)
-
-</div>

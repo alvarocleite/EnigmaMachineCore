@@ -1,7 +1,6 @@
 @startuml Enigma_Encryption_Sequence_Diagram
 
 skinparam monochrome true
-skinparam backgroundColor white
 skinparam responseMessageBelowArrow true
 
 actor User

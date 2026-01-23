@@ -1,7 +1,6 @@
 @startuml Enigma_Config_Loading_Sequence
 
 skinparam monochrome true
-skinparam backgroundColor white
 skinparam responseMessageBelowArrow true
 
 actor "Main App" as App

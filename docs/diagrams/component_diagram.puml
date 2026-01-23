@@ -1,7 +1,6 @@
 @startuml EnigmaMachineCore_Component_Diagram
 
 skinparam monochrome true
-skinparam backgroundColor white
 skinparam componentStyle uml2
 
 package "EnigmaMachineCore (Executable)" {
