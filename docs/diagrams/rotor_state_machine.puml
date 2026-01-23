@@ -1,6 +1,7 @@
 @startuml Enigma_Rotor_State_Machine
 
 skinparam monochrome true
+skinparam backgroundColor white
 skinparam state {
     BackgroundColor White
     BorderColor Black

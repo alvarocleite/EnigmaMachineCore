@@ -1,6 +1,7 @@
 @startuml EnigmaCore_Use_Case_Diagram
 
 skinparam monochrome true
+skinparam backgroundColor white
 left to right direction
 
 ' Actors

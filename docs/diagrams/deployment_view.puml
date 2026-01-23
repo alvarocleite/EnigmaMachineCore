@@ -1,6 +1,7 @@
 @startuml EnigmaMachineCore_Deployment_View
 
 skinparam monochrome true
+skinparam backgroundColor white
 skinparam componentStyle uml2
 
 node "Host System (Linux/Windows/macOS)" as Host {
