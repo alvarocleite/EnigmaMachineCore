@@ -3,7 +3,6 @@
 ' Styling
 skinparam classAttributeIconSize 0
 skinparam monochrome true
-skinparam backgroundColor white
 skinparam linetype ortho
 
 ' Enums and Structs
