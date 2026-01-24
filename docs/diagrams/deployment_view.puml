@@ -21,13 +21,13 @@ node "Host System (Linux/Windows/macOS)" as Host {
 node "Embedded System (MCU)" as Embedded {
     artifact "Firmware" as FW
     
-    folder "Flash Memory" {
+    folder "Flash Memory" as Flash {
         file "Config Data (Serialized)"
     }
 }
 
 App ..> Assets : Reads at Runtime (via IAssetProvider)
-FW ..> "Flash Memory" : Reads (via Custom AssetProvider)
+FW ..> Flash : Reads (via Custom AssetProvider)
 
 note right of App
   Standard deployment uses
