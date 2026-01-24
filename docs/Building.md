@@ -153,6 +153,29 @@ Static analysis is performed using **clang-tidy** and is integrated into the CMa
 
 ---
 
+## Generating Documentation
+
+If you have Doxygen and PlantUML installed, you can generate the project's API documentation and architectural diagrams locally.
+
+### To generate the documentation:
+
+```bash
+cmake --build build --target doxygen
+```
+
+This command will:
+1.  **Generate Diagrams:** Use PlantUML to process `.puml` files in `docs/diagrams/` and output SVG images to `docs/diagrams/output/`.
+2.  **Generate HTML/XML:** Use Doxygen to parse source code and Markdown files to create a complete documentation site.
+
+### Output Location
+
+The generated HTML documentation can be found at:
+`docs/doxygen-gen-files/html/index.html`
+
+Open this file in any web browser to view the interactive documentation.
+
+---
+
 ## VS Code Integration
 
 The project includes pre-configured settings for Visual Studio Code to streamline development and testing:

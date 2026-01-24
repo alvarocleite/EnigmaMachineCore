@@ -27,7 +27,8 @@ if (PLANTUML_PATH)
     # Create a custom target to generate SVGs
     # We use batch mode which automatically respects the filename defined in @startuml <name>
     add_custom_target(generate_diagrams
-        COMMAND ${Java_JAVA_EXECUTABLE} -jar ${PLANTUML_PATH} -tsvg "${CMAKE_CURRENT_SOURCE_DIR}/docs/diagrams/*.puml" -o "${DIAGRAM_GEN_DIR}"
+        COMMAND ${CMAKE_COMMAND} -E make_directory "${DIAGRAM_GEN_DIR}"
+        COMMAND ${Java_JAVA_EXECUTABLE} -jar ${PLANTUML_PATH} -tsvg "${CMAKE_CURRENT_SOURCE_DIR}/docs/diagrams" -o "${DIAGRAM_GEN_DIR}"
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
         COMMENT "Generating SVG diagrams with PlantUML..."
         VERBATIM
