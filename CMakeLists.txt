@@ -24,9 +24,9 @@ set(CORE_SOURCES
     EnigmaMachine/src/FileAssetProvider.cpp
     PlugBoard/src/PlugBoard.cpp
     RotorBox/src/RotorBox.cpp
-    RotorBox/Transformer/src/Transformer.cpp
-    RotorBox/Transformer/Reflector/src/Reflector.cpp
-    RotorBox/Transformer/Rotor/src/Rotor.cpp
+    RotorBox/src/Transformer.cpp
+    RotorBox/src/Reflector.cpp
+    RotorBox/src/Rotor.cpp
 )
 
 # Application entry point
@@ -44,9 +44,6 @@ add_library(EnigmaCore STATIC
 # Define search paths for header files
 set(INCLUDE_DIRS
     ${CMAKE_CURRENT_SOURCE_DIR}/RotorBox/include
-    ${CMAKE_CURRENT_SOURCE_DIR}/RotorBox/Transformer/include
-    ${CMAKE_CURRENT_SOURCE_DIR}/RotorBox/Transformer/Reflector/include
-    ${CMAKE_CURRENT_SOURCE_DIR}/RotorBox/Transformer/Rotor/include
     ${CMAKE_CURRENT_SOURCE_DIR}/PlugBoard/include
     ${CMAKE_CURRENT_SOURCE_DIR}/EnigmaMachine/include
     ${CMAKE_CURRENT_SOURCE_DIR}/config/

@@ -26,15 +26,14 @@ tests/
 │   ├── TestPlugBoard.cpp
 │   └── TestSpec.md
 └── RotorBox/
+    ├── TestReflector.cpp
+    ├── TestReflectorSpec.md
+    ├── TestRotor.cpp
     ├── TestRotorBox.cpp
+    ├── TestRotorSpec.md
     ├── TestSpec.md
-    └── Transformer/
-        ├── TestTransformer.cpp
-        ├── Reflector/
-        │   └── TestReflector.cpp
-        └── Rotor/
-            ├── TestRotor.cpp
-            └── TestSpec.md
+    ├── TestTransformer.cpp
+    └── TestTransformerSpec.md
 ```
 
 ## How to Run Tests

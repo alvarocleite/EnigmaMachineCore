@@ -31,12 +31,13 @@ WARN_NO_PARAMDOC       = YES
 
 # Input files configuration
 INPUT                  = README.md \
+                         CONTRIBUTING.md \
                          ./docs \
                          ./EnigmaMachine \
                          ./RotorBox \
                          ./PlugBoard \
                          ./config \
-                         ./main.cpp
+                         ./app/main.cpp
 RECURSIVE              = YES
 EXCLUDE                = build/ external/ .git/
 EXCLUDE_PATTERNS       = */.git/* */build/* */external/*
