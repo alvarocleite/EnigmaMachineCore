@@ -31,7 +31,7 @@ set(CORE_SOURCES
 
 # Application entry point
 set(APP_SOURCES
-    main.cpp
+    app/main.cpp
 )
 
 # Create Target (EnigmaCore)
@@ -136,7 +136,7 @@ if(CLANG_FORMAT_EXE)
         "RotorBox/*.cpp" "RotorBox/*.hpp"
         "tests/*.cpp"
     )
-    list(APPEND ALL_SOURCES "main.cpp" "config/config.hpp")
+    list(APPEND ALL_SOURCES "app/main.cpp" "config/config.hpp")
     
     add_custom_target(format
         COMMAND ${CLANG_FORMAT_EXE} -i -style=file ${ALL_SOURCES}
