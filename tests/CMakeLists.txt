@@ -5,10 +5,9 @@ add_executable(EnigmaTests
     EnigmaMachine/TestEnigmaObserver.cpp
     PlugBoard/TestPlugBoard.cpp
     RotorBox/TestRotorBox.cpp
-
-    RotorBox/Transformer/TestTransformer.cpp
-    RotorBox/Transformer/Reflector/TestReflector.cpp
-    RotorBox/Transformer/Rotor/TestRotor.cpp
+    RotorBox/TestTransformer.cpp
+    RotorBox/TestReflector.cpp
+    RotorBox/TestRotor.cpp
 )
 
 # Link against the Core library and GTest

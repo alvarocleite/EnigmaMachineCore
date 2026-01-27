@@ -44,7 +44,7 @@ To support robust testing and modularity, the project uses a "Library + Runner" 
     *   **CMake Target:** `EnigmaCore`
 
 2.  **EnigmaMachineCore (Application Executable):**
-    *   **Content:** Contains only `main.cpp`.
+    *   **Content:** Contains only `app/main.cpp`.
     *   **Purpose:** The user-facing application. It links to `EnigmaCore` to do the actual work.
     *   **CMake Variable:** `${PROJECT_NAME}`
 
@@ -56,30 +56,30 @@ To support robust testing and modularity, the project uses a "Library + Runner" 
 
 ```text
        ${INCLUDE_DIRS} (Headers)
-              |
-              v
-       +-------------+
+                |
+                v
+       +-----------------+
        | ${CORE_SOURCES} |  <-- Logic (Rotor, PlugBoard...)
-       +-------------+
-              |
+       +-----------------+
+                |
       Creates "EnigmaCore" Library
-              |
-      +-------+-------+
-      |               |
-      v               v
-${APP_SOURCES}   [ Test Sources ]
- (main.cpp)      (BasicTest.cpp)
-      |               |
-      v               v
-${PROJECT_NAME}   EnigmaTests
- (Executable)     (Executable)
+                |
+      +---------+----------+
+      |                    |
+      v                    v
+${APP_SOURCES}      [ Test Sources ]
+ (app/main.cpp)      (BasicTest.cpp)
+      |                    |
+      v                    v
+${PROJECT_NAME}       EnigmaTests
+ (Executable)         (Executable)
 ```
 
 ## CMake Variables
 
 *   **`${PROJECT_NAME}`**: The name of the main project (`EnigmaMachineCore`). Used to name the final application binary.
 *   **`${CORE_SOURCES}`**: The list of `.cpp` files that constitute the Enigma logic (e.g., `EnigmaMachine.cpp`, `Rotor.cpp`). These are compiled into the `EnigmaCore` library.
-*   **`${APP_SOURCES}`**: The list containing *only* the application entry point (`main.cpp`).
+*   **`${APP_SOURCES}`**: The list containing *only* the application entry point (`app/main.cpp`).
 *   **`${INCLUDE_DIRS}`**: A list of directory paths containing header files. These are added to the `EnigmaCore` library with `PUBLIC` visibility. This means any target that links `EnigmaCore` (like the App or Tests) automatically gets these include paths, simplifying configuration.
 
 ---
