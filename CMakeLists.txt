@@ -24,14 +24,14 @@ set(CORE_SOURCES
     EnigmaMachine/src/FileAssetProvider.cpp
     PlugBoard/src/PlugBoard.cpp
     RotorBox/src/RotorBox.cpp
-    RotorBox/Transformer/src/Transformer.cpp
-    RotorBox/Transformer/Reflector/src/Reflector.cpp
-    RotorBox/Transformer/Rotor/src/Rotor.cpp
+    RotorBox/src/Transformer.cpp
+    RotorBox/src/Reflector.cpp
+    RotorBox/src/Rotor.cpp
 )
 
 # Application entry point
 set(APP_SOURCES
-    main.cpp
+    app/main.cpp
 )
 
 # Create Target (EnigmaCore)
@@ -44,9 +44,6 @@ add_library(EnigmaCore STATIC
 # Define search paths for header files
 set(INCLUDE_DIRS
     ${CMAKE_CURRENT_SOURCE_DIR}/RotorBox/include
-    ${CMAKE_CURRENT_SOURCE_DIR}/RotorBox/Transformer/include
-    ${CMAKE_CURRENT_SOURCE_DIR}/RotorBox/Transformer/Reflector/include
-    ${CMAKE_CURRENT_SOURCE_DIR}/RotorBox/Transformer/Rotor/include
     ${CMAKE_CURRENT_SOURCE_DIR}/PlugBoard/include
     ${CMAKE_CURRENT_SOURCE_DIR}/EnigmaMachine/include
     ${CMAKE_CURRENT_SOURCE_DIR}/config/
@@ -136,7 +133,7 @@ if(CLANG_FORMAT_EXE)
         "RotorBox/*.cpp" "RotorBox/*.hpp"
         "tests/*.cpp"
     )
-    list(APPEND ALL_SOURCES "main.cpp" "config/config.hpp")
+    list(APPEND ALL_SOURCES "app/main.cpp" "config/config.hpp")
     
     add_custom_target(format
         COMMAND ${CLANG_FORMAT_EXE} -i -style=file ${ALL_SOURCES}

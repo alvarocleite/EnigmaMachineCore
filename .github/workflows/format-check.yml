@@ -20,8 +20,7 @@ jobs:
       run: |
         # Find all source files excluding external/ and build/
         # Matches the patterns in CMakeLists.txt
-        find EnigmaMachine PlugBoard RotorBox config tests -name '*.cpp' -o -name '*.hpp' | xargs clang-format -i -style=file
-        clang-format -i -style=file main.cpp
+        find EnigmaMachine PlugBoard RotorBox config tests app -name '*.cpp' -o -name '*.hpp' | xargs clang-format -i -style=file
 
     - name: Check for changes
       run: |

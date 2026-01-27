@@ -3,9 +3,9 @@
 #include <cctype>
 #include <iostream>
 #include <string>
-#include "./EnigmaMachine/include/EnigmaMachine.hpp"
+#include "EnigmaMachine.hpp"
 
-#include "config/config.hpp"
+#include "config.hpp"
 
 struct AppConfig {
     std::string configPath = std::string(assetsDir) + "EnigmaMachineConfig1.toml";

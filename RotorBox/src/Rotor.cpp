@@ -63,8 +63,6 @@ void Rotor::initReverseTransformLUT() {
 
 /**
  * @details Sets the internal rotation counter to the specified offset.
- * @param offset The starting position (0-25).
- * @return 0 (Success).
  */
 int Rotor::initRotorPosition(int offset) {
     rotorRotationCount = offset;

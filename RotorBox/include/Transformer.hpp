@@ -7,6 +7,11 @@
 #include "config.hpp"
 
 /**
+ * @file
+ * @brief Header file for the Transformer class.
+ */
+
+/**
  * @brief Enum representing the type of transformer.
  */
 enum class TransformerType { NotDefined = 0, Rotor, Reflector };
