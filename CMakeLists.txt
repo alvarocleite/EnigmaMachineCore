@@ -43,6 +43,7 @@ add_library(EnigmaCore STATIC
 # --- Include Directories ---
 # Define search paths for header files
 set(INCLUDE_DIRS
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
     ${CMAKE_CURRENT_SOURCE_DIR}/RotorBox/include
     ${CMAKE_CURRENT_SOURCE_DIR}/PlugBoard/include
     ${CMAKE_CURRENT_SOURCE_DIR}/EnigmaMachine/include
