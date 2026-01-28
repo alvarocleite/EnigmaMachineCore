@@ -47,6 +47,9 @@ add_library(EnigmaCore STATIC
     ${CORE_SOURCES}
 )
 
+# Create namespaced alias for safer consumption
+add_library(EnigmaMachineCore::EnigmaCore ALIAS EnigmaCore)
+
 # --- Include Directories ---
 # Define search paths for header files
 set(INCLUDE_DIRS
@@ -110,7 +113,7 @@ if(ENIGMA_BUILD_CLI)
     )
 
     # Link the core library logic to the executable
-    target_link_libraries(${PROJECT_NAME} PRIVATE EnigmaCore CLI11::CLI11)
+    target_link_libraries(${PROJECT_NAME} PRIVATE EnigmaMachineCore::EnigmaCore CLI11::CLI11)
 
     # --- Asset Handling ---
     # Copy assets to build directory after build

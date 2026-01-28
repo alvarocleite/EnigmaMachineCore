@@ -206,7 +206,7 @@ This project is designed to be easily embedded as a submodule in other CMake pro
 
 *   **Integration:** Link against the `EnigmaCore` library and include the public header:
     ```cmake
-    target_link_libraries(MyTarget PRIVATE EnigmaCore)
+    target_link_libraries(MyTarget PRIVATE EnigmaMachineCore::EnigmaCore)
     ```
     ```cpp
     #include <EnigmaCore.hpp>
