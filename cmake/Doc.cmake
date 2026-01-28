@@ -26,7 +26,7 @@ if (PLANTUML_PATH)
 
     # Create a custom target to generate SVGs
     # We use batch mode which automatically respects the filename defined in @startuml <name>
-    add_custom_target(generate_diagrams
+    add_custom_target(Enigma_generate_diagrams
         COMMAND ${CMAKE_COMMAND} -E make_directory "${DIAGRAM_GEN_DIR}"
         COMMAND ${Java_JAVA_EXECUTABLE} -jar ${PLANTUML_PATH} -tsvg "${CMAKE_CURRENT_SOURCE_DIR}/docs/diagrams/*.puml" -o "${DIAGRAM_GEN_DIR}"
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
@@ -40,7 +40,7 @@ endif()
 
 if (DOXYGEN_FOUND)
     configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile @ONLY)
-    add_custom_target(doxygen
+    add_custom_target(Enigma_doxygen
         COMMAND ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
         COMMENT "Generating API documentation with Doxygen"
@@ -48,12 +48,20 @@ if (DOXYGEN_FOUND)
     
     # Make Doxygen depend on the diagrams being generated first
     if (PLANTUML_PATH)
-        add_dependencies(doxygen generate_diagrams)
+        add_dependencies(Enigma_doxygen Enigma_generate_diagrams)
     endif()
     
     # Target to run everything (Build + Docs)
-    add_custom_target(full_build)
-    add_dependencies(full_build ${PROJECT_NAME} doxygen)
+    # Only add dependency on the executable if it is actually being built
+    add_custom_target(Enigma_full_build)
+    add_dependencies(Enigma_full_build Enigma_doxygen)
+    
+    if(ENIGMA_BUILD_CLI)
+         add_dependencies(Enigma_full_build ${PROJECT_NAME})
+    else()
+         add_dependencies(Enigma_full_build EnigmaCore)
+    endif()
+
 else()
     message(WARNING "Doxygen not found in the system. Documentation will not be generated.")
 endif()

@@ -44,7 +44,7 @@ jobs:
         # This target depends on 'generate_diagrams', so it will:
         # 1. Generate SVG diagrams from PlantUML files
         # 2. Run Doxygen to generate the HTML site
-        run: cmake --build build --target doxygen
+        run: cmake --build build --target Enigma_doxygen
 
       - name: Setup Pages
         uses: actions/configure-pages@v5

@@ -20,6 +20,7 @@ endif()
 # Define options to control build targets
 option(ENIGMA_BUILD_CLI "Build the Enigma Machine CLI executable" ${ENIGMA_IS_TOP_LEVEL})
 option(ENIGMA_BUILD_TESTS "Build the test suite" ${ENIGMA_IS_TOP_LEVEL})
+option(ENIGMA_BUILD_DOCS "Build the documentation" ${ENIGMA_IS_TOP_LEVEL})
 
 # --- C++ Standard ---
 set(CMAKE_CXX_STANDARD 20)
@@ -68,9 +69,9 @@ else()
 endif()
 
 # --- Static Analysis (clang-tidy) ---
-option(ENABLE_CLANG_TIDY "Enable static analysis with clang-tidy" OFF)
+option(ENIGMA_ENABLE_CLANG_TIDY "Enable static analysis with clang-tidy" OFF)
 
-if(ENABLE_CLANG_TIDY)
+if(ENIGMA_ENABLE_CLANG_TIDY)
     find_program(CLANG_TIDY_EXE clang-tidy)
     if(CLANG_TIDY_EXE)
         message(STATUS "clang-tidy found: ${CLANG_TIDY_EXE}")
@@ -123,7 +124,9 @@ endif()
 
 # --- Documentation ---
 # Include external module for Doxygen and PlantUML configuration
-include(cmake/Doc.cmake)
+if(ENIGMA_BUILD_DOCS)
+    include(cmake/Doc.cmake)
+endif()
 
 # --- Testing (GoogleTest) ---
 if(ENIGMA_BUILD_TESTS)
@@ -151,11 +154,11 @@ if(CLANG_FORMAT_EXE)
     )
     list(APPEND ALL_SOURCES "app/main.cpp" "config/config.hpp")
     
-    add_custom_target(format
+    add_custom_target(enigma_format
         COMMAND ${CLANG_FORMAT_EXE} -i -style=file ${ALL_SOURCES}
         COMMENT "Formatting source code with clang-format"
-        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     )
 else()
-    message(WARNING "clang-format not found. The 'format' target will not be available.")
+    message(WARNING "clang-format not found. The 'enigma_format' target will not be available.")
 endif()

@@ -132,7 +132,7 @@ To ensure a consistent style, the project uses `clang-format` based on the Googl
 
 ### To format the source code:
 ```bash
-cmake --build build --target format
+cmake --build build --target enigma_format
 ```
 
 This will automatically format all source and header files in the project.
@@ -143,9 +143,9 @@ This will automatically format all source and header files in the project.
 
 Static analysis is performed using **clang-tidy** and is integrated into the CMake build system.
 
-*   **How to Enable:** By default, static analysis is disabled to ensure fast build times. To enable it, use the `ENABLE_CLANG_TIDY` flag during configuration:
+*   **How to Enable:** By default, static analysis is disabled to ensure fast build times. To enable it, use the `ENIGMA_ENABLE_CLANG_TIDY` flag during configuration:
     ```bash
-    cmake -DENABLE_CLANG_TIDY=ON -S . -B build
+    cmake -DENIGMA_ENABLE_CLANG_TIDY=ON -S . -B build
     ```
 *   **Execution:** Once enabled, clang-tidy will run on every source file during compilation (`make`).
 *   **Identifying Issues:** Clang-tidy output is interleaved with compiler output. You can distinguish them by the bracketed check name at the end of the line (e.g., `[modernize-use-auto]`). Standard compiler warnings typically start with `-W`.
@@ -160,7 +160,7 @@ If you have Doxygen and PlantUML installed, you can generate the project's API d
 ### To generate the documentation:
 
 ```bash
-cmake --build build --target doxygen
+cmake --build build --target Enigma_doxygen
 ```
 
 This command will:
@@ -173,8 +173,6 @@ The generated HTML documentation can be found at:
 `docs/doxygen-gen-files/html/index.html`
 
 Open this file in any web browser to view the interactive documentation.
-
----
 
 ## VS Code Integration
 
@@ -191,3 +189,25 @@ The project includes pre-configured settings for Visual Studio Code to streamlin
 *   **Test Explorer:** If you have the **CMake Tools** extension installed, you can use the Test Explorer (beaker icon) to run or debug individual tests.
 
 ---
+
+## Submodule Support
+
+This project is designed to be easily embedded as a submodule in other CMake projects.
+
+*   **Default Behavior:** When included via `add_subdirectory()`, the build system automatically detects it is not the top-level project and **disables** the CLI executable, tests, and documentation targets to keep your build clean.
+*   **Configuration Options:** You can override this behavior by setting these variables before adding the subdirectory:
+
+    ```cmake
+    set(ENIGMA_BUILD_CLI ON)   # Build the CLI executable
+    set(ENIGMA_BUILD_TESTS ON) # Build the test suite
+    set(ENIGMA_BUILD_DOCS ON)  # Build documentation targets
+    add_subdirectory(external/EnigmaMachineCore)
+    ```
+
+*   **Integration:** Link against the `EnigmaCore` library and include the public header:
+    ```cmake
+    target_link_libraries(MyTarget PRIVATE EnigmaCore)
+    ```
+    ```cpp
+    #include <EnigmaCore.hpp>
+    ```
