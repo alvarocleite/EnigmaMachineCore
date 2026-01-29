@@ -58,7 +58,7 @@ If you have Doxygen installed, you can generate the project documentation.
 
 **Using the modern CMake CLI:**
 ```bash
-cmake --build build --target doxygen
+cmake --build build --target Enigma_doxygen
 ```
 
 **Using the traditional Makefile approach:**
@@ -75,14 +75,14 @@ HTML documentation is generated in: `docs/doxygen-gen-files/html/index.html`
 This project uses `clang-format` to maintain a consistent coding style. To format all source files:
 
 ```bash
-cmake --build build --target format
+cmake --build build --target enigma_format
 ```
 
 ### Static Analysis
 The project integrates `clang-tidy` to detect bugs and enforce modern C++ practices. This check is optional and can be enabled during configuration:
 
 ```bash
-cmake -DENABLE_CLANG_TIDY=ON ..
+cmake -DENIGMA_ENABLE_CLANG_TIDY=ON ..
 ```
 
 ## Contributing

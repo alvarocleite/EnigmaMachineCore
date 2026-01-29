@@ -3,7 +3,7 @@
 #include <cctype>
 #include <iostream>
 #include <string>
-#include "EnigmaMachine.hpp"
+#include "EnigmaCore.hpp"
 
 #include "config.hpp"
 
