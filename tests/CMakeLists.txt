@@ -12,7 +12,7 @@ add_executable(EnigmaTests
 
 # Link against the Core library and GTest
 # GTest::gtest_main includes the main() entry point for the test runner
-target_link_libraries(EnigmaTests PRIVATE EnigmaCore GTest::gtest_main)
+target_link_libraries(EnigmaTests PRIVATE EnigmaMachineCore::EnigmaCore GTest::gtest_main)
 
 # Register tests so CTest can find them
 include(GoogleTest)
