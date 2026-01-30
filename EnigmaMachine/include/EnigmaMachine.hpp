@@ -21,7 +21,7 @@
  * This class encapsulates the functionality of the Enigma machine, including the rotor box
  * and the transformation of input keys through the rotors and reflector.
  */
-class EnigmaMachine {
+class EnigmaMachine : public IEnigmaObserver {
 private:
     RotorBox rotorBox;
     PlugBoard plugBoard;  // Optional: if you want to include a plugboard for additional transformations
@@ -103,7 +103,13 @@ public:
      * @throws std::runtime_error If the file cannot be parsed or contains invalid configuration data.
      */
     EnigmaMachine(std::string_view fileName, std::string_view assetPath = "");
-    ~EnigmaMachine() = default;
+
+    // Rule of Five
+    ~EnigmaMachine() override;
+    EnigmaMachine(const EnigmaMachine&) = delete;
+    EnigmaMachine& operator=(const EnigmaMachine&) = delete;
+    EnigmaMachine(EnigmaMachine&& other) noexcept;
+    EnigmaMachine& operator=(EnigmaMachine&& other) noexcept;
 
     /**
      * @brief Transforms the input key through the rotor box.
@@ -124,4 +130,8 @@ public:
      * @param observer The observer to remove.
      */
     void removeObserver(IEnigmaObserver* observer);
+
+    // IEnigmaObserver implementation
+    void onRotorStepped(int rotorIndex, int position) override;
+    void onCharEncrypted(char input, char output) override;
 };
