@@ -38,7 +38,10 @@ activate EM
             end
             
             loop for each observer
-                RB -> OBS: onRotorStepped(rotorIndex, pos)
+                RB -> EM: onRotorStepped(rotorIndex, pos)
+                activate EM
+                    EM -> OBS: onRotorStepped(rotorIndex, pos)
+                deactivate EM
             end
         deactivate RB
         

@@ -58,7 +58,8 @@ The core engine does not access the filesystem directly.
 To allow external systems (User Interfaces, Loggers) to react to internal state changes without coupling the core engine to them, the system implements the **Observer Pattern**.
 
 *   **IEnigmaObserver:** An abstract interface defining callbacks for key events (`onRotorStepped`, `onCharEncrypted`).
-*   **Decoupling:** The `EnigmaMachine` maintains a list of observers but knows nothing about their concrete implementation. This allows the CLI to print logs or a GUI to animate spinning rotors simply by implementing this interface.
+*   **Proxy Pattern:** To minimize redundant logic, `EnigmaMachine` implements `IEnigmaObserver` and acts as a proxy. It registers itself as the sole observer of `RotorBox`. When `RotorBox` triggers a rotor step event, `EnigmaMachine` receives it and forwards it to all externally registered observers.
+*   **Decoupling:** The `EnigmaMachine` maintains a list of external observers but knows nothing about their concrete implementation. This allows the CLI to print logs or a GUI to animate spinning rotors simply by implementing this interface.
 
 ### 3.5. Configuration Loading
 

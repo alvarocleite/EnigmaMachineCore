@@ -32,6 +32,7 @@ EnigmaMachine::EnigmaMachine() {
             EnigmaConfigLoader::loadReflector(provider, std::string(assetsDir) + std::string(defaultReflectorFile));
 
         rotorBox = RotorBox(3, {0, 0, 0}, rotors, reflector);
+        rotorBox.registerObserver(this);
     } catch (const std::exception& e) {
         std::cerr << "Failed to initialize default EnigmaMachine: " << e.what() << "\n";
         throw;
@@ -57,6 +58,7 @@ EnigmaMachine::EnigmaMachine(int nRotorCount, const std::vector<int>& rotorPosit
     ReflectorConfig reflector = EnigmaConfigLoader::loadReflector(provider, transformerFiles[nRotorCount]);
 
     rotorBox = RotorBox(nRotorCount, rotorPositions, rotors, reflector);
+    rotorBox.registerObserver(this);
 }
 
 /**
@@ -79,6 +81,7 @@ EnigmaMachine::EnigmaMachine(int nRotorCount, const std::vector<int>& rotorPosit
     ReflectorConfig reflector = EnigmaConfigLoader::loadReflector(provider, transformerFiles[nRotorCount]);
 
     rotorBox = RotorBox(nRotorCount, rotorPositions, rotors, reflector);
+    rotorBox.registerObserver(this);
 }
 
 EnigmaMachine::EnigmaMachine(IAssetProvider& provider, std::string_view fileName, std::string_view assetPath)
@@ -86,13 +89,40 @@ EnigmaMachine::EnigmaMachine(IAssetProvider& provider, std::string_view fileName
 
 EnigmaMachine::EnigmaMachine(const EnigmaMachineConfig& config)
     : rotorBox(config.rotorCount, config.rotorPositions, config.rotors, config.reflector),
-      plugBoard(config.plugBoardPairs) {}
+      plugBoard(config.plugBoardPairs) {
+    rotorBox.registerObserver(this);
+}
 
 EnigmaMachine::EnigmaMachine(std::string_view fileName, std::string_view assetPath)
     : EnigmaMachine([&]() {
           FileAssetProvider p;
           return EnigmaConfigLoader::load(p, fileName, assetPath);
       }()) {}
+
+EnigmaMachine::~EnigmaMachine() = default;
+
+EnigmaMachine::EnigmaMachine(EnigmaMachine&& other) noexcept
+    : rotorBox(std::move(other.rotorBox)),
+      plugBoard(std::move(other.plugBoard)),
+      observers(std::move(other.observers)) {
+    // The moved-from rotorBox (now in *this) still has 'other' as observer.
+    // We must update it to point to 'this'.
+    rotorBox.removeObserver(&other);
+    rotorBox.registerObserver(this);
+}
+
+EnigmaMachine& EnigmaMachine::operator=(EnigmaMachine&& other) noexcept {
+    if (this != &other) {
+        rotorBox = std::move(other.rotorBox);
+        plugBoard = std::move(other.plugBoard);
+        observers = std::move(other.observers);
+
+        // Fix observer pointer
+        rotorBox.removeObserver(&other);
+        rotorBox.registerObserver(this);
+    }
+    return *this;
+}
 
 /**
  * @details The transformation follows the historic Enigma signal path:
@@ -109,20 +139,28 @@ int EnigmaMachine::keyTransform(int input) {
     input = rotorBox.keyTransform(input);
     int output = plugBoard.swap(input);
 
-    for (auto* obs : observers) {
-        obs->onCharEncrypted(static_cast<char>('A' + originalInput), static_cast<char>('A' + output));
-    }
+    this->onCharEncrypted(static_cast<char>('A' + originalInput), static_cast<char>('A' + output));
 
     return output;
 }
 
-void EnigmaMachine::registerObserver(IEnigmaObserver* observer) {
-    observers.push_back(observer);
-    rotorBox.registerObserver(observer);
-}
+void EnigmaMachine::registerObserver(IEnigmaObserver* observer) { observers.push_back(observer); }
 
 void EnigmaMachine::removeObserver(IEnigmaObserver* observer) {
     auto it = std::remove(observers.begin(), observers.end(), observer);
-    observers.erase(it, observers.end());
-    rotorBox.removeObserver(observer);
+    if (it != observers.end()) {
+        observers.erase(it, observers.end());
+    }
+}
+
+void EnigmaMachine::onRotorStepped(int rotorIndex, int position) {
+    for (auto* obs : observers) {
+        obs->onRotorStepped(rotorIndex, position);
+    }
+}
+
+void EnigmaMachine::onCharEncrypted(char input, char output) {
+    for (auto* obs : observers) {
+        obs->onCharEncrypted(input, output);
+    }
 }
