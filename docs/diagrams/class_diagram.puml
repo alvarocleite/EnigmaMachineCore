@@ -70,6 +70,8 @@ class EnigmaMachine {
     + keyTransform(input: int) : int
     + registerObserver(observer: IEnigmaObserver*) : void
     + removeObserver(observer: IEnigmaObserver*) : void
+    + onRotorStepped(rotorIndex: int, position: int) : void
+    + onCharEncrypted(input: char, output: char) : void
 }
 
 class PlugBoard {
@@ -135,6 +137,7 @@ class Reflector {
 
 ' Relationships
 IAssetProvider <|.. FileAssetProvider : implements
+IEnigmaObserver <|.. EnigmaMachine : implements
 
 EnigmaConfigLoader ..> IAssetProvider : uses
 EnigmaConfigLoader ..> EnigmaMachineConfig : creates

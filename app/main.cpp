@@ -17,10 +17,24 @@ struct AppConfig {
 };
 
 /**
+ * @brief Observer that logs Enigma machine events to the console.
+ */
+class ConsoleObserver : public IEnigmaObserver {
+public:
+    void onRotorStepped(int rotorIndex, int position) override {
+        std::cout << "[Event] Rotor " << rotorIndex << " stepped to position " << position << "\n";
+    }
+
+    void onCharEncrypted(char input, char output) override {
+        std::cout << "[Event] Encrypted: " << input << " -> " << output << "\n";
+    }
+};
+
+/**
  * @brief Processes a message through the Enigma Machine.
  * Transforms each character and optionally prints debug info.
  */
-std::string processMessage(EnigmaMachine& machine, const std::string& input, bool debug) {
+std::string processMessage(EnigmaMachine& machine, const std::string& input, bool /*debug*/) {
     std::string output = "";
     for (char c : input) {
         if (!std::isalpha(c)) {
@@ -29,10 +43,6 @@ std::string processMessage(EnigmaMachine& machine, const std::string& input, boo
         char upperC = std::toupper(c);
         char res = machine.keyTransform(upperC - 'A') + 'A';
         output += res;
-
-        if (debug) {
-            std::cout << "Input: " << upperC << ", Output: " << res << "\n";
-        }
     }
     return output;
 }
@@ -48,7 +58,7 @@ AppConfig parseArguments(int argc, char** argv) {
     app.add_option("-c,--config", config.configPath, "Path to the TOML configuration file");
     app.add_option("-a,--assets", config.assetPath, "Base directory for assets (rotors/reflectors)");
     app.add_option("-m,--message", config.message, "Message to process");
-    app.add_flag("-d,--debug", config.debug, "Enable character-by-character transformation output");
+    app.add_flag("-d,--debug", config.debug, "Enable verbose event logging (rotor steps, encryption details)");
     app.add_flag("--encode", config.encode, "Encode the message");
     app.add_flag("--decode", config.decode, "Decode the message");
 
@@ -69,6 +79,14 @@ AppConfig parseArguments(int argc, char** argv) {
 
 void runApplication(const AppConfig& config) {
     EnigmaMachine machine(config.configPath, config.assetPath);
+
+    // Create and register observer if debug is enabled
+    ConsoleObserver observer;
+    if (config.debug) {
+        machine.registerObserver(&observer);
+        std::cout << "Debug mode enabled: Observer registered.\n";
+    }
+
     std::string currentMessage = config.message;
 
     if (config.encode) {
@@ -80,6 +98,11 @@ void runApplication(const AppConfig& config) {
     if (config.decode) {
         // Re-initialize for decryption (symmetric cipher starting from same state)
         EnigmaMachine decodeMachine(config.configPath, config.assetPath);
+
+        // Register observer for the decode machine as well
+        if (config.debug) {
+            decodeMachine.registerObserver(&observer);
+        }
 
         std::cout << "Decoding message: " << currentMessage << "\n";
         std::string decoded = processMessage(decodeMachine, currentMessage, config.debug);
