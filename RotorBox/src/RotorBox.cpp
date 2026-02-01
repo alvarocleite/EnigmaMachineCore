@@ -109,12 +109,12 @@ int RotorBox::keyTransform(int input) {
 }
 
 /**
- * @details Implements odometer-style stepping logic.
- * The right-most rotor (index 0) always rotates.
- * Subsequent rotors rotate only if the preceding rotor hits its notch.
- *
- * @internal This is a simplified linear stepping. Real Enigma "double stepping"
- * is not implemented here to favor modularity over exact historical fidelity in this version.
+ * @details Updates the rotor positions according to Enigma stepping mechanics.
+ * 1. The rightmost rotor always steps.
+ * 2. A rotor steps the next rotor to its left if it is at its notch position.
+ * 3. Double-stepping occurs when a rotor steps due to its own notch position and      
+ *   also causes the next rotor to step.
+ * After stepping, observers are notified of the new rotor positions.
  */
 void RotorBox::updateRotors() {
     if (nRotorCount < 1) return;
