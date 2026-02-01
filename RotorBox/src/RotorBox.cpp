@@ -117,18 +117,32 @@ int RotorBox::keyTransform(int input) {
  * is not implemented here to favor modularity over exact historical fidelity in this version.
  */
 void RotorBox::updateRotors() {
-    int rotorIx = 0;
-    int isNotch = 0;
+    if (nRotorCount < 1) return;
 
-    do {
-        isNotch = transformerVec.at(rotorIx)->rotate();
+    // Storing notch states BEFORE stepping
+    std::vector<bool> atNotch(nRotorCount, false);
+    for (int i = 0; i < nRotorCount; i++) {
+        int pos = transformerVec.at(i)->getPosition();
+        atNotch[i] = transformerVec.at(i)->isNotchPosition(pos);
+    }
 
-        // Notify observers
-        int pos = transformerVec.at(rotorIx)->getPosition();
-        for (auto* obs : observers) {
-            obs->onRotorStepped(rotorIx, pos);
+    //  Step rotors according to Enigma mechanics
+
+    // Rightmost rotor always steps
+    transformerVec.at(0)->rotate();
+    
+    // Remaining rotors
+    for (int i = 1; i < nRotorCount; i++) {
+        if (atNotch[i - 1] || atNotch[i]) {
+            transformerVec.at(i)->rotate();
         }
+    }
 
-        rotorIx++;
-    } while (rotorIx < nRotorCount && isNotch == 1);
+    // Notify observers
+    for (int i = 0; i < nRotorCount; i++) {
+        int pos = transformerVec.at(i)->getPosition();
+        for (auto* obs : observers) {
+            obs->onRotorStepped(i, pos);
+        }
+    }
 }
