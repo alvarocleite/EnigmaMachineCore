@@ -3,7 +3,7 @@
 #include <array>
 #include <string>
 #include <vector>
-#include "PlugBoard.hpp"  // For PlugBoardPair and PLUGBOARD_MAX_PAIRS
+#include "PlugBoardPair.hpp"  // For PlugBoardPair and PLUGBOARD_MAX_PAIRS
 #include "config.hpp"     // For TRANSFORMER_SIZE
 
 /**
