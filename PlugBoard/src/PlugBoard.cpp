@@ -23,7 +23,7 @@ PlugBoard::PlugBoard() {
  *
  * @throws std::invalid_argument If a port index is out of range or if there is a mapping conflict.
  */
-PlugBoard::PlugBoard(std::array<Pair_t, PLUGBOARD_MAX_PAIRS> pairs) : PlugBoard() {
+PlugBoard::PlugBoard(std::array<PlugBoardPair, PLUGBOARD_MAX_PAIRS> pairs) : PlugBoard() {
     for (const auto& pair : pairs) {
         int a = pair.a;
         int b = pair.b;

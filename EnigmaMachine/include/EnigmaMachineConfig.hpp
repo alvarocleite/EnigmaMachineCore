@@ -3,7 +3,7 @@
 #include <array>
 #include <string>
 #include <vector>
-#include "PlugBoard.hpp"  // For Pair_t and PLUGBOARD_MAX_PAIRS
+#include "PlugBoard.hpp"  // For PlugBoardPair and PLUGBOARD_MAX_PAIRS
 #include "config.hpp"     // For TRANSFORMER_SIZE
 
 /**
@@ -41,7 +41,7 @@ struct EnigmaMachineConfig {
     /** @brief Configuration for the reflector. */
     ReflectorConfig reflector;
     /** @brief Plugboard connection pairs. */
-    std::array<Pair_t, PLUGBOARD_MAX_PAIRS> plugBoardPairs;
+    std::array<PlugBoardPair, PLUGBOARD_MAX_PAIRS> plugBoardPairs;
 
     /**
      * @brief Default constructor.

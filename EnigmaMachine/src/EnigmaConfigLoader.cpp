@@ -106,7 +106,7 @@ EnigmaMachineConfig EnigmaConfigLoader::load(IAssetProvider& provider, std::stri
         throw std::runtime_error("Error: Plugboard pairs count does not match specified count.");
     }
 
-    std::array<Pair_t, PLUGBOARD_MAX_PAIRS> plugBoardPairs;
+    std::array<PlugBoardPair, PLUGBOARD_MAX_PAIRS> plugBoardPairs;
     // Initialize pairs
     for (auto& p : plugBoardPairs) {
         p.a = -1;

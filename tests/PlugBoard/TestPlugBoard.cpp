@@ -7,8 +7,8 @@ class PlugBoardTests : public ::testing::Test {
 protected:
     // Helper to create a filled array (since constructor requires full array)
     // Defaults to 0,0 which is ignored as self-loop
-    std::array<Pair_t, PLUGBOARD_MAX_PAIRS> createPairs(std::initializer_list<Pair_t> init) {
-        std::array<Pair_t, PLUGBOARD_MAX_PAIRS> pairs;
+    std::array<PlugBoardPair, PLUGBOARD_MAX_PAIRS> createPairs(std::initializer_list<PlugBoardPair> init) {
+        std::array<PlugBoardPair, PLUGBOARD_MAX_PAIRS> pairs;
         // Fill with dummy self-loops (ignored)
         for (auto& p : pairs) {
             p = {0, 0};

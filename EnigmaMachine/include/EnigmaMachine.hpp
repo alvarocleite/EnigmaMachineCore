@@ -66,12 +66,12 @@ public:
      * rotor.
      * @param transformerFiles A vector of file paths defining the wiring for each rotor and the reflector.
      *                   The last file in the list is expected to be the Reflector.
-     * @param plugBoardPairs An array of `Pair_t` defining the swaps to be configured on the PlugBoard.
+     * @param plugBoardPairs An array of `PlugBoardPair` defining the swaps to be configured on the PlugBoard.
      * @throws std::invalid_argument If the number of transformer files does not match nRotorCount + 1.
      */
     EnigmaMachine(int nRotorCount, const std::vector<int>& rotorPositions,
                   const std::vector<std::string>& transformerFiles,
-                  const std::array<Pair_t, PLUGBOARD_MAX_PAIRS>& plugBoardPairs);
+                  const std::array<PlugBoardPair, PLUGBOARD_MAX_PAIRS>& plugBoardPairs);
 
     /**
      * @brief Constructor using the configuration struct.

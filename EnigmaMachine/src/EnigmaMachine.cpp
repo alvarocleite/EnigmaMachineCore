@@ -67,7 +67,7 @@ EnigmaMachine::EnigmaMachine(int nRotorCount, const std::vector<int>& rotorPosit
  */
 EnigmaMachine::EnigmaMachine(int nRotorCount, const std::vector<int>& rotorPositions,
                              const std::vector<std::string>& transformerFiles,
-                             const std::array<Pair_t, PLUGBOARD_MAX_PAIRS>& plugBoardPairs)
+                             const std::array<PlugBoardPair, PLUGBOARD_MAX_PAIRS>& plugBoardPairs)
     : plugBoard(plugBoardPairs) {
     if (transformerFiles.size() != static_cast<size_t>(nRotorCount + 1)) {
         throw std::invalid_argument("Error: Number of transformer files must be nRotorCount + 1 (Reflector).");
