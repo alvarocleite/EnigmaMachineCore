@@ -14,9 +14,9 @@
  */
 struct PlugBoardPair {
     /** @brief The first port index (0 - (TRANSFORMER_SIZE - 1)). */
-    int a;
+    int sourcePortIndex{-1};
     /** @brief The second port index (0 - (TRANSFORMER_SIZE - 1)). */
-    int b;
+    int destinationPortIndex{-1};
 };
 
 class PlugBoard {

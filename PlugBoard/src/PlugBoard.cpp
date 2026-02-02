@@ -25,8 +25,8 @@ PlugBoard::PlugBoard() {
  */
 PlugBoard::PlugBoard(std::array<PlugBoardPair, PLUGBOARD_MAX_PAIRS> pairs) : PlugBoard() {
     for (const auto& pair : pairs) {
-        int a = pair.a;
-        int b = pair.b;
+        int a = pair.sourcePortIndex;
+        int b = pair.destinationPortIndex;
 
         // Skip uninitialized/empty pairs
         if (a == -1 || b == -1) {

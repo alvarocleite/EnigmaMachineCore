@@ -109,13 +109,13 @@ EnigmaMachineConfig EnigmaConfigLoader::load(IAssetProvider& provider, std::stri
     std::array<PlugBoardPair, PLUGBOARD_MAX_PAIRS> plugBoardPairs;
     // Initialize pairs
     for (auto& p : plugBoardPairs) {
-        p.a = -1;
-        p.b = -1;
+        p.sourcePortIndex = -1;
+        p.destinationPortIndex = -1;
     }
 
     for (int i = 0; i < plugsCount; i++) {
-        plugBoardPairs.at(i).a = toml::find<int>(plugBoardArr.at(i), "from");
-        plugBoardPairs.at(i).b = toml::find<int>(plugBoardArr.at(i), "to");
+        plugBoardPairs.at(i).sourcePortIndex = toml::find<int>(plugBoardArr.at(i), "from");
+        plugBoardPairs.at(i).destinationPortIndex = toml::find<int>(plugBoardArr.at(i), "to");
     }
 
     EnigmaMachineConfig newConfig;
