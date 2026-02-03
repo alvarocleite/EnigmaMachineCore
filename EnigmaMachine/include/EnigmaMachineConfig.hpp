@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 #include "PlugBoardPair.hpp"  // For PlugBoardPair and PLUGBOARD_MAX_PAIRS
-#include "config.hpp"     // For TRANSFORMER_SIZE
+#include "config.hpp"         // For TRANSFORMER_SIZE
 
 /**
  * @brief Configuration structure for an individual Rotor.

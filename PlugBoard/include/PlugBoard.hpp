@@ -7,8 +7,8 @@
 
 #include <array>
 
-#include "config.hpp"
 #include "PlugBoardPair.hpp"
+#include "config.hpp"
 
 class PlugBoard {
 private:

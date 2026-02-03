@@ -13,8 +13,8 @@ enum TransformerType {
 }
 
 class PlugBoardPair <<struct>> {
-    + int a
-    + int b
+    + int sourcePortIndex
+    + int destinationPortIndex
 }
 
 class RotorConfig <<struct>> {
