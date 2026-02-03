@@ -82,5 +82,5 @@ public:
      * @param position The position to check.
      * @return true if the position is the notch position, false otherwise.
      */
-    inline bool isNotchPosition(int position);
+    bool isNotchPosition(int position);
 };
