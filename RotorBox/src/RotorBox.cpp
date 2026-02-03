@@ -112,7 +112,7 @@ int RotorBox::keyTransform(int input) {
  * @details Updates the rotor positions according to Enigma stepping mechanics.
  * 1. The rightmost rotor always steps.
  * 2. A rotor steps the next rotor to its left if it is at its notch position.
- * 3. Double-stepping occurs when a rotor steps due to its own notch position and      
+ * 3. Double-stepping occurs when a rotor steps due to its own notch position and
  *   also causes the next rotor to step.
  * After stepping, observers are notified of the new rotor positions.
  */
@@ -122,18 +122,21 @@ void RotorBox::updateRotors() {
     // Storing notch states BEFORE stepping
     std::vector<bool> atNotch(nRotorCount, false);
     for (int i = 0; i < nRotorCount; i++) {
-        int pos = transformerVec.at(i)->getPosition();
-        atNotch[i] = transformerVec.at(i)->isNotchPosition(pos);
+        auto* rotor = static_cast<Rotor*>(transformerVec.at(i).get());
+        int pos = rotor->getPosition();
+        atNotch[i] = rotor->isNotchPosition(pos);
     }
 
     //  Step rotors according to Enigma mechanics
 
     // Rightmost rotor always steps
     transformerVec.at(0)->rotate();
-    
+
     // Remaining rotors
     for (int i = 1; i < nRotorCount; i++) {
-        if (atNotch[i - 1] || atNotch[i]) {
+        bool carried = atNotch[i - 1];
+        bool doubleStep = (i < nRotorCount - 1) && atNotch[i];
+        if (carried || doubleStep) {
             transformerVec.at(i)->rotate();
         }
     }

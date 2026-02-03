@@ -74,7 +74,6 @@ public:
     virtual int rotate() = 0;
     virtual void setPosition(int /*position*/) {};
     virtual int getPosition() const { return 0; };
-    virtual bool isNotchPosition(int position) const { return false; };
 
     /**
      * @brief Calculates the size of the transformation lookup table (LUT).
