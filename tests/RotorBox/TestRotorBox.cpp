@@ -115,10 +115,10 @@ TEST_F(RotorBoxTests, DoubleSteppingMechanism_1) {
     EnigmaObserverTest observer(3);
     rb.registerObserver(&observer);
 
-    rb.keyTransform(0);             // First transform to cause stepping
-    EXPECT_EQ(observer.pos[0], 1);  // Rotor1 at notch
-    EXPECT_EQ(observer.pos[1], 2);  // Rotor2 at notch
-    EXPECT_EQ(observer.pos[2], 0);  // Rotor3 stepped
+    rb.keyTransform(0);
+    EXPECT_EQ(observer.pos[0], 1);
+    EXPECT_EQ(observer.pos[1], 2);
+    EXPECT_EQ(observer.pos[2], 0);
 }
 
 TEST_F(RotorBoxTests, DoubleSteppingMechanism_2) {
@@ -127,10 +127,10 @@ TEST_F(RotorBoxTests, DoubleSteppingMechanism_2) {
     EnigmaObserverTest observer(3);
     rb.registerObserver(&observer);
 
-    rb.keyTransform(0);             // First transform to cause stepping
-    EXPECT_EQ(observer.pos[0], 1);  // Rotor1 at notch
-    EXPECT_EQ(observer.pos[1], 1);  // Rotor2 at notch
-    EXPECT_EQ(observer.pos[2], 1);  // Rotor3 stepped
+    rb.keyTransform(0);
+    EXPECT_EQ(observer.pos[0], 1);
+    EXPECT_EQ(observer.pos[1], 1);
+    EXPECT_EQ(observer.pos[2], 1);
 }
 
 TEST_F(RotorBoxTests, DoubleSteppingMechanism_3) {
@@ -139,8 +139,8 @@ TEST_F(RotorBoxTests, DoubleSteppingMechanism_3) {
     EnigmaObserverTest observer(3);
     rb.registerObserver(&observer);
 
-    rb.keyTransform(0);             // First transform to cause stepping
-    EXPECT_EQ(observer.pos[0], 2);  // Rotor1 at notch
-    EXPECT_EQ(observer.pos[1], 1);  // Rotor2 at notch
-    EXPECT_EQ(observer.pos[2], 3);  // Rotor3 stepped
+    rb.keyTransform(0);
+    EXPECT_EQ(observer.pos[0], 2);
+    EXPECT_EQ(observer.pos[1], 1);
+    EXPECT_EQ(observer.pos[2], 3);
 }

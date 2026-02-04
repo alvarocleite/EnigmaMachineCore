@@ -87,9 +87,33 @@ The encryption logic follows the physical signal path of the historical machine:
 
 ### 4.1. Rotor Stepping Logic
 
-The mechanical stepping is the most complex state transition in the system. A rotor rotates when the *previous* rotor passes its notch.
+The mechanical stepping mechanism is the most complex state transition in the system and faithfully reproduces the behavior of the historical Enigma machine, including the **double-stepping phenomenon**.
 
-![State Machine](diagrams/output/Enigma_Rotor_State_Machine.svg)
+On each key press, the stepping logic operates as follows:
+
+1.  **Pre-step notch evaluation**  
+    Before any rotor is rotated, each rotor’s current position is checked to determine whether it is at its notch. These notch states are captured **prior to rotation** and drive all subsequent stepping decisions.
+
+2.  **Rightmost rotor rotation**  
+    The rightmost (fast) rotor always rotates on every key press, regardless of notch positions.
+
+3.  **Carry-over rotation**  
+    A rotor rotates if the rotor immediately to its right was at its notch position before the step. This models the mechanical carry behavior of the Enigma.
+
+4.  **Double stepping**  
+    If a rotor is at its own notch position and is not the leftmost rotor, it also rotates.
+
+5.  **Post-step notification**  
+    After all rotations are applied, observers are notified with the updated position of each rotor.
+
+This approach ensures historically accurate rotor motion by:
+- Evaluating notch positions **before** rotation
+- Always stepping the rightmost rotor
+- Correctly modeling carry-over and double-stepping behavior
+
+As a result, the rotor movement and resulting cipher output match authentic Enigma machine behavior.
+
+![State Machine](diagrams/Enigma_Rotor_State_Machine.svg)
 
 ### 4.2. Signal Path Sequence
 
