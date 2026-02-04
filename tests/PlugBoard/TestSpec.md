@@ -19,7 +19,7 @@
 
 ### Test Fixture: `PlugBoardTests`
 *   **Purpose:** Provides a clean environment for each test.
-*   **Helpers:** May provide helper functions to generate `Pair_t` arrays easily.
+*   **Helpers:** May provide helper functions to generate `PlugBoardPair` arrays easily.
 
 ### Test Case: `DefaultInitialization`
 *   **Goal:** Ensure a default `PlugBoard` acts as a pass-through.

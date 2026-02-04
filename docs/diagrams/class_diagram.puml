@@ -12,9 +12,9 @@ enum TransformerType {
     Reflector
 }
 
-class Pair_t <<struct>> {
-    + int a
-    + int b
+class PlugBoardPair <<struct>> {
+    + int sourcePortIndex
+    + int destinationPortIndex
 }
 
 class RotorConfig <<struct>> {
@@ -46,7 +46,7 @@ class EnigmaMachineConfig <<struct>> {
     + std::vector<int> rotorPositions
     + std::vector<RotorConfig> rotors
     + ReflectorConfig reflector
-    + std::array<Pair_t, PLUGBOARD_MAX_PAIRS> plugBoardPairs
+    + std::array<PlugBoardPair, PLUGBOARD_MAX_PAIRS> plugBoardPairs
     + EnigmaMachineConfig()
 }
 
@@ -62,7 +62,7 @@ class EnigmaMachine {
     - observers : std::vector<IEnigmaObserver*>
     + EnigmaMachine()
     + EnigmaMachine(nRotorCount: int, rotorPositions: std::vector<int>, transformerFiles: std::vector<std::string>)
-    + EnigmaMachine(nRotorCount: int, rotorPositions: std::vector<int>, transformerFiles: std::vector<std::string>, plugBoardPairs: std::array<Pair_t, PLUGBOARD_MAX_PAIRS>)
+    + EnigmaMachine(nRotorCount: int, rotorPositions: std::vector<int>, transformerFiles: std::vector<std::string>, plugBoardPairs: std::array<PlugBoardPair, PLUGBOARD_MAX_PAIRS>)
     + EnigmaMachine(config: EnigmaMachineConfig)
     + EnigmaMachine(fileName: std::string_view, assetPath: std::string_view)
     + EnigmaMachine(provider: IAssetProvider, fileName: std::string_view, assetPath: std::string_view)
@@ -77,7 +77,7 @@ class EnigmaMachine {
 class PlugBoard {
     - mapping : std::array<int, TRANSFORMER_SIZE>
     + PlugBoard()
-    + PlugBoard(pairs: std::array<Pair_t, PLUGBOARD_MAX_PAIRS>)
+    + PlugBoard(pairs: std::array<PlugBoardPair, PLUGBOARD_MAX_PAIRS>)
     + ~PlugBoard()
     + swap(key: int) : int
 }
@@ -146,7 +146,7 @@ EnigmaConfigLoader ..> ReflectorConfig : creates
 
 EnigmaMachineConfig *-- RotorConfig
 EnigmaMachineConfig *-- ReflectorConfig
-EnigmaMachineConfig *-- Pair_t
+EnigmaMachineConfig *-- PlugBoardPair
 
 EnigmaMachine ..> EnigmaMachineConfig : uses
 EnigmaMachine ..> EnigmaConfigLoader : uses
@@ -155,7 +155,7 @@ EnigmaMachine *-- RotorBox
 EnigmaMachine *-- PlugBoard
 EnigmaMachine o-- IEnigmaObserver : notifies
 
-PlugBoard ..> Pair_t
+PlugBoard ..> PlugBoardPair
 
 RotorBox o-- Transformer
 RotorBox ..> RotorConfig

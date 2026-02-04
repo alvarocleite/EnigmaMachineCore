@@ -32,8 +32,8 @@ TEST_F(EnigmaConfigLoaderTests, LoadValidConfig) {
 
     // Note: The array size is PLUGBOARD_MAX_PAIRS. Unused are (-1, -1).
     for (const auto& p : pairs) {
-        if (p.a == 4 && p.b == 7) foundFirst = true;
-        if (p.a == 18 && p.b == 20) foundSecond = true;
+        if (p.sourcePortIndex == 4 && p.destinationPortIndex == 7) foundFirst = true;
+        if (p.sourcePortIndex == 18 && p.destinationPortIndex == 20) foundSecond = true;
     }
     EXPECT_TRUE(foundFirst);
     EXPECT_TRUE(foundSecond);
