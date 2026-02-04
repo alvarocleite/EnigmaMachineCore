@@ -73,7 +73,7 @@ void RotorBox::initTransformerVec(int nRotorCount, const std::vector<RotorConfig
     transformerVec.push_back(std::make_unique<Reflector>(reflector));
 }
 
-void RotorBox::printTransformerVec() {
+void RotorBox::printTransformerVec() const {
     for (auto& transformer : transformerVec) {
         std::cout << "Transformer Type: " << static_cast<int>(transformer->getType()) << "\n";
     }
