@@ -75,7 +75,7 @@ int Rotor::initRotorPosition(int offset) {
     return 0;
 }
 
-inline bool Rotor::isNotchPosition(int position) { return (position == notchPosition); }
+inline bool Rotor::isNotchPosition(int position) const { return (position == notchPosition); }
 
 /**
  * @details Handles the relative coordinate shift caused by the rotor's rotation.

@@ -87,7 +87,7 @@ public:
      * @brief Prints the types of transformers in the transformer vector.
      * This function iterates through the transformer vector and prints the type of each transformer.
      */
-    void printTransformerVec();
+    void printTransformerVec() const;
 
     /**
      * @brief Transforms the input key through the rotor box.
