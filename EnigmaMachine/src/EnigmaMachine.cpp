@@ -103,9 +103,7 @@ EnigmaMachine::EnigmaMachine(std::string_view fileName, std::string_view assetPa
 EnigmaMachine::~EnigmaMachine() = default;
 
 EnigmaMachine::EnigmaMachine(EnigmaMachine&& other) noexcept
-    : rotorBox(std::move(other.rotorBox)),
-      plugBoard(other.plugBoard),
-      observers(std::move(other.observers)) {
+    : rotorBox(std::move(other.rotorBox)), plugBoard(other.plugBoard), observers(std::move(other.observers)) {
     // The moved-from rotorBox (now in *this) still has 'other' as observer.
     // We must update it to point to 'this'.
     rotorBox.removeObserver(&other);

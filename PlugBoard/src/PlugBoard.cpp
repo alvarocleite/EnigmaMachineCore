@@ -25,24 +25,25 @@ PlugBoard::PlugBoard() {
  */
 PlugBoard::PlugBoard(std::array<PlugBoardPair, PLUGBOARD_MAX_PAIRS> pairs) : PlugBoard() {
     for (const auto& [sourcePortIndex, destinationPortIndex] : pairs) {
-
         // Skip uninitialized/empty pairs
         if (sourcePortIndex == -1 || destinationPortIndex == -1) {
             continue;
         }
 
-        if (sourcePortIndex < 0 || sourcePortIndex >= TRANSFORMER_SIZE || destinationPortIndex < 0 || destinationPortIndex >= TRANSFORMER_SIZE) {
-            throw std::invalid_argument("PlugBoard error: Port index out of range (" + std::to_string(sourcePortIndex) + ", " +
-                                        std::to_string(destinationPortIndex) + ").");
+        if (sourcePortIndex < 0 || sourcePortIndex >= TRANSFORMER_SIZE || destinationPortIndex < 0 ||
+            destinationPortIndex >= TRANSFORMER_SIZE) {
+            throw std::invalid_argument("PlugBoard error: Port index out of range (" + std::to_string(sourcePortIndex) +
+                                        ", " + std::to_string(destinationPortIndex) + ").");
         }
 
         if (sourcePortIndex == destinationPortIndex) {
             continue;
         }
 
-        if (mapping.at(sourcePortIndex) != sourcePortIndex || mapping.at(destinationPortIndex) != destinationPortIndex) {
-            throw std::invalid_argument("PlugBoard error: Conflict for pair (" + std::to_string(sourcePortIndex) + ", " +
-                                        std::to_string(destinationPortIndex) + "). Port already in use.");
+        if (mapping.at(sourcePortIndex) != sourcePortIndex ||
+            mapping.at(destinationPortIndex) != destinationPortIndex) {
+            throw std::invalid_argument("PlugBoard error: Conflict for pair (" + std::to_string(sourcePortIndex) +
+                                        ", " + std::to_string(destinationPortIndex) + "). Port already in use.");
         }
 
         mapping.at(sourcePortIndex) = destinationPortIndex;
