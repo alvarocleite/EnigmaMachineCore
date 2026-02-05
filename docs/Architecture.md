@@ -113,7 +113,7 @@ This approach ensures historically accurate rotor motion by:
 
 As a result, the rotor movement and resulting cipher output match authentic Enigma machine behavior.
 
-![State Machine](diagrams/Enigma_Rotor_State_Machine.svg)
+![State Machine](diagrams/output/Enigma_Rotor_State_Machine.svg)
 
 ### 4.2. Signal Path Sequence
 
