@@ -36,28 +36,26 @@ void validateTransformerConfig(const toml::value& data, const std::string& expec
 }
 }  // namespace
 
-RotorConfig EnigmaConfigLoader::loadRotor(IAssetProvider& provider, std::string_view fileName) {
-    std::string content = provider.loadAsset(fileName);
-    std::istringstream stream(content);
+RotorConfig EnigmaConfigLoader::loadRotor(IAssetProvider& provider, const FileName& fileName) {
+    std::istringstream stream(provider.loadAsset(fileName.native()));
     // Parse from stream, pass filename for error reporting
-    auto rotorData = toml::parse(stream, std::string(fileName));
-    validateTransformerConfig(rotorData, "rotor", std::string(fileName));
+    auto rotorData = toml::parse(stream, fileName.string());
+    validateTransformerConfig(rotorData, "rotor", fileName.string());
 
     RotorConfig rotorConfig;
     rotorConfig.notchPosition = toml::find<int>(rotorData, "rotor", "notchPosition");
     rotorConfig.wiring = toml::find<std::vector<int>>(rotorData, "rotor", "forward");
 
     if (rotorConfig.wiring.size() != TRANSFORMER_SIZE) {
-        throw std::runtime_error("Error: Rotor wiring size mismatch in " + std::string(fileName));
+        throw std::runtime_error("Error: Rotor wiring size mismatch in " + fileName.string());
     }
     return rotorConfig;
 }
 
-ReflectorConfig EnigmaConfigLoader::loadReflector(IAssetProvider& provider, std::string_view fileName) {
-    std::string content = provider.loadAsset(fileName);
-    std::istringstream stream(content);
-    auto reflectorData = toml::parse(stream, std::string(fileName));
-    validateTransformerConfig(reflectorData, "reflector", std::string(fileName));
+ReflectorConfig EnigmaConfigLoader::loadReflector(IAssetProvider& provider, const FileName& fileName) {
+    std::istringstream stream(provider.loadAsset(fileName.native()));
+    auto reflectorData = toml::parse(stream, fileName.string());
+    validateTransformerConfig(reflectorData, "reflector", fileName.string());
 
     ReflectorConfig reflectorConfig;
     reflectorConfig.wiring = toml::find<std::vector<int>>(reflectorData, "reflector", "map");
@@ -67,12 +65,11 @@ ReflectorConfig EnigmaConfigLoader::loadReflector(IAssetProvider& provider, std:
     return reflectorConfig;
 }
 
-EnigmaMachineConfig EnigmaConfigLoader::load(IAssetProvider& provider, std::string_view fileName,
-                                             std::string_view assetPath) {
+EnigmaMachineConfig EnigmaConfigLoader::load(IAssetProvider& provider, const FileName& fileName,
+                                             const AssetPath& assetPath) {
     EnigmaMachineConfig config;
-    std::string content = provider.loadAsset(fileName);
-    std::istringstream stream(content);
-    auto data = toml::parse(stream, std::string(fileName));
+    std::istringstream stream(provider.loadAsset(fileName.native()));
+    auto data = toml::parse(stream, fileName.string());
 
     int rotorCount = toml::find<int>(data, "rotors", "RotorCount");
     std::vector<int> rotorPositions = toml::find<std::vector<int>>(data, "rotors", "RotorPositions");
@@ -83,19 +80,13 @@ EnigmaMachineConfig EnigmaConfigLoader::load(IAssetProvider& provider, std::stri
         throw std::runtime_error("Error: Number of rotors, positions, and files do not match.");
     }
 
-    std::string prefix = std::string(assetPath);
-    if (!prefix.empty() && prefix.back() != '/') {
-        prefix += "/";
-    }
-
     std::vector<RotorConfig> rotors;
     for (const auto& rotorFile : rotorFilePaths) {
-        rotors.push_back(loadRotor(provider, prefix + rotorFile));
+        rotors.push_back(loadRotor(provider, FileName(assetPath / rotorFile)));
     }
 
     auto reflectorFile = toml::find<std::string>(data, "ReflectorFile");
-    ReflectorConfig reflector = loadReflector(provider, prefix + reflectorFile);
-
+    auto reflector = loadReflector(provider, FileName(assetPath / reflectorFile));
     auto plugsCount = toml::find<int>(data, "plugboard", "PlugCount");
     if (plugsCount > PLUGBOARD_MAX_PAIRS) {
         throw std::runtime_error("Error: Plugboard pairs exceed maximum allowed.");
@@ -107,11 +98,6 @@ EnigmaMachineConfig EnigmaConfigLoader::load(IAssetProvider& provider, std::stri
     }
 
     std::array<PlugBoardPair, PLUGBOARD_MAX_PAIRS> plugBoardPairs;
-    // Initialize pairs
-    for (auto& p : plugBoardPairs) {
-        p.sourcePortIndex = -1;
-        p.destinationPortIndex = -1;
-    }
 
     for (int i = 0; i < plugsCount; i++) {
         plugBoardPairs.at(i).sourcePortIndex = toml::find<int>(plugBoardArr.at(i), "from");
