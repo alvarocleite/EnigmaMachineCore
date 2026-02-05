@@ -7,11 +7,13 @@
 #include "RotorBox.hpp"
 #include "config.hpp"
 
+namespace fs = std::filesystem;
+using FileName = EnigmaConfigLoader::FileName;
 class RotorBoxTests : public ::testing::Test {
 protected:
-    std::vector<std::string> rotorFiles = {
-        std::string(assetsDir) + "Rotor1.toml", std::string(assetsDir) + "Rotor2.toml",
-        std::string(assetsDir) + "Rotor3.toml", std::string(assetsDir) + "Reflector.toml"};
+    std::vector<FileName> rotorFiles = {
+        FileName(fs::path(assetsDir) / "Rotor1.toml"), FileName(fs::path(assetsDir) / "Rotor2.toml"),
+        FileName(fs::path(assetsDir) / "Rotor3.toml"), FileName(fs::path(assetsDir) / "Reflector.toml")};
 
     std::vector<RotorConfig> rotors;
     ReflectorConfig reflector;

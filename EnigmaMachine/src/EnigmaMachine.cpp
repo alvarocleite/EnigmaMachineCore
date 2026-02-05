@@ -17,20 +17,21 @@
  * @details Loads default configuration files (Rotor1, Rotor2, Rotor3, Reflector)
  * from the global assets directory defined in `config.hpp`.
  */
+using FileName = EnigmaConfigLoader::FileName;
+using AssetPath = EnigmaConfigLoader::AssetPath;
 EnigmaMachine::EnigmaMachine() {
+    namespace fs = std::filesystem;
     FileAssetProvider provider;
+    fs::path assetsDirectory(assetsDir);
     try {
         std::vector<RotorConfig> rotors;
         rotors.push_back(
-            EnigmaConfigLoader::loadRotor(provider, std::string(assetsDir) + std::string(defaultRotor1File)));
+            EnigmaConfigLoader::loadRotor(provider, FileName(assetsDirectory / defaultRotor1File)));
         rotors.push_back(
-            EnigmaConfigLoader::loadRotor(provider, std::string(assetsDir) + std::string(defaultRotor2File)));
+            EnigmaConfigLoader::loadRotor(provider, FileName(assetsDirectory / defaultRotor2File)));
         rotors.push_back(
-            EnigmaConfigLoader::loadRotor(provider, std::string(assetsDir) + std::string(defaultRotor3File)));
-
-        ReflectorConfig reflector =
-            EnigmaConfigLoader::loadReflector(provider, std::string(assetsDir) + std::string(defaultReflectorFile));
-
+            EnigmaConfigLoader::loadRotor(provider, FileName(assetsDirectory / defaultRotor3File)));
+        auto reflector = EnigmaConfigLoader::loadReflector(provider, FileName(assetsDirectory / defaultReflectorFile));
         rotorBox = RotorBox(3, {0, 0, 0}, rotors, reflector);
         rotorBox.registerObserver(this);
     } catch (const std::exception& e) {
@@ -50,12 +51,11 @@ EnigmaMachine::EnigmaMachine(int nRotorCount, const std::vector<int>& rotorPosit
     }
 
     FileAssetProvider provider;
-    std::vector<RotorConfig> rotors;
-    rotors.reserve(nRotorCount);
+    std::vector<RotorConfig> rotors(nRotorCount);
     for (int i = 0; i < nRotorCount; ++i) {
-        rotors.push_back(EnigmaConfigLoader::loadRotor(provider, transformerFiles[i]));
+        rotors[i] = EnigmaConfigLoader::loadRotor(provider, FileName(transformerFiles[i]));
     }
-    ReflectorConfig reflector = EnigmaConfigLoader::loadReflector(provider, transformerFiles[nRotorCount]);
+    auto reflector = EnigmaConfigLoader::loadReflector(provider, FileName(transformerFiles[nRotorCount]));
 
     rotorBox = RotorBox(nRotorCount, rotorPositions, rotors, reflector);
     rotorBox.registerObserver(this);
@@ -74,19 +74,18 @@ EnigmaMachine::EnigmaMachine(int nRotorCount, const std::vector<int>& rotorPosit
     }
 
     FileAssetProvider provider;
-    std::vector<RotorConfig> rotors;
-    rotors.reserve(nRotorCount);
+    std::vector<RotorConfig> rotors(nRotorCount);
     for (int i = 0; i < nRotorCount; ++i) {
-        rotors.push_back(EnigmaConfigLoader::loadRotor(provider, transformerFiles[i]));
+        rotors[i] = EnigmaConfigLoader::loadRotor(provider, FileName(transformerFiles[i]));
     }
-    ReflectorConfig reflector = EnigmaConfigLoader::loadReflector(provider, transformerFiles[nRotorCount]);
+    auto reflector = EnigmaConfigLoader::loadReflector(provider, FileName(transformerFiles[nRotorCount]));
 
     rotorBox = RotorBox(nRotorCount, rotorPositions, rotors, reflector);
     rotorBox.registerObserver(this);
 }
 
 EnigmaMachine::EnigmaMachine(IAssetProvider& provider, std::string_view fileName, std::string_view assetPath)
-    : EnigmaMachine(EnigmaConfigLoader::load(provider, fileName, assetPath)) {}
+    : EnigmaMachine(EnigmaConfigLoader::load(provider, FileName(fileName), AssetPath(assetPath))) {}
 
 EnigmaMachine::EnigmaMachine(const EnigmaMachineConfig& config)
     : rotorBox(config.rotorCount, config.rotorPositions, config.rotors, config.reflector),
@@ -97,7 +96,7 @@ EnigmaMachine::EnigmaMachine(const EnigmaMachineConfig& config)
 EnigmaMachine::EnigmaMachine(std::string_view fileName, std::string_view assetPath)
     : EnigmaMachine([&]() {
           FileAssetProvider provider;
-          return EnigmaConfigLoader::load(provider, fileName, assetPath);
+          return EnigmaConfigLoader::load(provider, FileName(fileName), AssetPath(assetPath));
       }()) {}
 
 EnigmaMachine::~EnigmaMachine() = default;

@@ -6,12 +6,12 @@
 
 class RotorTests : public ::testing::Test {
 protected:
-    const std::string configPath = "assets/Rotor1.toml";
+    static constexpr std::string_view configPath = "assets/Rotor1.toml";
     RotorConfig config;
 
     void SetUp() override {
         FileAssetProvider provider;
-        config = EnigmaConfigLoader::loadRotor(provider, configPath);
+        config = EnigmaConfigLoader::loadRotor(provider, EnigmaConfigLoader::FileName(configPath));
     }
 };
 
