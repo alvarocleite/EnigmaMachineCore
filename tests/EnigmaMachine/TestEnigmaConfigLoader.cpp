@@ -43,7 +43,8 @@ TEST_F(EnigmaConfigLoaderTests, LoadValidConfig) {
 
 TEST_F(EnigmaConfigLoaderTests, LoadInvalidConfig) {
     FileAssetProvider provider;
-    EXPECT_THROW({ EnigmaConfigLoader::load(provider, FileName(invalidConfigPath), AssetPath(assetsDir)); }, std::exception);
+    EXPECT_THROW(
+        { EnigmaConfigLoader::load(provider, FileName(invalidConfigPath), AssetPath(assetsDir)); }, std::exception);
 }
 
 TEST_F(EnigmaConfigLoaderTests, RotorConfigProperties) {

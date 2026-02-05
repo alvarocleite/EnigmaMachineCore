@@ -25,12 +25,9 @@ EnigmaMachine::EnigmaMachine() {
     fs::path assetsDirectory(assetsDir);
     try {
         std::vector<RotorConfig> rotors;
-        rotors.push_back(
-            EnigmaConfigLoader::loadRotor(provider, FileName(assetsDirectory / defaultRotor1File)));
-        rotors.push_back(
-            EnigmaConfigLoader::loadRotor(provider, FileName(assetsDirectory / defaultRotor2File)));
-        rotors.push_back(
-            EnigmaConfigLoader::loadRotor(provider, FileName(assetsDirectory / defaultRotor3File)));
+        rotors.push_back(EnigmaConfigLoader::loadRotor(provider, FileName(assetsDirectory / defaultRotor1File)));
+        rotors.push_back(EnigmaConfigLoader::loadRotor(provider, FileName(assetsDirectory / defaultRotor2File)));
+        rotors.push_back(EnigmaConfigLoader::loadRotor(provider, FileName(assetsDirectory / defaultRotor3File)));
         auto reflector = EnigmaConfigLoader::loadReflector(provider, FileName(assetsDirectory / defaultReflectorFile));
         rotorBox = RotorBox(3, {0, 0, 0}, rotors, reflector);
         rotorBox.registerObserver(this);
