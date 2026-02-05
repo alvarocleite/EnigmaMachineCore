@@ -9,7 +9,7 @@ std::string FileAssetProvider::loadAsset(std::string_view assetName) {
         throw std::runtime_error("FileAssetProvider: Could not open file " + std::string(assetName));
     }
 
-    std::ostringstream ss;
-    ss << file.rdbuf();
-    return ss.str();
+    std::ostringstream outputStream;
+    outputStream << file.rdbuf();
+    return outputStream.str();
 }

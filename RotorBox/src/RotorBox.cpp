@@ -46,8 +46,8 @@ RotorBox::RotorBox(int nRotorCount, const std::vector<int>& rotorPositions, cons
 void RotorBox::registerObserver(IEnigmaObserver* observer) { observers.push_back(observer); }
 
 void RotorBox::removeObserver(IEnigmaObserver* observer) {
-    auto it = std::remove(observers.begin(), observers.end(), observer);
-    observers.erase(it, observers.end());
+    auto iterator = std::remove(observers.begin(), observers.end(), observer);
+    observers.erase(iterator, observers.end());
 }
 
 /**
@@ -73,7 +73,7 @@ void RotorBox::initTransformerVec(int nRotorCount, const std::vector<RotorConfig
     transformerVec.push_back(std::make_unique<Reflector>(reflector));
 }
 
-void RotorBox::printTransformerVec() {
+void RotorBox::printTransformerVec() const {
     for (auto& transformer : transformerVec) {
         std::cout << "Transformer Type: " << static_cast<int>(transformer->getType()) << "\n";
     }

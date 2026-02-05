@@ -4,6 +4,8 @@
 #include "FileAssetProvider.hpp"
 #include "config.hpp"
 
+using FileName = EnigmaConfigLoader::FileName;
+using AssetPath = EnigmaConfigLoader::AssetPath;
 class EnigmaConfigLoaderTests : public ::testing::Test {
 protected:
     const std::string validConfigPath = "assets/EnigmaMachineConfig1.toml";
@@ -13,7 +15,7 @@ protected:
 TEST_F(EnigmaConfigLoaderTests, LoadValidConfig) {
     EnigmaMachineConfig config;
     FileAssetProvider provider;
-    EXPECT_NO_THROW({ config = EnigmaConfigLoader::load(provider, validConfigPath, assetsDir); });
+    EXPECT_NO_THROW({ config = EnigmaConfigLoader::load(provider, FileName(validConfigPath), AssetPath(assetsDir)); });
 
     EXPECT_EQ(config.rotorCount, 3);
 
@@ -32,8 +34,8 @@ TEST_F(EnigmaConfigLoaderTests, LoadValidConfig) {
 
     // Note: The array size is PLUGBOARD_MAX_PAIRS. Unused are (-1, -1).
     for (const auto& p : pairs) {
-        if (p.a == 4 && p.b == 7) foundFirst = true;
-        if (p.a == 18 && p.b == 20) foundSecond = true;
+        if (p.sourcePortIndex == 4 && p.destinationPortIndex == 7) foundFirst = true;
+        if (p.sourcePortIndex == 18 && p.destinationPortIndex == 20) foundSecond = true;
     }
     EXPECT_TRUE(foundFirst);
     EXPECT_TRUE(foundSecond);
@@ -41,12 +43,13 @@ TEST_F(EnigmaConfigLoaderTests, LoadValidConfig) {
 
 TEST_F(EnigmaConfigLoaderTests, LoadInvalidConfig) {
     FileAssetProvider provider;
-    EXPECT_THROW({ EnigmaConfigLoader::load(provider, invalidConfigPath, assetsDir); }, std::exception);
+    EXPECT_THROW(
+        { EnigmaConfigLoader::load(provider, FileName(invalidConfigPath), AssetPath(assetsDir)); }, std::exception);
 }
 
 TEST_F(EnigmaConfigLoaderTests, RotorConfigProperties) {
     FileAssetProvider provider;
-    EnigmaMachineConfig config = EnigmaConfigLoader::load(provider, validConfigPath, assetsDir);
+    EnigmaMachineConfig config = EnigmaConfigLoader::load(provider, FileName(validConfigPath), AssetPath(assetsDir));
     const auto& rotors = config.rotors;
     ASSERT_FALSE(rotors.empty());
 
@@ -79,17 +82,17 @@ public:
 TEST_F(EnigmaConfigLoaderTests, LoadMalformedRotor) {
     MalformedAssetProvider provider;
     // Should throw because 'forward' is missing or validation fails
-    EXPECT_THROW({ EnigmaConfigLoader::loadRotor(provider, "bad_rotor.toml"); }, std::exception);
+    EXPECT_THROW({ EnigmaConfigLoader::loadRotor(provider, FileName("bad_rotor.toml")); }, std::exception);
 }
 
 TEST_F(EnigmaConfigLoaderTests, LoadWrongComponentType) {
     MalformedAssetProvider provider;
     // Should throw because type is 'reflector' but we expect 'rotor'
-    EXPECT_THROW({ EnigmaConfigLoader::loadRotor(provider, "wrong_type.toml"); }, std::exception);
+    EXPECT_THROW({ EnigmaConfigLoader::loadRotor(provider, FileName("wrong_type.toml")); }, std::exception);
 }
 
 TEST_F(EnigmaConfigLoaderTests, LoadInconsistentConfig) {
     MalformedAssetProvider provider;
     // Should throw because count mismatch
-    EXPECT_THROW({ EnigmaConfigLoader::load(provider, "inconsistent_count.toml"); }, std::exception);
+    EXPECT_THROW({ EnigmaConfigLoader::load(provider, FileName("inconsistent_count.toml")); }, std::exception);
 }

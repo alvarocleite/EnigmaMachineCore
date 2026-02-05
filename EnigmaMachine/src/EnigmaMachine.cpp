@@ -17,20 +17,18 @@
  * @details Loads default configuration files (Rotor1, Rotor2, Rotor3, Reflector)
  * from the global assets directory defined in `config.hpp`.
  */
+using FileName = EnigmaConfigLoader::FileName;
+using AssetPath = EnigmaConfigLoader::AssetPath;
 EnigmaMachine::EnigmaMachine() {
+    namespace fs = std::filesystem;
     FileAssetProvider provider;
+    fs::path assetsDirectory(assetsDir);
     try {
         std::vector<RotorConfig> rotors;
-        rotors.push_back(
-            EnigmaConfigLoader::loadRotor(provider, std::string(assetsDir) + std::string(defaultRotor1File)));
-        rotors.push_back(
-            EnigmaConfigLoader::loadRotor(provider, std::string(assetsDir) + std::string(defaultRotor2File)));
-        rotors.push_back(
-            EnigmaConfigLoader::loadRotor(provider, std::string(assetsDir) + std::string(defaultRotor3File)));
-
-        ReflectorConfig reflector =
-            EnigmaConfigLoader::loadReflector(provider, std::string(assetsDir) + std::string(defaultReflectorFile));
-
+        rotors.push_back(EnigmaConfigLoader::loadRotor(provider, FileName(assetsDirectory / defaultRotor1File)));
+        rotors.push_back(EnigmaConfigLoader::loadRotor(provider, FileName(assetsDirectory / defaultRotor2File)));
+        rotors.push_back(EnigmaConfigLoader::loadRotor(provider, FileName(assetsDirectory / defaultRotor3File)));
+        auto reflector = EnigmaConfigLoader::loadReflector(provider, FileName(assetsDirectory / defaultReflectorFile));
         rotorBox = RotorBox(3, {0, 0, 0}, rotors, reflector);
         rotorBox.registerObserver(this);
     } catch (const std::exception& e) {
@@ -44,18 +42,17 @@ EnigmaMachine::EnigmaMachine() {
  * Loads each rotor and reflector configuration from the provided file paths before initializing the RotorBox.
  */
 EnigmaMachine::EnigmaMachine(int nRotorCount, const std::vector<int>& rotorPositions,
-                             const std::vector<std::string>& transformerFiles)
-    : plugBoard() {
-    if (transformerFiles.size() != static_cast<size_t>(nRotorCount + 1)) {
+                             const std::vector<std::string>& transformerFiles) {
+    if (transformerFiles.size() != static_cast<size_t>(nRotorCount) + 1) {
         throw std::invalid_argument("Error: Number of transformer files must be nRotorCount + 1 (Reflector).");
     }
 
     FileAssetProvider provider;
-    std::vector<RotorConfig> rotors;
+    std::vector<RotorConfig> rotors(nRotorCount);
     for (int i = 0; i < nRotorCount; ++i) {
-        rotors.push_back(EnigmaConfigLoader::loadRotor(provider, transformerFiles[i]));
+        rotors[i] = EnigmaConfigLoader::loadRotor(provider, FileName(transformerFiles[i]));
     }
-    ReflectorConfig reflector = EnigmaConfigLoader::loadReflector(provider, transformerFiles[nRotorCount]);
+    auto reflector = EnigmaConfigLoader::loadReflector(provider, FileName(transformerFiles[nRotorCount]));
 
     rotorBox = RotorBox(nRotorCount, rotorPositions, rotors, reflector);
     rotorBox.registerObserver(this);
@@ -67,25 +64,25 @@ EnigmaMachine::EnigmaMachine(int nRotorCount, const std::vector<int>& rotorPosit
  */
 EnigmaMachine::EnigmaMachine(int nRotorCount, const std::vector<int>& rotorPositions,
                              const std::vector<std::string>& transformerFiles,
-                             const std::array<Pair_t, PLUGBOARD_MAX_PAIRS>& plugBoardPairs)
+                             const std::array<PlugBoardPair, PLUGBOARD_MAX_PAIRS>& plugBoardPairs)
     : plugBoard(plugBoardPairs) {
-    if (transformerFiles.size() != static_cast<size_t>(nRotorCount + 1)) {
+    if (transformerFiles.size() != static_cast<size_t>(nRotorCount) + 1) {
         throw std::invalid_argument("Error: Number of transformer files must be nRotorCount + 1 (Reflector).");
     }
 
     FileAssetProvider provider;
-    std::vector<RotorConfig> rotors;
+    std::vector<RotorConfig> rotors(nRotorCount);
     for (int i = 0; i < nRotorCount; ++i) {
-        rotors.push_back(EnigmaConfigLoader::loadRotor(provider, transformerFiles[i]));
+        rotors[i] = EnigmaConfigLoader::loadRotor(provider, FileName(transformerFiles[i]));
     }
-    ReflectorConfig reflector = EnigmaConfigLoader::loadReflector(provider, transformerFiles[nRotorCount]);
+    auto reflector = EnigmaConfigLoader::loadReflector(provider, FileName(transformerFiles[nRotorCount]));
 
     rotorBox = RotorBox(nRotorCount, rotorPositions, rotors, reflector);
     rotorBox.registerObserver(this);
 }
 
 EnigmaMachine::EnigmaMachine(IAssetProvider& provider, std::string_view fileName, std::string_view assetPath)
-    : EnigmaMachine(EnigmaConfigLoader::load(provider, fileName, assetPath)) {}
+    : EnigmaMachine(EnigmaConfigLoader::load(provider, FileName(fileName), AssetPath(assetPath))) {}
 
 EnigmaMachine::EnigmaMachine(const EnigmaMachineConfig& config)
     : rotorBox(config.rotorCount, config.rotorPositions, config.rotors, config.reflector),
@@ -95,16 +92,14 @@ EnigmaMachine::EnigmaMachine(const EnigmaMachineConfig& config)
 
 EnigmaMachine::EnigmaMachine(std::string_view fileName, std::string_view assetPath)
     : EnigmaMachine([&]() {
-          FileAssetProvider p;
-          return EnigmaConfigLoader::load(p, fileName, assetPath);
+          FileAssetProvider provider;
+          return EnigmaConfigLoader::load(provider, FileName(fileName), AssetPath(assetPath));
       }()) {}
 
 EnigmaMachine::~EnigmaMachine() = default;
 
 EnigmaMachine::EnigmaMachine(EnigmaMachine&& other) noexcept
-    : rotorBox(std::move(other.rotorBox)),
-      plugBoard(std::move(other.plugBoard)),
-      observers(std::move(other.observers)) {
+    : rotorBox(std::move(other.rotorBox)), plugBoard(other.plugBoard), observers(std::move(other.observers)) {
     // The moved-from rotorBox (now in *this) still has 'other' as observer.
     // We must update it to point to 'this'.
     rotorBox.removeObserver(&other);
@@ -114,7 +109,7 @@ EnigmaMachine::EnigmaMachine(EnigmaMachine&& other) noexcept
 EnigmaMachine& EnigmaMachine::operator=(EnigmaMachine&& other) noexcept {
     if (this != &other) {
         rotorBox = std::move(other.rotorBox);
-        plugBoard = std::move(other.plugBoard);
+        plugBoard = other.plugBoard;
         observers = std::move(other.observers);
 
         // Fix observer pointer
@@ -147,9 +142,9 @@ int EnigmaMachine::keyTransform(int input) {
 void EnigmaMachine::registerObserver(IEnigmaObserver* observer) { observers.push_back(observer); }
 
 void EnigmaMachine::removeObserver(IEnigmaObserver* observer) {
-    auto it = std::remove(observers.begin(), observers.end(), observer);
-    if (it != observers.end()) {
-        observers.erase(it, observers.end());
+    auto iterator = std::remove(observers.begin(), observers.end(), observer);
+    if (iterator != observers.end()) {
+        observers.erase(iterator, observers.end());
     }
 }
 

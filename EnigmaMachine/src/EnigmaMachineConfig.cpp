@@ -7,7 +7,7 @@
 
 EnigmaMachineConfig::EnigmaMachineConfig() {
     for (auto& pair : plugBoardPairs) {
-        pair.a = -1;
-        pair.b = -1;
+        pair.sourcePortIndex = -1;
+        pair.destinationPortIndex = -1;
     }
 }

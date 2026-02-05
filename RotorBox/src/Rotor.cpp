@@ -45,19 +45,25 @@ Rotor::Rotor(const RotorConfig& config) {
  */
 void Rotor::initReverseTransformLUT() {
     const auto& forwardRow = getTransformRow(0);
+    std::vector<bool> seen(TRANSFORMER_SIZE, false);
 
-    for (int forwardValue = 0; forwardValue < TRANSFORMER_SIZE; forwardValue++) {
-        const auto it = std::find_if(forwardRow.begin(), forwardRow.end(),
-                                     [forwardValue](int value) { return value == forwardValue; });
-
-        if (it != forwardRow.end()) {
-            int reverseIndex = std::distance(forwardRow.begin(), it);
-            setTransformValue(1, forwardValue, reverseIndex);
-        } else {
-            // This implies the forward mapping is not a bijection (valid permutation)
-            throw std::runtime_error("Invalid Rotor mapping: Not a bijection. Missing output: " +
-                                     std::to_string(forwardValue));
+    int newVal{0};
+    std::for_each(forwardRow.begin(), forwardRow.end(), [&](int value) {
+        if (value < 0 || value >= TRANSFORMER_SIZE) {
+            throw std::runtime_error("Invalid Rotor mapping: Value out of range: " + std::to_string(value));
         }
+        if (seen[value]) {
+            throw std::runtime_error("Invalid Rotor mapping: Duplicate output value: " + std::to_string(value));
+        }
+        seen[value] = true;
+        auto newCol = value;
+        setTransformValue(1, /* col = */ newCol, /* value = */ newVal++);  // Initialize reverse mapping
+    });
+
+    auto missing_it = std::find(seen.begin(), seen.end(), false);
+    if (missing_it != seen.end()) {
+        throw std::runtime_error("Invalid Rotor mapping: Not a bijection. Missing output: " +
+                                 std::to_string(std::distance(seen.begin(), missing_it)));
     }
 }
 
