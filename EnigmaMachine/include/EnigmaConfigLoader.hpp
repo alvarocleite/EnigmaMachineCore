@@ -14,10 +14,23 @@
 namespace fs = std::filesystem;
 class EnigmaConfigLoader {
 public:
+    /**
+     * @brief Strongly typed wrapper for file names.
+     * Used to distinguish between general file names and base asset directories.
+     * @note This helps prevent accidental mix-ups between different types of paths.
+     * @see AssetPath
+     */
     struct FileName : public fs::path {
         explicit FileName(fs::path path) : fs::path(std::move(path)) {}
     };
 
+    /**
+     * @brief Strongly typed wrapper for asset paths.
+     * Used to distinguish between general file names and base asset directories.
+     * @note This helps prevent accidental mix-ups between different types of paths.
+     * @see FileName
+     * @note Defaults to an empty path if not provided.
+     */
     struct AssetPath : public fs::path {
         explicit AssetPath(fs::path path) : fs::path(std::move(path)) {}
         explicit AssetPath() : fs::path("") {}
