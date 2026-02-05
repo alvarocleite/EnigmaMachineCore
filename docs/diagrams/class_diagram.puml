@@ -119,7 +119,7 @@ class Rotor {
     - notchPosition : int
     - rotorRotationCount : int
     - initReverseTransformLUT() : void
-    - isNotchPosition(position: int) : bool
+    + isNotchPosition(position: int) : bool
     + Rotor(config: RotorConfig)
     + ~Rotor()
     + transform(position: int, reverse: bool) : int
