@@ -34,14 +34,6 @@ private:
      */
     int initRotorPosition(int offset = 0);
 
-    /**
-     * @brief Checks if the given position is the notch position.
-     *
-     * @param position The position to check.
-     * @return true if the position is the notch position, false otherwise.
-     */
-    inline bool isNotchPosition(int position) const;
-
 public:
     /**
      * @brief Constructor for the Rotor class.
@@ -83,4 +75,12 @@ public:
      * @return int The current position (0-25).
      */
     int getPosition() const override;
+
+    /**
+     * @brief Checks if the given position is the notch position.
+     *
+     * @param position The position to check.
+     * @return true if the position is the notch position, false otherwise.
+     */
+    bool isNotchPosition(int position);
 };

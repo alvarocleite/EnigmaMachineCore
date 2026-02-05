@@ -11,27 +11,27 @@ title Rotor State Machine (Stepping Logic)
 [*] --> Idle
 
 state Idle {
-    note "Waiting for Signal" as N1
+    note "Waiting for Input Signal" as N1
 }
 
 state "Check Position" as CheckPos {
-    note "Is current position == Notch?" as N2
+    note "Check notch state BEFORE stepping\natNotch[] precomputed\nLeftmost rotor excluded" as N2
 }
 
 state "Engage Notch" as Notch {
-    note "Trigger next rotor's rotation" as N3
+    note "Carry: atNotch[i-1]\nDouble-step: atNotch[i] AND not leftmost" as N3
 }
 
 state "Rotate" as Rotate {
-    note "Increment Position (Mod 26)" as N4
+    note "Rotate rotor\nIncrement position (mod 26)" as N4
 }
 
 Idle --> CheckPos : Input Signal (Before Encrypting)
 
-CheckPos --> Rotate : Position != Notch
-CheckPos --> Notch : Position == Notch
+CheckPos --> Rotate : Rightmost rotor\n(always steps)
+CheckPos --> Notch : Carry or Double-step condition met
 
-Notch --> Rotate : Trigger Sent
-Rotate --> Idle : Update Complete
+Notch --> Rotate : Trigger rotation
+Rotate --> Idle : All rotors updated\nObservers notified
 
 @enduml

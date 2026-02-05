@@ -109,26 +109,43 @@ int RotorBox::keyTransform(int input) {
 }
 
 /**
- * @details Implements odometer-style stepping logic.
- * The right-most rotor (index 0) always rotates.
- * Subsequent rotors rotate only if the preceding rotor hits its notch.
- *
- * @internal This is a simplified linear stepping. Real Enigma "double stepping"
- * is not implemented here to favor modularity over exact historical fidelity in this version.
+ * @details Updates the rotor positions according to Enigma stepping mechanics.
+ * 1. The rightmost rotor always steps.
+ * 2. A rotor steps the next rotor to its left if it is at its notch position.
+ * 3. Double-stepping occurs when a rotor steps due to its own notch position and
+ *   also causes the next rotor to step.
+ * After stepping, observers are notified of the new rotor positions.
  */
 void RotorBox::updateRotors() {
-    int rotorIx = 0;
-    int isNotch = 0;
+    if (nRotorCount < 1) return;
 
-    do {
-        isNotch = transformerVec.at(rotorIx)->rotate();
+    // Storing notch states BEFORE stepping
+    std::vector<bool> atNotch(nRotorCount, false);
+    for (int i = 0; i < nRotorCount; i++) {
+        auto* rotor = static_cast<Rotor*>(transformerVec.at(i).get());
+        int pos = rotor->getPosition();
+        atNotch[i] = rotor->isNotchPosition(pos);
+    }
 
-        // Notify observers
-        int pos = transformerVec.at(rotorIx)->getPosition();
-        for (auto* obs : observers) {
-            obs->onRotorStepped(rotorIx, pos);
+    //  Step rotors according to Enigma mechanics
+
+    // Rightmost rotor always steps
+    transformerVec.at(0)->rotate();
+
+    // Remaining rotors
+    for (int i = 1; i < nRotorCount; i++) {
+        bool carried = atNotch[i - 1];
+        bool doubleStep = (i < nRotorCount - 1) && atNotch[i];
+        if (carried || doubleStep) {
+            transformerVec.at(i)->rotate();
         }
+    }
 
-        rotorIx++;
-    } while (rotorIx < nRotorCount && isNotch == 1);
+    // Notify observers
+    for (int i = 0; i < nRotorCount; i++) {
+        int pos = transformerVec.at(i)->getPosition();
+        for (auto* obs : observers) {
+            obs->onRotorStepped(i, pos);
+        }
+    }
 }
