@@ -24,31 +24,29 @@ PlugBoard::PlugBoard() {
  * @throws std::invalid_argument If a port index is out of range or if there is a mapping conflict.
  */
 PlugBoard::PlugBoard(std::array<PlugBoardPair, PLUGBOARD_MAX_PAIRS> pairs) : PlugBoard() {
-    for (const auto& pair : pairs) {
-        int a = pair.sourcePortIndex;
-        int b = pair.destinationPortIndex;
+    for (const auto& [sourcePortIndex, destinationPortIndex] : pairs) {
 
         // Skip uninitialized/empty pairs
-        if (a == -1 || b == -1) {
+        if (sourcePortIndex == -1 || destinationPortIndex == -1) {
             continue;
         }
 
-        if (a < 0 || a >= TRANSFORMER_SIZE || b < 0 || b >= TRANSFORMER_SIZE) {
-            throw std::invalid_argument("PlugBoard error: Port index out of range (" + std::to_string(a) + ", " +
-                                        std::to_string(b) + ").");
+        if (sourcePortIndex < 0 || sourcePortIndex >= TRANSFORMER_SIZE || destinationPortIndex < 0 || destinationPortIndex >= TRANSFORMER_SIZE) {
+            throw std::invalid_argument("PlugBoard error: Port index out of range (" + std::to_string(sourcePortIndex) + ", " +
+                                        std::to_string(destinationPortIndex) + ").");
         }
 
-        if (a == b) {
+        if (sourcePortIndex == destinationPortIndex) {
             continue;
         }
 
-        if (mapping.at(a) != a || mapping.at(b) != b) {
-            throw std::invalid_argument("PlugBoard error: Conflict for pair (" + std::to_string(a) + ", " +
-                                        std::to_string(b) + "). Port already in use.");
+        if (mapping.at(sourcePortIndex) != sourcePortIndex || mapping.at(destinationPortIndex) != destinationPortIndex) {
+            throw std::invalid_argument("PlugBoard error: Conflict for pair (" + std::to_string(sourcePortIndex) + ", " +
+                                        std::to_string(destinationPortIndex) + "). Port already in use.");
         }
 
-        mapping.at(a) = b;
-        mapping.at(b) = a;
+        mapping.at(sourcePortIndex) = destinationPortIndex;
+        mapping.at(destinationPortIndex) = sourcePortIndex;
     }
 }
 
