@@ -48,7 +48,6 @@ jobs:
 
     - name: Compiler warning summary
       if: matrix.os == 'ubuntu-latest' || (github.ref != 'refs/heads/feature/log-warning-during-build' && github.base_ref != 'development')
-      shell: bash
       run: |
         if [ -f warnings_list.txt ]; then
           COUNT=$(wc -l < warnings_list.txt)
@@ -58,6 +57,13 @@ jobs:
         echo "## Compiler Warnings" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
         echo "⚠️ Total warnings: $COUNT" >> $GITHUB_STEP_SUMMARY
+
+    - name: Upload compiler warnings
+      if: matrix.os == 'ubuntu-latest' || (github.ref != 'refs/heads/feature/log-warning-during-build' && github.base_ref != 'development')
+      uses: actions/upload-artifact@v4
+      with:
+        name: compiler-warnings-${{ matrix.os }}-${{ matrix.build_type }}
+        path: warnings_list.txt
 
     - name: Test
       if: matrix.os == 'ubuntu-latest' || (github.ref != 'refs/heads/feature/log-warning-during-build' && github.base_ref != 'development')
@@ -83,4 +89,3 @@ jobs:
           !${{github.workspace}}/build/**/*.tlog
           !${{github.workspace}}/build/**/*.log
           !${{github.workspace}}/build/build.log.warning_list.txt
-          !${{github.workspace}}/warning_list.txt
