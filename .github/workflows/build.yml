@@ -47,7 +47,7 @@ jobs:
         grep -E "warning:|warning C" build.log > warnings_list.txt || true
 
     - name: Compiler warning summary
-      if: always()
+      if: matrix.os == 'ubuntu-latest' || (github.ref != 'refs/heads/development' && github.base_ref != 'development')
       run: |
         if [ -f warnings_list.txt ]; then
           COUNT=$(wc -l < warnings_list.txt)
@@ -69,13 +69,6 @@ jobs:
       with:
         name: test-results-${{ matrix.os }}-${{ matrix.build_type }}
         path: ${{github.workspace}}/build/test_results.xml
-
-    - name: Upload compiler warnings
-      if: always()
-      uses: actions/upload-artifact@v4
-      with:
-        name: compiler-warnings-${{ matrix.os }}-${{ matrix.build_type }}
-        path: warnings_list.txt
 
     - name: Upload Build Artifacts
       if: (matrix.os == 'ubuntu-latest' || (github.ref != 'refs/heads/development' && github.base_ref != 'development')) && success()
