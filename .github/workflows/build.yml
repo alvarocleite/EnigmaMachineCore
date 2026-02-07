@@ -59,7 +59,7 @@ jobs:
         echo "⚠️ Total warnings: $COUNT" >> $GITHUB_STEP_SUMMARY
 
     - name: Upload compiler warnings
-      if: matrix.os == 'ubuntu-latest' || (github.ref != 'refs/heads/feature/log-warning-during-build' && github.base_ref != 'development')
+      if: (matrix.os == 'ubuntu-latest' || (github.ref != 'refs/heads/feature/log-warning-during-build' && github.base_ref != 'development')) && env.warning_count > 1
       uses: actions/upload-artifact@v4
       with:
         name: compiler-warnings-${{ matrix.os }}-${{ matrix.build_type }}
