@@ -89,4 +89,3 @@ jobs:
           !${{github.workspace}}/build/**/*.obj
           !${{github.workspace}}/build/**/*.tlog
           !${{github.workspace}}/build/**/*.log
-          !${{github.workspace}}/build/build.log.warning_list.txt
