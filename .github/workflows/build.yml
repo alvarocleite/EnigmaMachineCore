@@ -48,6 +48,7 @@ jobs:
 
     - name: Compiler warning summary
       if: matrix.os == 'ubuntu-latest' || (github.ref != 'refs/heads/development' && github.base_ref != 'development')
+      shell: bash
       run: |
         if [ -f warnings_list.txt ]; then
           COUNT=$(wc -l < warnings_list.txt)
