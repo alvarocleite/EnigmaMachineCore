@@ -32,22 +32,23 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-      if: matrix.os == 'ubuntu-latest' || (github.ref != 'refs/heads/feature/log-warning-during-build' && github.base_ref != 'feature/log-warning-during-build')
+      # if: matrix.os == 'ubuntu-latest' || (github.ref != 'refs/heads/feature/log-warning-during-build' && github.base_ref != 'feature/log-warning-during-build')
       with:
         submodules: recursive
 
     - name: Configure CMake
-      if: matrix.os == 'ubuntu-latest' || (github.ref != 'refs/heads/feature/log-warning-during-build' && github.base_ref != 'feature/log-warning-during-build')
+      # if: matrix.os == 'ubuntu-latest' || (github.ref != 'refs/heads/feature/log-warning-during-build' && github.base_ref != 'feature/log-warning-during-build')
       run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.build_type}}
 
     - name: Build
-      if: matrix.os == 'ubuntu-latest' || (github.ref != 'refs/heads/feature/log-warning-during-build' && github.base_ref != 'feature/log-warning-during-build')
+      # if: matrix.os == 'ubuntu-latest' || (github.ref != 'refs/heads/feature/log-warning-during-build' && github.base_ref != 'feature/log-warning-during-build')
+      shell: bash
       run: |
         cmake --build ${{github.workspace}}/build --config ${{matrix.build_type}} 2>&1 | tee build.log
         grep -E "warning:|warning C" build.log > warnings_list.txt || true
 
     - name: Compiler warning summary
-      if: matrix.os == 'ubuntu-latest' || (github.ref != 'refs/heads/feature/log-warning-during-build' && github.base_ref != 'feature/log-warning-during-build')
+      # if: matrix.os == 'ubuntu-latest' || (github.ref != 'refs/heads/feature/log-warning-during-build' && github.base_ref != 'feature/log-warning-during-build')
       shell: bash
       run: |
         if [ -f warnings_list.txt ]; then
@@ -61,33 +62,33 @@ jobs:
         echo "⚠️ Total warnings: $COUNT" >> $GITHUB_STEP_SUMMARY
 
     - name: Upload build log
-      if: matrix.os == 'ubuntu-latest' || (github.ref != 'refs/heads/feature/log-warning-during-build' && github.base_ref != 'feature/log-warning-during-build')
+      # if: matrix.os == 'ubuntu-latest' || (github.ref != 'refs/heads/feature/log-warning-during-build' && github.base_ref != 'feature/log-warning-during-build')
       uses: actions/upload-artifact@v4
       with:
         name: build-log-${{ matrix.os }}-${{ matrix.build_type }}
         path: build.log
 
     - name: Upload compiler warnings
-      if: (matrix.os == 'ubuntu-latest' || (github.ref != 'refs/heads/feature/log-warning-during-build' && github.base_ref != 'feature/log-warning-during-build')) && env.warning_count > 0
+      # if: (matrix.os == 'ubuntu-latest' || (github.ref != 'refs/heads/feature/log-warning-during-build' && github.base_ref != 'feature/log-warning-during-build')) && env.warning_count > 0
       uses: actions/upload-artifact@v4
       with:
         name: compiler-warnings-${{ matrix.os }}-${{ matrix.build_type }}
         path: warnings_list.txt
 
     - name: Test
-      if: matrix.os == 'ubuntu-latest' || (github.ref != 'refs/heads/feature/log-warning-during-build' && github.base_ref != 'feature/log-warning-during-build')
+      # if: matrix.os == 'ubuntu-latest' || (github.ref != 'refs/heads/feature/log-warning-during-build' && github.base_ref != 'feature/log-warning-during-build')
       working-directory: ${{github.workspace}}/build
       run: ctest -C ${{matrix.build_type}} --output-on-failure --output-junit test_results.xml
 
     - name: Upload Test Results
-      if: (matrix.os == 'ubuntu-latest' || (github.ref != 'refs/heads/feature/log-warning-during-build' && github.base_ref != 'feature/log-warning-during-build')) && always()
+      # if: (matrix.os == 'ubuntu-latest' || (github.ref != 'refs/heads/feature/log-warning-during-build' && github.base_ref != 'feature/log-warning-during-build')) && always()
       uses: actions/upload-artifact@v4
       with:
         name: test-results-${{ matrix.os }}-${{ matrix.build_type }}
         path: ${{github.workspace}}/build/test_results.xml
 
     - name: Upload Build Artifacts
-      if: (matrix.os == 'ubuntu-latest' || (github.ref != 'refs/heads/feature/log-warning-during-build' && github.base_ref != 'feature/log-warning-during-build')) && success()
+      # if: (matrix.os == 'ubuntu-latest' || (github.ref != 'refs/heads/feature/log-warning-during-build' && github.base_ref != 'feature/log-warning-during-build')) && success()
       uses: actions/upload-artifact@v4
       with:
         name: build-artifacts-${{ matrix.os }}-${{ matrix.build_type }}
