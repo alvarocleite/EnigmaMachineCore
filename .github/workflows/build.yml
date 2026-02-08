@@ -38,6 +38,7 @@ jobs:
 
     - name: Configure CMake
       # if: matrix.os == 'ubuntu-latest' || (github.ref != 'refs/heads/feature/log-warning-during-build' && github.base_ref != 'feature/log-warning-during-build')
+      shell: bash
       run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.build_type}}
 
     - name: Build
