@@ -57,8 +57,7 @@ void RotorBox::removeObserver(IEnigmaObserver* observer) {
  * must contain exactly nRotorCount rotors followed by one reflector at the end.
  * Memory is managed via std::unique_ptr to ensure proper cleanup.
  */
-void RotorBox::initTransformerVec(int count, const std::vector<RotorConfig>& rotors,
-                                  const ReflectorConfig& reflector) {
+void RotorBox::initTransformerVec(int count, const std::vector<RotorConfig>& rotors, const ReflectorConfig& reflector) {
     transformerVec.clear();
     transformerVec.reserve(count + 1);
 
