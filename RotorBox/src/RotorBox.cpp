@@ -24,21 +24,21 @@ RotorBox::RotorBox() { nRotorCount = 0; }
  * Validates that the number of provided positions matches the rotor count before
  * proceeding with transformer initialization and position setting.
  */
-RotorBox::RotorBox(int nRotorCount, const std::vector<int>& rotorPositions, const std::vector<RotorConfig>& rotors,
+RotorBox::RotorBox(int count, const std::vector<int>& rotorPositions, const std::vector<RotorConfig>& rotors,
                    const ReflectorConfig& reflector) {
-    if (std::cmp_not_equal(nRotorCount, rotorPositions.size())) {
+    if (std::cmp_not_equal(count, rotorPositions.size())) {
         throw std::invalid_argument("Error: Number of rotors and number of rotor positions do not match.");
     }
 
-    this->nRotorCount = nRotorCount;
+    this->nRotorCount = count;
     for (const auto& position : rotorPositions) {
         this->rotorPositions.push_back(position);
     }
 
     // Will throw if initialization fails
-    initTransformerVec(nRotorCount, rotors, reflector);
+    initTransformerVec(count, rotors, reflector);
 
-    for (int i = 0; i < nRotorCount; i++) {
+    for (int i = 0; i < count; i++) {
         transformerVec.at(i)->setPosition(this->rotorPositions.at(i));
     }
 }
@@ -57,13 +57,13 @@ void RotorBox::removeObserver(IEnigmaObserver* observer) {
  * must contain exactly nRotorCount rotors followed by one reflector at the end.
  * Memory is managed via std::unique_ptr to ensure proper cleanup.
  */
-void RotorBox::initTransformerVec(int nRotorCount, const std::vector<RotorConfig>& rotors,
+void RotorBox::initTransformerVec(int count, const std::vector<RotorConfig>& rotors,
                                   const ReflectorConfig& reflector) {
     transformerVec.clear();
-    transformerVec.reserve(nRotorCount + 1);
+    transformerVec.reserve(count + 1);
 
     // Validate input size: n Rotors
-    if (rotors.size() != (size_t)nRotorCount) {
+    if (rotors.size() != (size_t)count) {
         throw std::runtime_error("Error: Mismatch between rotor count and provided configurations.");
     }
 

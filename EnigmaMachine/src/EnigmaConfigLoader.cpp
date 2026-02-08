@@ -37,7 +37,7 @@ void validateTransformerConfig(const toml::value& data, const std::string& expec
 }  // namespace
 
 RotorConfig EnigmaConfigLoader::loadRotor(IAssetProvider& provider, const FileName& fileName) {
-    std::istringstream stream(provider.loadAsset(fileName.native()));
+    std::istringstream stream(provider.loadAsset(fileName.string()));
     // Parse from stream, pass filename for error reporting
     auto rotorData = toml::parse(stream, fileName.string());
     validateTransformerConfig(rotorData, "rotor", fileName.string());
@@ -53,14 +53,14 @@ RotorConfig EnigmaConfigLoader::loadRotor(IAssetProvider& provider, const FileNa
 }
 
 ReflectorConfig EnigmaConfigLoader::loadReflector(IAssetProvider& provider, const FileName& fileName) {
-    std::istringstream stream(provider.loadAsset(fileName.native()));
+    std::istringstream stream(provider.loadAsset(fileName.string()));
     auto reflectorData = toml::parse(stream, fileName.string());
     validateTransformerConfig(reflectorData, "reflector", fileName.string());
 
     ReflectorConfig reflectorConfig;
     reflectorConfig.wiring = toml::find<std::vector<int>>(reflectorData, "reflector", "map");
     if (reflectorConfig.wiring.size() != TRANSFORMER_SIZE) {
-        throw std::runtime_error("Error: Reflector wiring size mismatch in " + std::string(fileName));
+        throw std::runtime_error("Error: Reflector wiring size mismatch in " + fileName.string());
     }
     return reflectorConfig;
 }
@@ -68,7 +68,7 @@ ReflectorConfig EnigmaConfigLoader::loadReflector(IAssetProvider& provider, cons
 EnigmaMachineConfig EnigmaConfigLoader::load(IAssetProvider& provider, const FileName& fileName,
                                              const AssetPath& assetPath) {
     EnigmaMachineConfig config;
-    std::istringstream stream(provider.loadAsset(fileName.native()));
+    std::istringstream stream(provider.loadAsset(fileName.string()));
     auto data = toml::parse(stream, fileName.string());
 
     int rotorCount = toml::find<int>(data, "rotors", "RotorCount");
