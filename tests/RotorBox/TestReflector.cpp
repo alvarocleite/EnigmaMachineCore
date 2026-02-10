@@ -4,15 +4,16 @@
 #include "FileAssetProvider.hpp"
 #include "Reflector.hpp"
 
+using FileName = EnigmaConfigLoader::FileName;
 class ReflectorTests : public ::testing::Test {
 protected:
     // Path to the asset file copied by CMake
-    const std::string configPath = "assets/Reflector.toml";
+    static constexpr std::string_view configPath = "assets/Reflector.toml";
     ReflectorConfig config;
 
     void SetUp() override {
         FileAssetProvider provider;
-        config = EnigmaConfigLoader::loadReflector(provider, configPath);
+        config = EnigmaConfigLoader::loadReflector(provider, FileName(configPath));
     }
 };
 

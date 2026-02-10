@@ -7,17 +7,8 @@
 
 #include <array>
 
+#include "PlugBoardPair.hpp"
 #include "config.hpp"
-
-/**
- * @brief Represents a pair of characters connected on the plugboard.
- */
-struct Pair_t {
-    /** @brief The first port index (0 - (TRANSFORMER_SIZE - 1)). */
-    int a;
-    /** @brief The second port index (0 - (TRANSFORMER_SIZE - 1)). */
-    int b;
-};
 
 class PlugBoard {
 private:
@@ -38,7 +29,7 @@ public:
      * @param pairs An array of pairs to initialize the plugboard with.
      * @throws std::invalid_argument If a port index is out of range or if there is a mapping conflict.
      */
-    PlugBoard(std::array<Pair_t, PLUGBOARD_MAX_PAIRS> pairs);
+    PlugBoard(std::array<PlugBoardPair, PLUGBOARD_MAX_PAIRS> pairs);
     ~PlugBoard() = default;
 
     /**

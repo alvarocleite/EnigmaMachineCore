@@ -7,11 +7,13 @@
 #include "RotorBox.hpp"
 #include "config.hpp"
 
+namespace fs = std::filesystem;
+using FileName = EnigmaConfigLoader::FileName;
 class RotorBoxTests : public ::testing::Test {
 protected:
-    std::vector<std::string> rotorFiles = {
-        std::string(assetsDir) + "Rotor1.toml", std::string(assetsDir) + "Rotor2.toml",
-        std::string(assetsDir) + "Rotor3.toml", std::string(assetsDir) + "Reflector.toml"};
+    std::vector<FileName> rotorFiles = {
+        FileName(fs::path(assetsDir) / "Rotor1.toml"), FileName(fs::path(assetsDir) / "Rotor2.toml"),
+        FileName(fs::path(assetsDir) / "Rotor3.toml"), FileName(fs::path(assetsDir) / "Reflector.toml")};
 
     std::vector<RotorConfig> rotors;
     ReflectorConfig reflector;
@@ -22,6 +24,16 @@ protected:
         rotors.push_back(EnigmaConfigLoader::loadRotor(provider, rotorFiles[1]));
         rotors.push_back(EnigmaConfigLoader::loadRotor(provider, rotorFiles[2]));
         reflector = EnigmaConfigLoader::loadReflector(provider, rotorFiles[3]);
+    }
+};
+
+class EnigmaObserverTest : public IEnigmaObserver {
+public:
+    std::vector<int> pos;
+    EnigmaObserverTest(int rotorCount) { pos.resize(rotorCount, 0); }
+    void onRotorStepped(int rotorIndex, int position) override { pos[rotorIndex] = position; }
+    void onCharEncrypted(char input, char output) override {
+        // Not used in this test however needs to override as IEnigmaObserver is pure virtual
     }
 };
 
@@ -97,4 +109,40 @@ TEST_F(RotorBoxTests, MultiStepCarry) {
 
     int out = rb.keyTransform(0);
     EXPECT_GE(out, 0);
+}
+
+TEST_F(RotorBoxTests, DoubleSteppingMechanism_1) {
+    std::vector<int> startPos = {0, 1, 0};
+    RotorBox rb(3, startPos, rotors, reflector);
+    EnigmaObserverTest observer(3);
+    rb.registerObserver(&observer);
+
+    rb.keyTransform(0);
+    EXPECT_EQ(observer.pos[0], 1);
+    EXPECT_EQ(observer.pos[1], 2);
+    EXPECT_EQ(observer.pos[2], 0);
+}
+
+TEST_F(RotorBoxTests, DoubleSteppingMechanism_2) {
+    std::vector<int> startPos = {0, 0, 0};
+    RotorBox rb(3, startPos, rotors, reflector);
+    EnigmaObserverTest observer(3);
+    rb.registerObserver(&observer);
+
+    rb.keyTransform(0);
+    EXPECT_EQ(observer.pos[0], 1);
+    EXPECT_EQ(observer.pos[1], 1);
+    EXPECT_EQ(observer.pos[2], 1);
+}
+
+TEST_F(RotorBoxTests, DoubleSteppingMechanism_3) {
+    std::vector<int> startPos = {1, 0, 2};
+    RotorBox rb(3, startPos, rotors, reflector);
+    EnigmaObserverTest observer(3);
+    rb.registerObserver(&observer);
+
+    rb.keyTransform(0);
+    EXPECT_EQ(observer.pos[0], 2);
+    EXPECT_EQ(observer.pos[1], 1);
+    EXPECT_EQ(observer.pos[2], 3);
 }

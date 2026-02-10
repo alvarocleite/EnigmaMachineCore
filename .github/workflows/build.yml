@@ -42,7 +42,38 @@ jobs:
 
     - name: Build
       if: matrix.os == 'ubuntu-latest' || (github.ref != 'refs/heads/development' && github.base_ref != 'development')
-      run: cmake --build ${{github.workspace}}/build --config ${{matrix.build_type}}
+      shell: bash
+      run: |
+        cmake --build "$GITHUB_WORKSPACE/build" --config ${{matrix.build_type}} 2>&1 | tee build.log
+        grep -E "warning:|warning C" build.log > warnings_list.txt || true
+
+    - name: Compiler warning summary
+      if: matrix.os == 'ubuntu-latest' || (github.ref != 'refs/heads/development' && github.base_ref != 'development')
+      shell: bash
+      run: |
+        if [ -f warnings_list.txt ]; then
+          COUNT=$(wc -l < warnings_list.txt)
+        else
+          COUNT=0
+        fi
+        echo "warning_count=$COUNT" >> $GITHUB_ENV
+        echo "## Compiler Warnings" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "⚠️ Total warnings: $COUNT" >> $GITHUB_STEP_SUMMARY
+
+    - name: Upload build log
+      if: matrix.os == 'ubuntu-latest' || (github.ref != 'refs/heads/development' && github.base_ref != 'development')
+      uses: actions/upload-artifact@v4
+      with:
+        name: build-log-${{ matrix.os }}-${{ matrix.build_type }}
+        path: build.log
+
+    - name: Upload compiler warnings
+      if: (matrix.os == 'ubuntu-latest' || (github.ref != 'refs/heads/development' && github.base_ref != 'development')) && env.warning_count > 0
+      uses: actions/upload-artifact@v4
+      with:
+        name: compiler-warnings-${{ matrix.os }}-${{ matrix.build_type }}
+        path: warnings_list.txt
 
     - name: Test
       if: matrix.os == 'ubuntu-latest' || (github.ref != 'refs/heads/development' && github.base_ref != 'development')

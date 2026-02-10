@@ -27,11 +27,11 @@ private:
     /**
      * @brief Initializes the transformer vector with rotors and a reflector.
      *
-     * @param nRotorCount The number of rotors to be initialized.
+     * @param count The number of rotors to be initialized.
      * @param rotors A vector containing the configuration for each rotor.
      * @param reflector Configuration for the reflector.
      */
-    void initTransformerVec(int nRotorCount, const std::vector<RotorConfig>& rotors, const ReflectorConfig& reflector);
+    void initTransformerVec(int count, const std::vector<RotorConfig>& rotors, const ReflectorConfig& reflector);
 
     /**
      * @brief Updates the positions of the rotors.
@@ -51,14 +51,14 @@ public:
      * @brief Constructor for the RotorBox class.
      * Initializes the rotor box with a specified number of rotors, their positions, and configurations.
      *
-     * @param nRotorCount The number of rotors in the rotor box.
+     * @param count The number of rotors in the rotor box.
      * @param rotorPositions A vector containing the initial positions of each rotor.
      * @param rotors A vector containing the configuration for each rotor.
      * @param reflector Configuration for the reflector.
      * @throws std::invalid_argument If the number of rotors does not match the number of positions.
      * @throws std::runtime_error If initialization of transformers fails.
      */
-    RotorBox(int nRotorCount, const std::vector<int>& rotorPositions, const std::vector<RotorConfig>& rotors,
+    RotorBox(int count, const std::vector<int>& rotorPositions, const std::vector<RotorConfig>& rotors,
              const ReflectorConfig& reflector);
 
     // Disable Copy
@@ -87,7 +87,7 @@ public:
      * @brief Prints the types of transformers in the transformer vector.
      * This function iterates through the transformer vector and prints the type of each transformer.
      */
-    void printTransformerVec();
+    void printTransformerVec() const;
 
     /**
      * @brief Transforms the input key through the rotor box.
