@@ -1,75 +1,103 @@
 # EnigmaMachineCore Roadmap
 
-This roadmap outlines the evolution of `EnigmaMachineCore` from a C++ library into a universal cryptographic backend capable of running on everything from high-end Desktop environments to constrained RTOS (Zephyr) and Web (WASM).
+This roadmap outlines the evolution of `EnigmaMachineCore` from a C++ library into a universal cryptographic backend capable of running on everything from high-end Desktop environments to constrained RTOS (Zephyr), Mobile (Android), and Web (WASM).
 
-## Phase 1: Core Architectural Foundation (The "Universal" Refactor)
-**Goal:** Decouple the engine from the filesystem and the C++ Exception runtime.
+## Vision
+To provide a high-performance, zero-overhead, and platform-agnostic Enigma cipher core that serves as a reference implementation for modern C++20 cryptographic engineering.
 
-- [ ] **CMake Modernization:**
+## Current State (v0.x)
+- [x] Core cryptographic logic (Rotors, Plugboard, Reflector).
+- [x] Modern C++20 architecture with Dependency Injection (DI).
+- [x] Basic TOML configuration support via `toml11`.
+- [x] Automated CI/CD for Linux, Windows, and macOS.
+
+---
+
+## Phase 1: Foundation & Performance Baseline (v1.0)
+**Goal:** Stabilize the API and establish performance/memory metrics.
+
+- [ ] **Performance Benchmarking:**
+    - Integrate `Google Benchmark` to measure encryption throughput (chars/sec).
+    - Establish a baseline for latency and memory usage.
+- [ ] **CMake Modernization & Distribution:**
     - Support `BUILD_SHARED_LIBS` for Desktop/Android integration.
-    - Implement `install()` rules for headers and binaries.
-    - Export `EnigmaMachineCoreConfig.cmake` for `find_package` support.
-- [ ] **Logging Abstraction (`ILogger`):**
-    - Remove hardcoded `std::cout`/`std::cerr`.
-    - Create a log-sink interface to support Android Logcat and Embedded UART.
-- [ ] **POD Configuration Structs:**
-    - Define `EnigmaMachineData` (Plain Old Data) structs.
-    - Modify `EnigmaMachine` to initialize from these structs rather than loading files directly.
-- [ ] **Error Handling Refactor:**
-    - Transition from `throw` to `Result<T>` (using `std::expected` or a lightweight polyfill).
-    - Enable `-fno-exceptions` support for embedded targets.
+    - Implement `install()` rules and export `EnigmaMachineCoreConfig.cmake` for `find_package`.
+- [ ] **Memory Profiling:**
+    - Use `Valgrind`/`Sanitizers` to ensure zero leaks in the core library.
+- [ ] **Architecture Decision Records (ADRs):**
+    - Document core design choices (e.g., Signal path, DI strategy) in `docs/adr/`.
 
-## Phase 2: Configuration & Asset Evolution
-**Goal:** Implement the "Split-Provider Pattern" to handle different resource environments.
+## Phase 2: Universal Portability & PAL (Platform Abstraction Layer)
+**Goal:** Decouple from the OS and C++ Runtime (Exceptions/Filesystem).
 
-- [ ] **Split-Provider Implementation:**
-    - **Rich Provider:** Keep `toml11` as an optional module for CLI, Desktop, and Android.
-    - **Memory Provider:** Create a provider for WASM/Python where assets are pre-loaded in memory.
-    - **Static Provider:** Support compile-time configuration (Code Gen) for Zephyr.
-- [ ] **Polymorphic Configurator (`IConfigurator`):**
-    - Introduce an interface to abstract the configuration loading process (TOML, JSON, Static).
-    - Implement `TOMLConfigurator` as the default runtime loader.
-    - Implement `StaticConfigurator` for unit tests and memory-constrained targets.
-- [ ] **Path Independence:**
-    - Ensure the `ConfigLoader` handles relative asset resolution (e.g., Rotor files inside Machine config) via the `IAssetProvider` abstraction.
+- [ ] **Zero-Overhead Refactor (Static DI):**
+    - Move from virtual interfaces to **C++20 Concepts and Templates** in the hot signal path to eliminate vtable overhead.
+- [ ] **Error Handling & Exception-Free Core:**
+    - Transition from `throw` to `std::expected` (or `tl::expected`) for all public APIs.
+    - Enable `-fno-exceptions` support for embedded and WASM targets.
+- [ ] **Logging & IO Abstraction (`ILogger` / `PAL`):**
+    - Remove `std::cout`/`std::cerr`.
+    - Implement a `PAL` (Platform Abstraction Layer) for Logging (Logcat, UART, Console).
+- [ ] **POD Configuration & No-std Prep:**
+    - Define `EnigmaMachineData` structs for direct initialization.
+    - Abstract `std::iostream` and `std::filesystem` out of the Core logic.
 
-## Phase 3: Desktop, Mobile & Web Integration
-**Goal:** Expose the core to high-level languages and web environments.
+## Phase 3: Interoperability & Ecosystem Integration
+**Goal:** Expose the core to all major application environments via a stable ABI.
 
-- [ ] **Python Bindings:**
-    - Implement a `pybind11` wrapper to allow `import enigma_core`.
-- [ ] **WebAssembly (WASM):**
-    - Configure Emscripten build pipeline.
-    - Use `Embind` to expose the machine to JavaScript/TypeScript.
-- [ ] **Android / Kotlin:**
-    - Develop a JNI (Java Native Interface) bridge.
-    - Implement `AndroidAssetProvider` using NDK `AAssetManager`.
-- [ ] **Desktop Distribution:**
-    - Integrate `CPack` for generating `.deb`, `.msi`, and `.dmg` installers.
+- [ ] **Stable C-API (`enigma_core_c.h`):**
+    - Define a pure C interface to ensure compatibility with Rust, Swift, and Go.
+- [ ] **Android & WASM Track:**
+    - **Android:** JNI/NDK bridge and `AAR` packaging.
+    - **WASM:** `Emscripten` build pipeline with `Embind` for JS/TS bindings.
+- [ ] **High-Level Bindings:**
+    - Implement `pybind11` for Python support.
+- [ ] **Cross-Compilation CI:**
+    - Add GitHub Actions for `wasm32-unknown-unknown` and `arm-none-eabi` (Cortex-M).
 
-## Phase 4: Constrained Embedded Support (Zephyr/Yocto)
-**Goal:** Zero-overhead execution on MCUs.
+## Phase 4: Constrained Embedded & Hardening
+**Goal:** Hardware-ready execution for Zephyr.
 
-- [ ] **Zephyr Module Integration:**
+- [ ] **Zephyr RTOS Module:**
     - Add `zephyr/module.yml` and `Kconfig` support.
 - [ ] **Build-Time Code Generation:**
-    - Create a Python script to convert `.toml` configs into `const` C++ structs.
-    - Allow Zephyr targets to link without `toml11` or the STL `Loader`.
-- [ ] **Binary Serialization:**
-    - Investigate `FlatBuffers` (no-alloc mode) for zero-copy configuration loading.
+    - Python script to convert `.toml` configs into `const` C++ structs (Flash-friendly).
+- [ ] **Security & Hardening:**
+    - Integrate `LLVM libFuzzer` for the signal path and config loaders.
+    - Investigate constant-time operations for sensitive logic.
+- [ ] **Zero-Allocation Mode:**
+    - Ensure the core can run without `malloc`/`new` after initialization.
+
+## Phase 5: Industrial Linux & System Integration (Yocto)
+**Goal:** Provide first-class support for Embedded Linux distributions.
+
+- [ ] **BitBake Recipe Development:**
+    - Create a `meta-enigma` layer with recipes for the Core library and CLI tool.
+- [ ] **Package Configuration (pkg-config):**
+    - Generate `.pc` files via CMake to support standard Linux linking conventions.
+- [ ] **Runtime Optimization:**
+    - Validate performance and thermal impact on low-power ARM SoCs (e.g., i.MX6/8, Raspberry Pi).
+- [ ] **System-Wide Installation:**
+    - Ensure robust support for `/usr/lib` and `/usr/include` standard paths.
+
+---
 
 ## Target Matrix & Status
 
 | Target | Build System | Config Strategy | Status |
 | :--- | :--- | :--- | :--- |
 | **CLI (Linux/Win/Mac)** | CMake | TOML (Runtime) | ✅ Basic |
-| **Desktop (C++/Qt)** | CMake | TOML (Runtime) | 🏗️ Planned |
-| **Python** | pybind11 | Memory/String | 🏗️ Planned |
 | **Web (WASM)** | Emscripten | Memory/Embedded | 🏗️ Planned |
-| **Android** | Gradle/JNI | AAssetManager | 🏗️ Planned |
-| **Yocto (Linux)** | BitBake | TOML (Runtime) | 🏗️ Planned |
-| **Zephyr (RTOS)** | Zephyr/West | Static (Compile-time) | 🏗️ Planned |
+| **Android (Kotlin/JNI)**| Gradle/CMake | AAssetManager | 🏗️ Planned |
+| **Embedded (Zephyr)** | West/CMake | Static (Flash) | 🏗️ Planned |
+| **Industrial Linux (Yocto)** | BitBake/CMake | TOML (Runtime) | 🏗️ Planned |
+| **Python** | pybind11 | Memory/String | 🏗️ Planned |
 
-## Future Considerations
-- **Fuzz Testing:** Integrate LLVM `libFuzzer` for the TOML parser and signal path.
-- **Performance:** Optimize the signal path using `std::span` and SIMD where applicable.
+## Success Metrics
+- **Portability:** Core logic compiles with `-fno-exceptions` and `-fno-rtti`.
+- **Performance:** Zero performance regression between vtable-based DI and Template-based DI.
+- **Size:** Embedded binary footprint (Core only) < 50KB.
+
+## Non-Goals
+- We will NOT implement UI components (GUI/Mobile Screens) in this repository.
+- We will NOT support legacy C++ standards (< C++20).
