@@ -69,6 +69,10 @@ make doxygen     # Generate only the documentation
 
 HTML documentation is generated in: `docs/doxygen-gen-files/html/index.html`
 
+## Roadmap
+
+For a detailed view of our future plans, architectural evolution, and platform support strategy (including WASM, Android, and Embedded targets), please refer to our [Project Roadmap](roadmap.md).
+
 ## Development
 
 ### Code Formatting
