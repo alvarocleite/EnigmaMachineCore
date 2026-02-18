@@ -38,6 +38,13 @@ tests/
 
 ## How to Run Tests
 
+### Configuration
+By default, tests are **disabled** to maintain fast build times for the core application. You must explicitly enable them during the CMake configuration step:
+
+```bash
+cmake -DENIGMA_BUILD_TESTS=ON -S . -B build
+```
+
 ### Command Line (CLI)
 Navigate to your build directory (usually `build/debug`) and use `ctest`:
 
