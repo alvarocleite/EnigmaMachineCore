@@ -38,7 +38,7 @@ jobs:
 
       - name: Configure CMake
         # We need to configure the project to generate the 'doxygen' target
-        run: cmake -B build
+        run: cmake -B build -DENIGMA_BUILD_DOCS=ON
 
       - name: Build Documentation
         # This target depends on 'generate_diagrams', so it will:

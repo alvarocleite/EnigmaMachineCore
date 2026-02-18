@@ -34,6 +34,8 @@
 # Make and CMake files
 build/*
 !build/
+build_bench/*
+!build_bench/
 
 # Documentation
 docs/doxygen-gen-files/
