@@ -89,6 +89,8 @@ HTML documentation is generated in: `docs/doxygen-gen-files/html/index.html`
 
 For a detailed view of our future plans, architectural evolution, and platform support strategy (including WASM, Android, and Embedded targets), please refer to our [Project Roadmap](roadmap.md).
 
+Significant design choices and their rationales are documented in our [Architectural Decision Records (ADRs)](docs/adr/ADRs.md).
+
 ## Development
 
 ### Code Formatting
