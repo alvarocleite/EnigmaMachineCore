@@ -1,5 +1,9 @@
 # Architecture & Design
 
+This document outlines the architectural design and key decisions behind the **EnigmaMachineCore** project. It provides an overview of the system's structure, components, and interactions, as well as the rationale behind major design choices.
+
+Significant architectural decisions, including their context, rationale, and consequences, are tracked in our [ADRs (Architectural Decision Records)](adr/ADRs.md).
+
 ## 1. System Overview
 
 The **EnigmaMachineCore** is a C++20 implementation of the Enigma cipher. It separates the cryptographic "Business Logic" from the application layer and the physical storage layer.

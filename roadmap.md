@@ -24,8 +24,8 @@ To provide a high-performance, zero-overhead, and platform-agnostic Enigma ciphe
     - Implement `install()` rules and export `EnigmaMachineCoreConfig.cmake` for `find_package`.
 - [ ] **Memory Profiling:**
     - Use `Valgrind`/`Sanitizers` to ensure zero leaks in the core library.
-- [ ] **Architecture Decision Records (ADRs):**
-    - Document core design choices (e.g., Signal path, DI strategy) in `docs/adr/`.
+- [x] **Architecture Decision Records (ADRs):**
+    - Document core design choices (e.g., Signal path, DI strategy) in [docs/adr/ADRs.md](docs/adr/ADRs.md).
 
 ## Phase 2: Universal Portability & PAL (Platform Abstraction Layer)
 **Goal:** Decouple from the OS and C++ Runtime (Exceptions/Filesystem).
