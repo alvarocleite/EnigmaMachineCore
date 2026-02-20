@@ -84,17 +84,24 @@ The following reference metrics were established for the **v1.0** release to gui
 | **Rotor Transform Latency** | ~5.5 ns | Average time to process a character through a single rotor. |
 | **Rotor Rotate Latency** | ~3.6 ns | Overhead of the mechanical stepping logic per rotor. |
 
-### Standard Reference Environment
-*   **OS:** Linux (Arch Linux / Fedora)
-*   **CPU:** 8 x 4500 MHz (Intel/AMD)
-*   **Compiler:** GCC 15.2.1 (-O3)
-*   **Baseline File:** `docs/benchmarks/baseline_v1.0.json`
+### Standard Reference Environment (SRE)
+Two official baselines are maintained to ensure accuracy across different execution contexts:
+
+1.  **Workstation Baseline (`docs/benchmarks/baseline_v1.0.json`):**
+    *   **Purpose:** High-performance reference for absolute throughput goals.
+    *   **OS/CPU:** Linux / 8 x 4500 MHz (Intel/AMD)
+    *   **Compiler:** GCC 15.2.1 (-O3)
+
+2.  **CI Baseline (`docs/benchmarks/baseline_ci_v1.0.json`):**
+    *   **Purpose:** Regression tracking for GitHub Actions.
+    *   **Environment:** Ubuntu Latest (GitHub Hosted Runner)
+    *   **Note:** This file is used by the automated CI workflow to avoid false positives caused by hardware differences between CI runners and local workstations.
 
 ### CI/CD
-Benchmarks are automatically executed on every Pull Request via GitHub Actions. Results are uploaded as artifacts for performance regression analysis.
+Benchmarks are automatically executed on every Pull Request via GitHub Actions. The current performance is compared against the **CI Baseline** (`baseline_ci_v1.0.json`). Results are uploaded as artifacts for manual review if the automated check fails.
 
 ### Local Development Workflow
-When optimizing the "hot path" of the engine (e.g., `Rotor::transform`), avoid comparing your local results directly against the repository's `baseline_v1.0.json`, as differences in hardware (CPU frequency, cache, etc.) will produce misleading results.
+When optimizing the "hot path" of the engine (e.g., `Rotor::transform`), avoid comparing your local results directly against the repository's baseline files, as differences in hardware (CPU frequency, cache, etc.) will produce misleading results.
 
 Instead, follow this "A/B" workflow on your local machine:
 
@@ -112,6 +119,6 @@ Instead, follow this "A/B" workflow on your local machine:
     ```
 
 ### Performance Regression Threshold
-The CI environment enforces a **5% regression threshold**. 
+The CI environment enforces a **5% regression threshold** against the **CI Baseline**. 
 *   **Why 5%?** Benchmarking on shared CI runners (like GitHub Actions) is subject to "system noise" (CPU scaling, OS interrupts). A 5% buffer ensures that we only fail for genuine algorithmic regressions, not minor hardware fluctuations.
-*   **Standard Reference Environment (SRE):** The repository's `baseline_v1.0.json` is a snapshot of the engine's performance on a controlled environment. If a PR significantly alters the engine's architecture, this baseline may need to be officially updated by a maintainer.
+*   **Baseline Management:** If a PR significantly alters the engine's architecture in a way that intentionally changes the performance profile, the official CI baseline may need to be updated.

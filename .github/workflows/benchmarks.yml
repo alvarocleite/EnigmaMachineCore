@@ -35,7 +35,7 @@ jobs:
     - name: Performance Regression Check
       run: |
         python3 scripts/compare_benchmarks.py \
-          docs/benchmarks/baseline_v1.0.json \
+          docs/benchmarks/baseline_ci_v1.0.json \
           build/benchmarks/current_results.json
 
     - name: Upload Benchmark Results
