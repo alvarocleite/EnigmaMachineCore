@@ -30,8 +30,7 @@ jobs:
     - name: Run Benchmark
       working-directory: ${{github.workspace}}/build/benchmarks
       run: |
-        ./EnigmaBenchmark --benchmark_format=json --benchmark_out=current_results.json
-        ./EnigmaBenchmark --benchmark_format=console
+        ./EnigmaBenchmark --benchmark_format=console --benchmark_out=current_results.json --benchmark_out_format=json
 
     - name: Performance Regression Check
       run: |
