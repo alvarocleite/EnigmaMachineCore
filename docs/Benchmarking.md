@@ -71,8 +71,47 @@ Google Benchmark supports several useful flags:
 
 ## Integration
 
+### Performance & Memory Baselines
+
+The following reference metrics were established for the **v1.0** release to guide optimization and prevent regressions:
+
+| Metric | Reference Value (v1.0) | Description |
+| :--- | :--- | :--- |
+| **Initialization Peak Heap** | ~27.7 KB | Total heap memory used during configuration loading and machine setup. |
+| **Hot-Path Allocations** | 1 per character | Number of dynamic memory allocations during `keyTransform`. |
+| **Peak Stack Depth** | ~450 Bytes | Maximum stack space used by the transformation call chain. |
+| **Throughput (3 Rotors)** | ~7.7 MiB/s | Average encryption speed for 128 KB messages (Release Build). |
+| **Rotor Transform Latency** | ~5.5 ns | Average time to process a character through a single rotor. |
+| **Rotor Rotate Latency** | ~3.6 ns | Overhead of the mechanical stepping logic per rotor. |
+
+### Standard Reference Environment
+*   **OS:** Linux (Arch Linux / Fedora)
+*   **CPU:** 8 x 4500 MHz (Intel/AMD)
+*   **Compiler:** GCC 15.2.1 (-O3)
+*   **Baseline File:** `docs/benchmarks/baseline_v1.0.json`
+
 ### CI/CD
 Benchmarks are automatically executed on every Pull Request via GitHub Actions. Results are uploaded as artifacts for performance regression analysis.
 
-### Local Development
-When optimizing the "hot path" of the engine (e.g., `Rotor::transform`), use the `BM_Rotor_Transform` benchmark to verify that your changes provide a measurable speedup without regressing other components.
+### Local Development Workflow
+When optimizing the "hot path" of the engine (e.g., `Rotor::transform`), avoid comparing your local results directly against the repository's `baseline_v1.0.json`, as differences in hardware (CPU frequency, cache, etc.) will produce misleading results.
+
+Instead, follow this "A/B" workflow on your local machine:
+
+1.  **Generate a Local Baseline:** Checkout the `main` branch, build in Release, and save results:
+    ```bash
+    ./EnigmaBenchmark --benchmark_out=base.json --benchmark_out_format=json
+    ```
+2.  **Benchmark your Changes:** Checkout your feature branch and repeat:
+    ```bash
+    ./EnigmaBenchmark --benchmark_out=new.json --benchmark_out_format=json
+    ```
+3.  **Compare Locally:** Use the provided script to see the relative delta:
+    ```bash
+    python3 scripts/compare_benchmarks.py base.json new.json
+    ```
+
+### Performance Regression Threshold
+The CI environment enforces a **5% regression threshold**. 
+*   **Why 5%?** Benchmarking on shared CI runners (like GitHub Actions) is subject to "system noise" (CPU scaling, OS interrupts). A 5% buffer ensures that we only fail for genuine algorithmic regressions, not minor hardware fluctuations.
+*   **Standard Reference Environment (SRE):** The repository's `baseline_v1.0.json` is a snapshot of the engine's performance on a controlled environment. If a PR significantly alters the engine's architecture, this baseline may need to be officially updated by a maintainer.

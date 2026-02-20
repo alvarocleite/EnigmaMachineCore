@@ -29,10 +29,18 @@ jobs:
 
     - name: Run Benchmark
       working-directory: ${{github.workspace}}/build/benchmarks
-      run: ./EnigmaBenchmark --benchmark_format=console | tee benchmark_results.txt
+      run: |
+        ./EnigmaBenchmark --benchmark_format=json --benchmark_out=current_results.json
+        ./EnigmaBenchmark --benchmark_format=console
+
+    - name: Performance Regression Check
+      run: |
+        python3 scripts/compare_benchmarks.py \
+          docs/benchmarks/baseline_v1.0.json \
+          build/benchmarks/current_results.json
 
     - name: Upload Benchmark Results
       uses: actions/upload-artifact@v4
       with:
         name: benchmark-results
-        path: ${{github.workspace}}/build/benchmarks/benchmark_results.txt
+        path: ${{github.workspace}}/build/benchmarks/current_results.json
