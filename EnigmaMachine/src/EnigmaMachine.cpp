@@ -11,6 +11,8 @@
 #include "EnigmaConfigLoader.hpp"
 #include "EnigmaMachine.hpp"
 #include "FileAssetProvider.hpp"
+#include "PlugBoard.hpp"
+#include "RotorBox.hpp"
 #include "config.hpp"
 
 /**
@@ -29,65 +31,23 @@ EnigmaMachine::EnigmaMachine() {
         rotors.push_back(EnigmaConfigLoader::loadRotor(provider, FileName(assetsDirectory / defaultRotor2File)));
         rotors.push_back(EnigmaConfigLoader::loadRotor(provider, FileName(assetsDirectory / defaultRotor3File)));
         auto reflector = EnigmaConfigLoader::loadReflector(provider, FileName(assetsDirectory / defaultReflectorFile));
-        rotorBox = RotorBox(3, {0, 0, 0}, rotors, reflector);
-        rotorBox.registerObserver(this);
+        
+        rotorBox = std::make_unique<RotorBox>(3, std::vector<int>{0, 0, 0}, rotors, reflector);
+        plugBoard = std::make_unique<PlugBoard>();
+        rotorBox->registerObserver(this);
     } catch (const std::exception& e) {
         std::cerr << "Failed to initialize default EnigmaMachine: " << e.what() << "\n";
         throw;
     }
 }
 
-/**
- * @details Validates that the number of transformer files matches `nRotorCount + 1` (for the reflector).
- * Loads each rotor and reflector configuration from the provided file paths before initializing the RotorBox.
- */
-EnigmaMachine::EnigmaMachine(int nRotorCount, const std::vector<int>& rotorPositions,
-                             const std::vector<std::string>& transformerFiles) {
-    if (transformerFiles.size() != static_cast<size_t>(nRotorCount) + 1) {
-        throw std::invalid_argument("Error: Number of transformer files must be nRotorCount + 1 (Reflector).");
-    }
-
-    FileAssetProvider provider;
-    std::vector<RotorConfig> rotors(nRotorCount);
-    for (int i = 0; i < nRotorCount; ++i) {
-        rotors[i] = EnigmaConfigLoader::loadRotor(provider, FileName(transformerFiles[i]));
-    }
-    auto reflector = EnigmaConfigLoader::loadReflector(provider, FileName(transformerFiles[nRotorCount]));
-
-    rotorBox = RotorBox(nRotorCount, rotorPositions, rotors, reflector);
-    rotorBox.registerObserver(this);
-}
-
-/**
- * @details Similar to the standard parameterized constructor, but also initializes the PlugBoard
- * with the provided pairs.
- */
-EnigmaMachine::EnigmaMachine(int nRotorCount, const std::vector<int>& rotorPositions,
-                             const std::vector<std::string>& transformerFiles,
-                             const std::array<PlugBoardPair, PLUGBOARD_MAX_PAIRS>& plugBoardPairs)
-    : plugBoard(plugBoardPairs) {
-    if (transformerFiles.size() != static_cast<size_t>(nRotorCount) + 1) {
-        throw std::invalid_argument("Error: Number of transformer files must be nRotorCount + 1 (Reflector).");
-    }
-
-    FileAssetProvider provider;
-    std::vector<RotorConfig> rotors(nRotorCount);
-    for (int i = 0; i < nRotorCount; ++i) {
-        rotors[i] = EnigmaConfigLoader::loadRotor(provider, FileName(transformerFiles[i]));
-    }
-    auto reflector = EnigmaConfigLoader::loadReflector(provider, FileName(transformerFiles[nRotorCount]));
-
-    rotorBox = RotorBox(nRotorCount, rotorPositions, rotors, reflector);
-    rotorBox.registerObserver(this);
-}
-
 EnigmaMachine::EnigmaMachine(IAssetProvider& provider, std::string_view fileName, std::string_view assetPath)
     : EnigmaMachine(EnigmaConfigLoader::load(provider, FileName(fileName), AssetPath(assetPath))) {}
 
 EnigmaMachine::EnigmaMachine(const EnigmaMachineConfig& config)
-    : rotorBox(config.rotorCount, config.rotorPositions, config.rotors, config.reflector),
-      plugBoard(config.plugBoardPairs) {
-    rotorBox.registerObserver(this);
+    : rotorBox(std::make_unique<RotorBox>(config.rotorCount, config.rotorPositions, config.rotors, config.reflector)),
+      plugBoard(std::make_unique<PlugBoard>(config.plugBoardPairs)) {
+    rotorBox->registerObserver(this);
 }
 
 EnigmaMachine::EnigmaMachine(std::string_view fileName, std::string_view assetPath)
@@ -99,22 +59,23 @@ EnigmaMachine::EnigmaMachine(std::string_view fileName, std::string_view assetPa
 EnigmaMachine::~EnigmaMachine() = default;
 
 EnigmaMachine::EnigmaMachine(EnigmaMachine&& other) noexcept
-    : rotorBox(std::move(other.rotorBox)), plugBoard(other.plugBoard), observers(std::move(other.observers)) {
-    // The moved-from rotorBox (now in *this) still has 'other' as observer.
-    // We must update it to point to 'this'.
-    rotorBox.removeObserver(&other);
-    rotorBox.registerObserver(this);
+    : rotorBox(std::move(other.rotorBox)), plugBoard(std::move(other.plugBoard)), observers(std::move(other.observers)) {
+    if (rotorBox) {
+        rotorBox->removeObserver(&other);
+        rotorBox->registerObserver(this);
+    }
 }
 
 EnigmaMachine& EnigmaMachine::operator=(EnigmaMachine&& other) noexcept {
     if (this != &other) {
         rotorBox = std::move(other.rotorBox);
-        plugBoard = other.plugBoard;
+        plugBoard = std::move(other.plugBoard);
         observers = std::move(other.observers);
 
-        // Fix observer pointer
-        rotorBox.removeObserver(&other);
-        rotorBox.registerObserver(this);
+        if (rotorBox) {
+            rotorBox->removeObserver(&other);
+            rotorBox->registerObserver(this);
+        }
     }
     return *this;
 }
@@ -126,13 +87,13 @@ EnigmaMachine& EnigmaMachine::operator=(EnigmaMachine&& other) noexcept {
  * 3. Pass through Plugboard (Reverse).
  *
  * @internal The plugboard is its own inverse, so the same swap() method is used for both entry and exit.
- * The mechanical stepping happens inside rotorBox.keyTransform() before the signal starts.
+ * The mechanical stepping happens inside rotorBox->keyTransform() before the signal starts.
  */
 int EnigmaMachine::keyTransform(int input) {
     int originalInput = input;
-    input = plugBoard.swap(input);
-    input = rotorBox.keyTransform(input);
-    int output = plugBoard.swap(input);
+    input = plugBoard->swap(input);
+    input = rotorBox->keyTransform(input);
+    int output = plugBoard->swap(input);
 
     this->onCharEncrypted(static_cast<char>('A' + originalInput), static_cast<char>('A' + output));
 

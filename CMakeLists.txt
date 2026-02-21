@@ -28,6 +28,11 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+# --- Global Visibility Settings ---
+# Hide symbols by default to enforce clean API
+set(CMAKE_CXX_VISIBILITY_PRESET hidden)
+set(CMAKE_VISIBILITY_INLINES_HIDDEN 1)
+
 # --- Source Files ---
 # Group core logic files for the library
 set(CORE_SOURCES
@@ -35,21 +40,14 @@ set(CORE_SOURCES
     EnigmaMachine/src/EnigmaMachineConfig.cpp
     EnigmaMachine/src/EnigmaConfigLoader.cpp
     EnigmaMachine/src/FileAssetProvider.cpp
+    EnigmaMachine/src/IEnigmaObserver.cpp
+    EnigmaMachine/src/IAssetProvider.cpp
     PlugBoard/src/PlugBoard.cpp
     RotorBox/src/RotorBox.cpp
     RotorBox/src/Transformer.cpp
     RotorBox/src/Reflector.cpp
     RotorBox/src/Rotor.cpp
 )
-
-# Create Target (EnigmaCore)
-# Create a static library contains the business logic, to be testable without main()
-add_library(EnigmaCore STATIC
-    ${CORE_SOURCES}
-)
-
-# Create namespaced alias for safer consumption
-add_library(EnigmaMachineCore::EnigmaCore ALIAS EnigmaCore)
 
 # --- Include Directories ---
 # Define search paths for header files
@@ -61,15 +59,45 @@ set(INCLUDE_DIRS
     ${CMAKE_CURRENT_SOURCE_DIR}/config/
 )
 
-# Apply include paths to EnigmaCore
-# PUBLIC visibility ensures any target linking EnigmaCore also inherits these paths
+# --- External Dependencies ---
+# Initialize toml11 library (header-only submodule)
+add_subdirectory(external/toml11)
+
+# --- Core Targets ---
+
+# 1. Create Object Library for all core logic
+# This target contains all symbols but they are hidden by default.
+# Unit tests will link directly to these objects.
+add_library(EnigmaCore_OBJ OBJECT
+    ${CORE_SOURCES}
+)
+target_include_directories(EnigmaCore_OBJ PUBLIC ${INCLUDE_DIRS})
+target_link_libraries(EnigmaCore_OBJ PUBLIC toml11::toml11)
+set_target_properties(EnigmaCore_OBJ PROPERTIES POSITION_INDEPENDENT_CODE ON)
+
+# 2. Create the final EnigmaCore library target (Static or Shared)
+# This target ONLY exports symbols annotated with ENIGMACORE_EXPORT.
+add_library(EnigmaCore
+    $<TARGET_OBJECTS:EnigmaCore_OBJ>
+)
+target_link_libraries(EnigmaCore PUBLIC toml11::toml11)
 target_include_directories(EnigmaCore PUBLIC ${INCLUDE_DIRS})
+
+# Create namespaced alias for safer consumption
+add_library(EnigmaMachineCore::EnigmaCore ALIAS EnigmaCore)
+
+# --- Symbol Visibility (Shared Library Support) ---
+include(GenerateExportHeader)
+generate_export_header(EnigmaCore
+    BASE_NAME ENIGMACORE
+    EXPORT_FILE_NAME ${CMAKE_CURRENT_SOURCE_DIR}/include/EnigmaCore_EXPORT.hpp
+)
 
 # --- Compiler Warnings ---
 if(MSVC)
-    target_compile_options(EnigmaCore PRIVATE /W4)
+    target_compile_options(EnigmaCore_OBJ PRIVATE /W4)
 else()
-    target_compile_options(EnigmaCore PRIVATE -Wall -Wextra -Wpedantic)
+    target_compile_options(EnigmaCore_OBJ PRIVATE -Wall -Wextra -Wpedantic)
 endif()
 
 # --- Static Analysis (clang-tidy) ---
@@ -85,18 +113,13 @@ if(ENIGMA_ENABLE_CLANG_TIDY)
         )
         string(REPLACE ";" "," CLANG_TIDY_CHECKS_STR "${CLANG_TIDY_CHECKS}")
         
-        set_target_properties(EnigmaCore PROPERTIES
+        set_target_properties(EnigmaCore_OBJ PROPERTIES
             CXX_CLANG_TIDY "${CLANG_TIDY_EXE};-checks=${CLANG_TIDY_CHECKS_STR}"
         )
     else()
         message(WARNING "clang-tidy not found. Static analysis will not be run.")
     endif()
 endif()
-
-# --- External Dependencies ---
-# Initialize and link toml11 library (header-only submodule)
-add_subdirectory(external/toml11)
-target_link_libraries(EnigmaCore PUBLIC toml11::toml11)
 
 # --- Main Executable Target ---
 if(ENIGMA_BUILD_CLI)

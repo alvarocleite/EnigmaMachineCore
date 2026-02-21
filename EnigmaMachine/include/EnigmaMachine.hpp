@@ -7,104 +7,60 @@
 
 #include <memory>
 #include <string_view>
-#include <tuple>
 #include <vector>
 
-#include "EnigmaMachineConfig.hpp"
-#include "IAssetProvider.hpp"
+#include "EnigmaCore_EXPORT.hpp"
 #include "IEnigmaObserver.hpp"
-#include "PlugBoard.hpp"
-#include "RotorBox.hpp"
+
+// Forward declarations for internal implementation details
+class RotorBox;
+class PlugBoard;
+struct EnigmaMachineConfig;
+class IAssetProvider;
 
 /**
  * @brief Class representing the Enigma machine.
- * This class encapsulates the functionality of the Enigma machine, including the rotor box
- * and the transformation of input keys through the rotors and reflector.
+ * This class encapsulates the functionality of the Enigma machine, providing a simple
+ * interface for encryption while hiding the complexity of the rotors and plugboard.
  */
-class EnigmaMachine : public IEnigmaObserver {
+class ENIGMACORE_EXPORT EnigmaMachine : public IEnigmaObserver {
 private:
-    RotorBox rotorBox;
-    PlugBoard plugBoard;  // Optional: if you want to include a plugboard for additional transformations
+    std::unique_ptr<RotorBox> rotorBox;
+    std::unique_ptr<PlugBoard> plugBoard;
     std::vector<IEnigmaObserver*> observers;
+
+    /**
+     * @brief Internal constructor using the configuration struct.
+     * Hidden from the public API to prevent exposure of internal DTOs.
+     */
+    explicit EnigmaMachine(const EnigmaMachineConfig& config);
 
 public:
     /**
-     * @brief Default Constructor for the EnigmaMachine class.
-     *
-     * Initializes a standard Enigma Machine configuration with:
-     * - 3 Rotors (Rotor1, Rotor2, Rotor3) positioned at 0.
-     * - A standard Reflector.
-     * - An empty PlugBoard (identity mapping).
-     *
-     * This configuration is useful for basic testing or default behavior.
-     * @throws std::runtime_error If default asset files cannot be found or parsed.
+     * @brief Default Constructor.
+     * Initializes a standard Enigma Machine (3 Rotors, standard Reflector).
      */
     EnigmaMachine();
 
     /**
-     * @brief Parameterized Constructor for the EnigmaMachine class (No PlugBoard).
-     *
-     * Initializes the machine with a custom RotorBox configuration and an empty PlugBoard.
-     *
-     * @param nRotorCount The number of rotors to be used in the RotorBox.
-     * @param rotorPositions A vector defining the initial rotational position (0 - (TRANSFORMER_SIZE - 1)) for each
-     * rotor.
-     * @param transformerFiles A vector of file paths defining the wiring for each rotor and the reflector.
-     *                   The last file in the list is expected to be the Reflector.
-     * @throws std::invalid_argument If the number of transformer files does not match nRotorCount + 1.
-     */
-    EnigmaMachine(int nRotorCount, const std::vector<int>& rotorPositions,
-                  const std::vector<std::string>& transformerFiles);
-
-    /**
-     * @brief Parameterized Constructor for the EnigmaMachine class (With PlugBoard).
-     *
-     * Initializes the machine with a fully custom configuration for both the RotorBox and PlugBoard.
-     *
-     * @param nRotorCount The number of rotors to be used in the RotorBox.
-     * @param rotorPositions A vector defining the initial rotational position (0-(TRANSFORMER_SIZE - 1)) for each
-     * rotor.
-     * @param transformerFiles A vector of file paths defining the wiring for each rotor and the reflector.
-     *                   The last file in the list is expected to be the Reflector.
-     * @param plugBoardPairs An array of `PlugBoardPair` defining the swaps to be configured on the PlugBoard.
-     * @throws std::invalid_argument If the number of transformer files does not match nRotorCount + 1.
-     */
-    EnigmaMachine(int nRotorCount, const std::vector<int>& rotorPositions,
-                  const std::vector<std::string>& transformerFiles,
-                  const std::array<PlugBoardPair, PLUGBOARD_MAX_PAIRS>& plugBoardPairs);
-
-    /**
-     * @brief Constructor using the configuration struct.
-     *
-     * @param config The parsed configuration object.
-     */
-    EnigmaMachine(const EnigmaMachineConfig& config);
-
-    /**
      * @brief File-based Constructor using a specific Asset Provider.
      *
-     * @param provider The asset provider to use for loading configuration and components.
+     * @param provider The asset provider to use for loading configuration.
      * @param fileName The path to the TOML configuration file.
      * @param assetPath Optional base directory for assets.
      */
     EnigmaMachine(IAssetProvider& provider, std::string_view fileName, std::string_view assetPath = "");
 
     /**
-     * @brief File-based Constructor for the EnigmaMachine class.
-     *
+     * @brief File-based Constructor.
      * Initializes the machine by parsing a TOML configuration file from the filesystem.
-     * Uses FileAssetProvider internally.
-     *
-     * This constructor delegates the parsing logic to `parseConfig` and then delegates
-     * initialization to the main parameterized constructor.
      *
      * @param fileName The path to the TOML configuration file.
-     * @param assetPath Optional base directory for assets (rotors/reflectors).
-     * @throws std::runtime_error If the file cannot be parsed or contains invalid configuration data.
+     * @param assetPath Optional base directory for assets.
      */
     EnigmaMachine(std::string_view fileName, std::string_view assetPath = "");
 
-    // Rule of Five
+    // Rule of Five (Required due to unique_ptr)
     ~EnigmaMachine() override;
     EnigmaMachine(const EnigmaMachine&) = delete;
     EnigmaMachine& operator=(const EnigmaMachine&) = delete;

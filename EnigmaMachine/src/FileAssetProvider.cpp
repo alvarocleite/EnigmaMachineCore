@@ -3,6 +3,8 @@
 #include <sstream>
 #include <stdexcept>
 
+FileAssetProvider::~FileAssetProvider() = default;
+
 std::string FileAssetProvider::loadAsset(std::string_view assetName) {
     std::ifstream file(std::string(assetName), std::ios::in | std::ios::binary);
     if (!file) {

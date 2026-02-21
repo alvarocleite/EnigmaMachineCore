@@ -8,6 +8,7 @@
  */
 class FileAssetProvider : public IAssetProvider {
 public:
+    ~FileAssetProvider() override;
     /**
      * @brief Loads the content of a file from the disk.
      *
