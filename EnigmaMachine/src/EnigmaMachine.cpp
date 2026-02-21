@@ -31,7 +31,7 @@ EnigmaMachine::EnigmaMachine() {
         rotors.push_back(EnigmaConfigLoader::loadRotor(provider, FileName(assetsDirectory / defaultRotor2File)));
         rotors.push_back(EnigmaConfigLoader::loadRotor(provider, FileName(assetsDirectory / defaultRotor3File)));
         auto reflector = EnigmaConfigLoader::loadReflector(provider, FileName(assetsDirectory / defaultReflectorFile));
-        
+
         rotorBox = std::make_unique<RotorBox>(3, std::vector<int>{0, 0, 0}, rotors, reflector);
         plugBoard = std::make_unique<PlugBoard>();
         rotorBox->registerObserver(this);
@@ -59,7 +59,9 @@ EnigmaMachine::EnigmaMachine(std::string_view fileName, std::string_view assetPa
 EnigmaMachine::~EnigmaMachine() = default;
 
 EnigmaMachine::EnigmaMachine(EnigmaMachine&& other) noexcept
-    : rotorBox(std::move(other.rotorBox)), plugBoard(std::move(other.plugBoard)), observers(std::move(other.observers)) {
+    : rotorBox(std::move(other.rotorBox)),
+      plugBoard(std::move(other.plugBoard)),
+      observers(std::move(other.observers)) {
     if (rotorBox) {
         rotorBox->removeObserver(&other);
         rotorBox->registerObserver(this);

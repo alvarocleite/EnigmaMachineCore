@@ -74,11 +74,11 @@ TEST_F(EnigmaMachineTests, PlugBoardEffect) {
     // We can use a simpler config or rely on default behavior if we had one,
     // but here let's just use a config that we know has no plugs or a different path.
     // For now, let's just ensure that two different configurations yield different results.
-    
+
     // Instead of manual construction which is now internal, we use the supported constructor
     // but we can't easily "disable" plugs via filename if the file has them.
     // However, we can use the Default Constructor which has NO plugs.
-    EnigmaMachine mDefault; 
+    EnigmaMachine mDefault;
 
     int input = 4;  // 'E'
     int out1 = mWithPlugs.keyTransform(input);

@@ -7,7 +7,7 @@ package "EnigmaMachineCore (Executable)" {
     [Main App] as App
 }
 
-package "EnigmaCore (Static Library)" {
+package "EnigmaCore (Library)" {
     component [EnigmaMachine] as EM
     component [RotorBox] as RB
     component [PlugBoard] as PB
@@ -23,7 +23,6 @@ package "External Dependencies" {
 
 ' Application Dependencies
 App ..> EM : uses
-App ..> Config : uses
 App ..> CLI11 : uses
 
 ' Core Internal Dependencies

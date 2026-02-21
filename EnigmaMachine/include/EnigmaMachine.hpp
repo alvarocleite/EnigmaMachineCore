@@ -24,16 +24,17 @@ class IAssetProvider;
  * interface for encryption while hiding the complexity of the rotors and plugboard.
  */
 class ENIGMACORE_EXPORT EnigmaMachine : public IEnigmaObserver {
+protected:
+    /**
+     * @brief Internal constructor using the configuration struct.
+     * Accessible to tests and benchmarks, but hidden from the public API.
+     */
+    explicit EnigmaMachine(const EnigmaMachineConfig& config);
+
 private:
     std::unique_ptr<RotorBox> rotorBox;
     std::unique_ptr<PlugBoard> plugBoard;
     std::vector<IEnigmaObserver*> observers;
-
-    /**
-     * @brief Internal constructor using the configuration struct.
-     * Hidden from the public API to prevent exposure of internal DTOs.
-     */
-    explicit EnigmaMachine(const EnigmaMachineConfig& config);
 
 public:
     /**

@@ -38,6 +38,26 @@ cmake --build build
 
 For more detailed build configurations and VS Code integration, see [docs/Building.md](docs/Building.md).
 
+## Library Usage
+
+To use `EnigmaCore` as a library in your own project, include the public API gateway:
+
+```cpp
+#include "EnigmaCore.hpp"
+
+int main() {
+    // 1. Initialize with a configuration file and assets path
+    EnigmaMachine machine("EnigmaMachineConfig1.toml", "./assets");
+
+    // 2. Transform a character (0-25 index)
+    int encrypted = machine.keyTransform(7); // 'H' -> ?
+    
+    return 0;
+}
+```
+
+Refer to the [Library API Specification](docs/Library_API.md) for full interface details.
+
 ## Running Tests
 
 The project uses **Google Test (GTest)** for unit testing and **CTest** for execution. By default, tests are disabled to keep the build fast. To run them, you must explicitly enable them:
