@@ -20,10 +20,11 @@ To build and run this project, you will need the following tools and libraries:
   
 *Note: These are included as git submodules in the `external/` directory.*
 
-### Testing Tools
+### Testing & Benchmarking Tools
 *   **[GoogleTest (gTest)](https://github.com/google/googletest):** Used for unit testing the core logic.
+*   **[Google Benchmark](https://github.com/google/benchmark):** Used for performance profiling and throughput measurement.
 
-*Note: You do NOT need to install GoogleTest on your machine. The build system (CMake) automatically downloads and configures it during the first build (requires internet connection for the initial configuration).*
+*Note: You do NOT need to install these libraries on your machine. The build system (CMake) automatically downloads and configures them during the first build (requires internet connection for the initial configuration).*
 
 ### Documentation & Visualization (Optional)
 *   **[Doxygen](https://www.doxygen.nl/):** Used for generating the HTML/XML API documentation.
@@ -75,12 +76,23 @@ ${PROJECT_NAME}       EnigmaTests
  (Executable)         (Executable)
 ```
 
-## CMake Variables
+## CMake Options & Variables
 
-*   **`${PROJECT_NAME}`**: The name of the main project (`EnigmaMachineCore`). Used to name the final application binary.
-*   **`${CORE_SOURCES}`**: The list of `.cpp` files that constitute the Enigma logic (e.g., `EnigmaMachine.cpp`, `Rotor.cpp`). These are compiled into the `EnigmaCore` library.
-*   **`${APP_SOURCES}`**: The list containing *only* the application entry point (`app/main.cpp`).
-*   **`${INCLUDE_DIRS}`**: A list of directory paths containing header files. These are added to the `EnigmaCore` library with `PUBLIC` visibility. This means any target that links `EnigmaCore` (like the App or Tests) automatically gets these include paths, simplifying configuration.
+The project uses CMake options to control the build process. By default, **only the core library and CLI application are built** to ensure maximum build speed.
+
+### Build Toggles
+*   **`ENIGMA_BUILD_CLI`**: Build the main Enigma machine command-line tool. Default is `ON`.
+*   **`ENIGMA_BUILD_TESTS`**: Build the GoogleTest-based unit test suite. Default is `OFF`.
+*   **`ENIGMA_BUILD_BENCHMARKS`**: Build the Google Benchmark-based performance suite. Default is `OFF`.
+*   **`ENIGMA_BUILD_DOCS`**: Build the Doxygen documentation targets. Default is `OFF`.
+
+### Feature Options
+*   **`ENIGMA_ENABLE_CLANG_TIDY`**: Enable static analysis during the build process. Default is `OFF`.
+
+### Internal Variables
+*   **`${PROJECT_NAME}`**: The name of the main project (`EnigmaMachineCore`).
+*   **`${CORE_SOURCES}`**: The list of `.cpp` files compiled into the `EnigmaCore` library.
+*   **`${INCLUDE_DIRS}`**: Directory paths added to `EnigmaCore` with `PUBLIC` visibility.
 
 ---
 

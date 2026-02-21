@@ -27,30 +27,46 @@ git clone --recurse-submodules https://github.com/alvarocleite/EnigmaMachineCore
 cd EnigmaMachineCore
 
 # 2. Configure and Build
-# Choose -DCMAKE_BUILD_TYPE=Release for production or Debug for debugging and for testing
+# Standard build only includes the application and core library
 cmake -DCMAKE_BUILD_TYPE=Release -S . -B build
 cmake --build build
 
-# 3. Run Tests
-cd build && ctest --output-on-failure
-
-# 4. Run the Application
-./EnigmaMachineCore --help
-./EnigmaMachineCore -m "HELLO" --debug
+# 3. Run the Application
+./build/EnigmaMachineCore --help
+./build/EnigmaMachineCore -m "HELLO" --debug
 ```
 
 For more detailed build configurations and VS Code integration, see [docs/Building.md](docs/Building.md).
 
 ## Running Tests
 
-The project uses **Google Test (GTest)** for unit testing and **CTest** for execution. To run the tests, navigate to the build directory and use the following command:
+The project uses **Google Test (GTest)** for unit testing and **CTest** for execution. By default, tests are disabled to keep the build fast. To run them, you must explicitly enable them:
 
 ```bash
-cd build
-ctest --output-on-failure
+# 1. Configure with tests enabled
+cmake -DENIGMA_BUILD_TESTS=ON -S . -B build
+
+# 2. Build and run
+cmake --build build
+cd build && ctest --output-on-failure
 ```
 
 For a detailed overview of the testing infrastructure, VS Code integration, and how to add new tests, refer to the [Testing Guide](docs/Testing.md).
+
+## Benchmarking
+
+EnigmaMachineCore includes a high-resolution benchmarking suite using **Google Benchmark**. This is used to measure encryption throughput and component latency.
+
+```bash
+# 1. Configure with benchmarks enabled
+cmake -DENIGMA_BUILD_BENCHMARKS=ON -S . -B build_bench
+
+# 2. Build and run
+cmake --build build_bench --target EnigmaBenchmark
+cd build_bench/benchmarks && ./EnigmaBenchmark
+```
+
+For more details on performance metrics and benchmarking options, see [docs/Benchmarking.md](docs/Benchmarking.md).
 
 ## Documentation
 
@@ -72,6 +88,8 @@ HTML documentation is generated in: `docs/doxygen-gen-files/html/index.html`
 ## Roadmap
 
 For a detailed view of our future plans, architectural evolution, and platform support strategy (including WASM, Android, and Embedded targets), please refer to our [Project Roadmap](roadmap.md).
+
+Significant design choices and their rationales are documented in our [Architectural Decision Records (ADRs)](docs/adr/ADRs.md).
 
 ## Development
 

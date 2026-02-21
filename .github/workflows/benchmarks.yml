@@ -1,0 +1,55 @@
+name: Benchmarks
+
+on:
+  push:
+    branches: [ "main", "development" ]
+  pull_request:
+    branches: [ "main", "development" ]
+
+jobs:
+  benchmark:
+    name: Ubuntu - Release - Benchmarks
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: recursive
+
+    - name: Configure CMake
+      run: |
+        cmake -B ${{github.workspace}}/build \
+          -DCMAKE_BUILD_TYPE=Release \
+          -DENIGMA_BUILD_BENCHMARKS=ON \
+          -DENIGMA_BUILD_TESTS=OFF \
+          -DENIGMA_BUILD_CLI=OFF
+
+    - name: Build Benchmark
+      run: cmake --build ${{github.workspace}}/build --target EnigmaBenchmark --config Release
+
+    - name: Run Benchmark
+      working-directory: ${{github.workspace}}/build/benchmarks
+      run: |
+        ./EnigmaBenchmark --benchmark_format=console --benchmark_out=current_results.json --benchmark_out_format=json
+
+    - name: Performance Regression Check
+      run: |
+        python3 scripts/compare_benchmarks.py \
+          docs/benchmarks/baseline_ci_v1.0.json \
+          build/benchmarks/current_results.json \
+          --github-summary $GITHUB_STEP_SUMMARY
+
+    - name: Write Benchmark Summary
+      if: always()
+      run: |
+        echo "### 📊 Raw Benchmark Results" >> $GITHUB_STEP_SUMMARY
+        echo "\`\`\`json" >> $GITHUB_STEP_SUMMARY
+        cat build/benchmarks/current_results.json | jq '.benchmarks[] | {name, cpu_time, bytes_per_second}' >> $GITHUB_STEP_SUMMARY
+        echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+
+    - name: Upload Benchmark Results
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: benchmark-results
+        path: ${{github.workspace}}/build/benchmarks/current_results.json

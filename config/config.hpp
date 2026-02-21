@@ -10,7 +10,7 @@
 inline constexpr int TRANSFORMER_SIZE = 26;
 
 /** @brief Maximum number of allowed pairs on the plugboard. */
-inline constexpr int PLUGBOARD_MAX_PAIRS = 10;
+inline constexpr int PLUGBOARD_MAX_PAIRS = 13;
 
 /** @brief Default assets base directory. */
 inline constexpr std::string_view assetsDir = "assets/";

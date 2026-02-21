@@ -19,8 +19,9 @@ endif()
 
 # Define options to control build targets
 option(ENIGMA_BUILD_CLI "Build the Enigma Machine CLI executable" ${ENIGMA_IS_TOP_LEVEL})
-option(ENIGMA_BUILD_TESTS "Build the test suite" ${ENIGMA_IS_TOP_LEVEL})
-option(ENIGMA_BUILD_DOCS "Build the documentation" ${ENIGMA_IS_TOP_LEVEL})
+option(ENIGMA_BUILD_TESTS "Build the test suite" OFF)
+option(ENIGMA_BUILD_BENCHMARKS "Build the benchmark suite" OFF)
+option(ENIGMA_BUILD_DOCS "Build the documentation" OFF)
 
 # --- C++ Standard ---
 set(CMAKE_CXX_STANDARD 20)
@@ -144,6 +145,22 @@ if(ENIGMA_BUILD_TESTS)
 
     enable_testing()
     add_subdirectory(tests)
+endif()
+
+# --- Benchmarking (Google Benchmark) ---
+if(ENIGMA_BUILD_BENCHMARKS)
+    include(FetchContent)
+    FetchContent_Declare(
+        benchmark
+        URL https://github.com/google/benchmark/archive/refs/tags/v1.8.3.zip
+    )
+    # Disable building benchmark tests and examples to speed up build
+    set(BENCHMARK_ENABLE_TESTING OFF CACHE BOOL "" FORCE)
+    set(BENCHMARK_ENABLE_GTEST_TESTS OFF CACHE BOOL "" FORCE)
+    set(BENCHMARK_ENABLE_INSTALL OFF CACHE BOOL "" FORCE)
+    FetchContent_MakeAvailable(benchmark)
+
+    add_subdirectory(benchmarks)
 endif()
 
 # --- Code Formatting (clang-format) ---
