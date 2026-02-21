@@ -36,6 +36,8 @@ build/*
 !build/
 build_bench/*
 !build_bench/
+build_release/*
+!build_release/
 
 # Documentation
 docs/doxygen-gen-files/
