@@ -1,0 +1,38 @@
+name: Library API Validation
+
+on:
+  push:
+    branches: [ "main", "development" ]
+  pull_request:
+    branches: [ "main", "development" ]
+
+jobs:
+  validate-api:
+    name: Shared Library API Validation (Linux)
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: recursive
+
+    - name: Configure CMake
+      run: |
+        cmake -B ${{github.workspace}}/build \
+          -DCMAKE_BUILD_TYPE=Release \
+          -DBUILD_SHARED_LIBS=ON \
+          -DENIGMA_BUILD_TESTS=ON \
+          -DENIGMA_BUILD_CLI=OFF
+
+    - name: Build
+      run: cmake --build ${{github.workspace}}/build --config Release
+
+    - name: Run Tests
+      working-directory: ${{github.workspace}}/build
+      run: ctest --output-on-failure
+
+    - name: Verify Exported Symbols
+      run: |
+        # Locate the shared library (name might vary by OS but here it's Linux)
+        LIB_PATH=$(find ${{github.workspace}}/build -name "libEnigmaCore.so")
+        ./scripts/verify_library_api.sh "$LIB_PATH"

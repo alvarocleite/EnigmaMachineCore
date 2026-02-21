@@ -41,6 +41,15 @@ void operator delete(void* p, std::size_t) noexcept {
 const std::string ASSETS_DIR = "./assets/";
 const std::string CONFIG_FILE = ASSETS_DIR + "EnigmaMachineConfig1.toml";
 
+/**
+ * @brief Subclass used ONLY for benchmarking to access internal constructors.
+ */
+class BenchmarkingEnigmaMachine : public EnigmaMachine {
+public:
+    explicit BenchmarkingEnigmaMachine(const EnigmaMachineConfig& config) 
+        : EnigmaMachine(config) {}
+};
+
 constexpr int KB = 1024;
 
 static void BM_EnigmaMachine_Initialization(benchmark::State& state) {
@@ -135,7 +144,7 @@ static void BM_EnigmaMachine_Throughput_Scaling(benchmark::State& state) {
     
     config.reflector.wiring = {25, 24, 23, 22, 21, 20, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0};
     
-    EnigmaMachine machine(config);
+    BenchmarkingEnigmaMachine machine(config);
     
     std::vector<int> message(message_length);
     std::default_random_engine generator;
@@ -175,7 +184,7 @@ static void BM_EnigmaMachine_PlugBoard_Scaling(benchmark::State& state) {
         config.plugBoardPairs[i] = {i*2, i*2 + 1};
     }
     
-    EnigmaMachine machine(config);
+    BenchmarkingEnigmaMachine machine(config);
     
     std::vector<int> message(message_length);
     std::default_random_engine generator;

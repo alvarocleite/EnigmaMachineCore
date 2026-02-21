@@ -2,15 +2,16 @@
 
 #include <string>
 #include <string_view>
+#include "EnigmaCore_EXPORT.hpp"
 
 /**
  * @brief Interface for providing configuration/asset data.
  * Abstracts the source of assets (filesystem, memory, embedded) to allow for
  * decoupling the Enigma Engine from the physical filesystem.
  */
-class IAssetProvider {
+class ENIGMACORE_EXPORT IAssetProvider {
 public:
-    virtual ~IAssetProvider() = default;
+    virtual ~IAssetProvider();
 
     /**
      * @brief Loads the content of an asset.

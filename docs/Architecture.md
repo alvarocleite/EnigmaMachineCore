@@ -20,6 +20,14 @@ The system is designed for flexibility across different platforms. The deploymen
 
 ![Deployment View](diagrams/output/EnigmaMachineCore_Deployment_View.svg)
 
+### 1.3. API Encapsulation (Minimal Surface Area)
+
+The library follows a "Strict Facade" approach. To ensure binary stability and security, only the high-level control interfaces are exported.
+
+*   **Public API:** `EnigmaMachine` (Execution), `IEnigmaObserver` (Monitoring), and `IAssetProvider` (Extensibility). See [Library API Specification](Library_API.md) for details.
+*   **Hidden Internals:** All internal components (`Rotor`, `PlugBoard`, `RotorBox`, `EnigmaConfigLoader`) and raw configuration structs (`EnigmaMachineConfig`) are hidden from the binary's export table.
+*   **Symbol Visibility:** The library is compiled with `hidden` visibility by default. Only classes annotated with `ENIGMACORE_EXPORT` are visible to consumers.
+
 ## 2. Use Cases
 
 The system serves two primary actors:
