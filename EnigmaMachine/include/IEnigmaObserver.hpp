@@ -1,11 +1,13 @@
 #pragma once
 
+#include "EnigmaCore_EXPORT.hpp"
+
 /**
  * @brief Interface for observing Enigma Machine events.
  * Implement this interface to receive notifications about state changes.
  */
-struct IEnigmaObserver {
-    virtual ~IEnigmaObserver() = default;
+struct ENIGMACORE_EXPORT IEnigmaObserver {
+    virtual ~IEnigmaObserver();
 
     /**
      * @brief Called when a rotor steps.

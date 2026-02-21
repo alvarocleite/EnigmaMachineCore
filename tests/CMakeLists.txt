@@ -10,9 +10,9 @@ add_executable(EnigmaTests
     RotorBox/TestRotor.cpp
 )
 
-# Link against the Core library and GTest
-# GTest::gtest_main includes the main() entry point for the test runner
-target_link_libraries(EnigmaTests PRIVATE EnigmaMachineCore::EnigmaCore GTest::gtest_main)
+# Link against the Core Logic (Object Library) and GTest
+# Linking against the OBJ library allows access to hidden internal symbols
+target_link_libraries(EnigmaTests PRIVATE EnigmaCore_OBJ GTest::gtest_main)
 
 # Register tests so CTest can find them
 include(GoogleTest)

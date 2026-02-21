@@ -57,13 +57,11 @@ class EnigmaConfigLoader {
 }
 
 class EnigmaMachine {
-    - rotorBox : RotorBox
-    - plugBoard : PlugBoard
+    - rotorBox : std::unique_ptr<RotorBox>
+    - plugBoard : std::unique_ptr<PlugBoard>
     - observers : std::vector<IEnigmaObserver*>
+    # EnigmaMachine(config: EnigmaMachineConfig)
     + EnigmaMachine()
-    + EnigmaMachine(nRotorCount: int, rotorPositions: std::vector<int>, transformerFiles: std::vector<std::string>)
-    + EnigmaMachine(nRotorCount: int, rotorPositions: std::vector<int>, transformerFiles: std::vector<std::string>, plugBoardPairs: std::array<PlugBoardPair, PLUGBOARD_MAX_PAIRS>)
-    + EnigmaMachine(config: EnigmaMachineConfig)
     + EnigmaMachine(fileName: std::string_view, assetPath: std::string_view)
     + EnigmaMachine(provider: IAssetProvider, fileName: std::string_view, assetPath: std::string_view)
     + ~EnigmaMachine()
@@ -79,7 +77,7 @@ class PlugBoard {
     + PlugBoard()
     + PlugBoard(pairs: std::array<PlugBoardPair, PLUGBOARD_MAX_PAIRS>)
     + ~PlugBoard()
-    + swap(key: int) : int
+    + swap(key: int) : int const
 }
 
 class RotorBox {

@@ -1,11 +1,15 @@
 # Add benchmark target
 add_executable(EnigmaBenchmark EnigmaBenchmark.cpp)
 
-# Link benchmark library and EnigmaCore
+# Link benchmark library and EnigmaCore Logic
+# Linking against the OBJ library allows access to hidden internal symbols for micro-benchmarking
 target_link_libraries(EnigmaBenchmark PRIVATE 
     benchmark::benchmark 
-    EnigmaMachineCore::EnigmaCore
+    EnigmaCore_OBJ
 )
+
+# Enable access to internal constructors and classes
+target_compile_definitions(EnigmaBenchmark PRIVATE ENIGMACORE_BUILD_TESTS)
 
 # --- Asset Handling for Benchmarks ---
 add_custom_command(TARGET EnigmaBenchmark POST_BUILD

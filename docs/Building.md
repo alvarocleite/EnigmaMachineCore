@@ -39,19 +39,23 @@ To support robust testing and modularity, the project uses a "Library + Runner" 
 
 ### The Components
 
-1.  **EnigmaCore (Static Library):**
-    *   **Content:** Contains all the business logic (`EnigmaMachine`, `Rotor`, `PlugBoard`, etc.).
-    *   **Purpose:** This is the "engine". It has NO `main()` function. This allows it to be linked into multiple different executables (like the main app or the test suite).
-    *   **CMake Target:** `EnigmaCore`
+1.  **EnigmaCore (Shared/Static Library):**
+    *   **Content:** The final distributable binary. It contains only the **Public API** symbols.
+    *   **Purpose:** The production-ready engine for external applications.
+    *   **Library Type:** Generic (respects `BUILD_SHARED_LIBS`).
 
-2.  **EnigmaMachineCore (Application Executable):**
+2.  **EnigmaCore_OBJ (Object Library):**
+    *   **Content:** Contains ALL symbols (public + internal) as unlinked object files.
+    *   **Purpose:** Acts as the "source of truth" for both the production library and the test suite. This allows tests to access internal components (`Rotor`, `PlugBoard`) without exposing them in the final `libEnigmaCore.so`.
+
+3.  **EnigmaMachineCore (Application Executable):**
     *   **Content:** Contains only `app/main.cpp`.
     *   **Purpose:** The user-facing application. It links to `EnigmaCore` to do the actual work.
     *   **CMake Variable:** `${PROJECT_NAME}`
 
-3.  **EnigmaTests (Test Executable):**
+4.  **EnigmaTests (Test Executable):**
     *   **Content:** Contains the GoogleTest runner (`gtest_main`) and all unit test files.
-    *   **Purpose:** Runs the test suite. It also links to `EnigmaCore` to test the logic directly.
+    *   **Purpose:** Runs the test suite. It also links to `EnigmaCore_OBJ` to test the logic directly.
 
 ### Architecture Visualization
 
@@ -63,17 +67,17 @@ To support robust testing and modularity, the project uses a "Library + Runner" 
        | ${CORE_SOURCES} |  <-- Logic (Rotor, PlugBoard...)
        +-----------------+
                 |
-      Creates "EnigmaCore" Library
+      Creates "EnigmaCore_OBJ" (Internal)
                 |
       +---------+----------+
       |                    |
       v                    v
-${APP_SOURCES}      [ Test Sources ]
- (app/main.cpp)      (BasicTest.cpp)
+"EnigmaCore" Library   EnigmaTests
+ (Public API only)    (Full Access)
       |                    |
       v                    v
-${PROJECT_NAME}       EnigmaTests
- (Executable)         (Executable)
+EnigmaMachineCore     [ Test Results ]
+  (Executable)
 ```
 
 ## CMake Options & Variables
@@ -81,6 +85,7 @@ ${PROJECT_NAME}       EnigmaTests
 The project uses CMake options to control the build process. By default, **only the core library and CLI application are built** to ensure maximum build speed.
 
 ### Build Toggles
+*   **`BUILD_SHARED_LIBS`**: If `ON`, builds `EnigmaCore` as a shared library (`.so`, `.dll`). If `OFF` (default), builds it as a static library.
 *   **`ENIGMA_BUILD_CLI`**: Build the main Enigma machine command-line tool. Default is `ON`.
 *   **`ENIGMA_BUILD_TESTS`**: Build the GoogleTest-based unit test suite. Default is `OFF`.
 *   **`ENIGMA_BUILD_BENCHMARKS`**: Build the Google Benchmark-based performance suite. Default is `OFF`.

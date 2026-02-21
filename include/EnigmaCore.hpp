@@ -10,15 +10,7 @@
 
 // Core Engine
 #include "EnigmaMachine.hpp"
-#include "EnigmaMachineConfig.hpp"
 #include "IEnigmaObserver.hpp"
 
 // Asset Management
 #include "IAssetProvider.hpp"
-#include "FileAssetProvider.hpp"
-
-// Components (Optional for direct interaction)
-#include "Rotor.hpp"
-#include "Reflector.hpp"
-#include "PlugBoard.hpp"
-#include "RotorBox.hpp"
