@@ -1,15 +1,40 @@
 
 #include <CLI/CLI.hpp>
 #include <cctype>
+#include <filesystem>
 #include <iostream>
 #include <string>
-#include "EnigmaCore.hpp"
 
+#include "EnigmaCore.hpp"
 #include "config.hpp"
 
+namespace fs = std::filesystem;
+
+/**
+ * @brief Resolves the default asset path based on execution context.
+ * Checks for a local 'assets/' folder first, otherwise falls back to the
+ * path defined during installation.
+ */
+std::string resolveDefaultAssetPath() {
+    // Check for local 'assets' directory
+    if (fs::exists("assets") && fs::is_directory("assets")) {
+        return "assets/";
+    }
+
+#ifdef ENIGMA_INSTALL_ASSETS_PATH
+    // Fallback to the installed assets path if defined via CMake
+    if (fs::exists(ENIGMA_INSTALL_ASSETS_PATH) && fs::is_directory(ENIGMA_INSTALL_ASSETS_PATH)) {
+        return ENIGMA_INSTALL_ASSETS_PATH;
+    }
+#endif
+
+    // Default to the header-defined constant if everything else fails
+    return std::string(assetsDir);
+}
+
 struct AppConfig {
-    std::string configPath = std::string(assetsDir) + "EnigmaMachineConfig1.toml";
-    std::string assetPath = std::string(assetsDir);
+    std::string assetPath = resolveDefaultAssetPath();
+    std::string configPath = "";  // Will be set after assetPath is finalized
     std::string message = "HELLOWORLD";
     bool debug = false;
     bool encode = false;
@@ -66,6 +91,11 @@ AppConfig parseArguments(int argc, char** argv) {
         app.parse(argc, argv);
     } catch (const CLI::ParseError& e) {
         std::exit(app.exit(e));
+    }
+
+    // Default to a standard config file if none provided, relative to finalized assetPath
+    if (config.configPath.empty()) {
+        config.configPath = (fs::path(config.assetPath) / "EnigmaMachineConfig1.toml").string();
     }
 
     // Default to round-trip if neither is specified

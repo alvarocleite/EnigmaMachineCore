@@ -10,7 +10,7 @@ The **EnigmaMachineCore** is a C++20 implementation of the Enigma cipher. It sep
 
 ### 1.1. Component Architecture
 
-The system is divided into a reusable Static Library (`EnigmaCore`) and a thin CLI Wrapper (`EnigmaMachineCore`).
+The system is divided into a reusable library (`EnigmaCore`) and a thin CLI Wrapper (`EnigmaMachineCore`).
 
 ![Component Diagram](diagrams/output/EnigmaMachineCore_Component_Diagram.svg)
 

@@ -16,10 +16,10 @@ To provide a high-performance, zero-overhead, and platform-agnostic Enigma ciphe
 ## Phase 1: Foundation & Performance Baseline (v1.0)
 **Goal:** Stabilize the API and establish performance/memory metrics.
 
-- [ ] **Performance Benchmarking:**
+- [x] **Performance Benchmarking:**
     - Integrate `Google Benchmark` to measure encryption throughput (chars/sec).
     - Establish a baseline for latency and memory usage.
-- [ ] **CMake Modernization & Distribution:**
+- [x] **CMake Modernization & Distribution:**
     - Support `BUILD_SHARED_LIBS` for Desktop/Android integration.
     - Implement `install()` rules and export `EnigmaMachineCoreConfig.cmake` for `find_package`.
 - [ ] **Memory Profiling:**

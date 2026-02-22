@@ -4,6 +4,7 @@
  */
 
 #include <algorithm>
+#include <filesystem>
 #include <iostream>
 #include <stdexcept>
 #include <vector>
@@ -15,6 +16,30 @@
 #include "RotorBox.hpp"
 #include "config.hpp"
 
+namespace fs = std::filesystem;
+
+/**
+ * @brief Resolves the default asset path based on execution context.
+ * Checks for a local 'assets/' folder first, otherwise falls back to the
+ * path defined during installation.
+ */
+static std::string resolveDefaultAssetPath() {
+    // Check for local 'assets' directory
+    if (fs::exists("assets") && fs::is_directory("assets")) {
+        return "assets/";
+    }
+
+#ifdef ENIGMA_INSTALL_ASSETS_PATH
+    // Fallback to the installed assets path if defined via CMake
+    if (fs::exists(ENIGMA_INSTALL_ASSETS_PATH) && fs::is_directory(ENIGMA_INSTALL_ASSETS_PATH)) {
+        return ENIGMA_INSTALL_ASSETS_PATH;
+    }
+#endif
+
+    // Default to the header-defined constant if everything else fails
+    return std::string(assetsDir);
+}
+
 /**
  * @details Loads default configuration files (Rotor1, Rotor2, Rotor3, Reflector)
  * from the global assets directory defined in `config.hpp`.
@@ -22,9 +47,8 @@
 using FileName = EnigmaConfigLoader::FileName;
 using AssetPath = EnigmaConfigLoader::AssetPath;
 EnigmaMachine::EnigmaMachine() {
-    namespace fs = std::filesystem;
     FileAssetProvider provider;
-    fs::path assetsDirectory(assetsDir);
+    fs::path assetsDirectory(resolveDefaultAssetPath());
     try {
         std::vector<RotorConfig> rotors;
         rotors.push_back(EnigmaConfigLoader::loadRotor(provider, FileName(assetsDirectory / defaultRotor1File)));
