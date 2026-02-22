@@ -83,6 +83,12 @@ target_compile_definitions(EnigmaCore_OBJ PRIVATE
     ENIGMA_INSTALL_ASSETS_PATH="${CMAKE_INSTALL_FULL_DATADIR}/EnigmaMachineCore/assets/"
 )
 
+# On Windows, when building a shared library, the object files must also 
+# have the EXPORTS definition so they know to export symbols rather than import them.
+if(BUILD_SHARED_LIBS)
+    target_compile_definitions(EnigmaCore_OBJ PRIVATE EnigmaCore_EXPORTS)
+endif()
+
 # 2. Create the final EnigmaCore library target (Static or Shared)
 # This target ONLY exports symbols annotated with ENIGMACORE_EXPORT.
 add_library(EnigmaCore
@@ -102,7 +108,15 @@ add_library(EnigmaMachineCore::EnigmaCore ALIAS EnigmaCore)
 include(GenerateExportHeader)
 generate_export_header(EnigmaCore
     BASE_NAME ENIGMACORE
-    EXPORT_FILE_NAME ${CMAKE_CURRENT_SOURCE_DIR}/include/EnigmaCore_EXPORT.hpp
+    EXPORT_FILE_NAME ${CMAKE_CURRENT_BINARY_DIR}/generated/EnigmaCore_EXPORT.hpp
+)
+
+# Add the generated directory to include paths
+target_include_directories(EnigmaCore_OBJ PUBLIC 
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/generated>
+)
+target_include_directories(EnigmaCore PUBLIC 
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/generated>
 )
 
 # --- Compiler Warnings ---
@@ -240,13 +254,16 @@ install(TARGETS EnigmaCore
 # 2. Install public headers
 set(PUBLIC_HEADERS
     include/EnigmaCore.hpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/EnigmaCore_EXPORT.hpp
     EnigmaMachine/include/EnigmaMachine.hpp
     EnigmaMachine/include/IEnigmaObserver.hpp
     EnigmaMachine/include/IAssetProvider.hpp
 )
 
 install(FILES ${PUBLIC_HEADERS}
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/EnigmaMachineCore
+)
+
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/generated/EnigmaCore_EXPORT.hpp
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/EnigmaMachineCore
 )
 
