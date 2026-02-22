@@ -22,7 +22,8 @@ jobs:
           -DCMAKE_BUILD_TYPE=Release \
           -DBUILD_SHARED_LIBS=ON \
           -DENIGMA_BUILD_TESTS=OFF \
-          -DENIGMA_BUILD_CLI=ON
+          -DENIGMA_BUILD_CLI=ON \
+          -DCMAKE_INSTALL_PREFIX=${{ github.workspace }}/install_dir
         cmake --build build --config Release
 
     - name: Install to Local Prefix
