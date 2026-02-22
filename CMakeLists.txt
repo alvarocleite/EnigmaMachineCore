@@ -92,7 +92,7 @@ target_link_libraries(EnigmaCore PRIVATE $<BUILD_INTERFACE:toml11::toml11>)
 target_include_directories(EnigmaCore 
     PUBLIC 
         $<BUILD_INTERFACE:${INCLUDE_DIRS}>
-        $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/EnigmaMachineCore>
+        $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
 )
 
 # Create namespaced alias for safer consumption
@@ -234,7 +234,7 @@ install(TARGETS EnigmaCore
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-    INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/EnigmaMachineCore
+    INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
 )
 
 # 2. Install public headers

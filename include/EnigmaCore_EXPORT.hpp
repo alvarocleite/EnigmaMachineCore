@@ -9,15 +9,15 @@
 #  ifndef ENIGMACORE_EXPORT
 #    ifdef EnigmaCore_EXPORTS
         /* We are building this library */
-#      define ENIGMACORE_EXPORT __attribute__((visibility("default")))
+#      define ENIGMACORE_EXPORT 
 #    else
         /* We are using this library */
-#      define ENIGMACORE_EXPORT __attribute__((visibility("default")))
+#      define ENIGMACORE_EXPORT 
 #    endif
 #  endif
 
 #  ifndef ENIGMACORE_NO_EXPORT
-#    define ENIGMACORE_NO_EXPORT __attribute__((visibility("hidden")))
+#    define ENIGMACORE_NO_EXPORT 
 #  endif
 #endif
 
