@@ -258,5 +258,5 @@ This project is designed to be easily embedded as a submodule in other CMake pro
     target_link_libraries(MyTarget PRIVATE EnigmaMachineCore::EnigmaCore)
     ```
     ```cpp
-    #include <EnigmaCore.hpp>
+    #include <EnigmaMachineCore/EnigmaCore.hpp>
     ```

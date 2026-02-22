@@ -46,9 +46,11 @@ To use `EnigmaCore` as a library in your own project, include the namespaced pub
 #include <EnigmaMachineCore/EnigmaCore.hpp>
 
 int main() {
-    // 1. Initialize with a configuration file and assets path
-    // If the library is installed, it can automatically resolve assets.
-    EnigmaMachine machine("EnigmaMachineConfig1.toml", "./assets");
+    // 1. Initialize a standard machine (auto-resolves assets if installed)
+    EnigmaMachine machine;
+
+    // OR initialize with a specific configuration file
+    // EnigmaMachine machine("EnigmaMachineConfig1.toml", "./assets");
 
     // 2. Transform a character (0-25 index)
     int encrypted = machine.keyTransform(7); // 'H' -> ?

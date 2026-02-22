@@ -88,8 +88,12 @@ target_compile_definitions(EnigmaCore_OBJ PRIVATE
 add_library(EnigmaCore
     $<TARGET_OBJECTS:EnigmaCore_OBJ>
 )
-target_link_libraries(EnigmaCore PUBLIC toml11::toml11)
-target_include_directories(EnigmaCore PUBLIC ${INCLUDE_DIRS})
+target_link_libraries(EnigmaCore PRIVATE $<BUILD_INTERFACE:toml11::toml11>)
+target_include_directories(EnigmaCore 
+    PUBLIC 
+        $<BUILD_INTERFACE:${INCLUDE_DIRS}>
+        $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/EnigmaMachineCore>
+)
 
 # Create namespaced alias for safer consumption
 add_library(EnigmaMachineCore::EnigmaCore ALIAS EnigmaCore)

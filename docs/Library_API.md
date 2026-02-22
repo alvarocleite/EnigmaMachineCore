@@ -78,9 +78,11 @@ class MyLogger : public IEnigmaObserver {
 };
 
 int main() {
-    // 1. Initialize
-    // If installed, this can also resolve assets automatically
-    EnigmaMachine machine("config.toml", "./assets");
+    // 1. Initialize (standard machine auto-resolves assets if installed)
+    EnigmaMachine machine;
+    
+    // OR: Initialize with specific config and assets folder
+    // EnigmaMachine machine("config.toml", "./assets");
     
     // 2. Observe
     MyLogger logger;
