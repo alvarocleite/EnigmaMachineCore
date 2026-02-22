@@ -1,0 +1,118 @@
+name: Install Verification
+
+on:
+  push:
+    branches: [ "main", "development" ]
+  pull_request:
+    branches: [ "main", "development" ]
+
+jobs:
+  verify-install:
+    name: Verify Installation (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: recursive
+
+    - name: Configure and Build
+      shell: bash
+      run: |
+        cmake -B build \
+          -DCMAKE_BUILD_TYPE=Release \
+          -DBUILD_SHARED_LIBS=ON \
+          -DENIGMA_BUILD_TESTS=OFF \
+          -DENIGMA_BUILD_CLI=ON \
+          -DCMAKE_INSTALL_PREFIX="$GITHUB_WORKSPACE/install_dir"
+        cmake --build build --config Release
+
+    - name: Install to Local Prefix
+      shell: bash
+      run: |
+        cmake --install build --config Release --prefix "$GITHUB_WORKSPACE/install_dir"
+
+    - name: Verify Installed Files
+      shell: bash
+      run: |
+        INSTALL_DIR="$GITHUB_WORKSPACE/install_dir"
+        if [ "${{ matrix.os }}" == "windows-latest" ]; then
+          test -f "$INSTALL_DIR/bin/EnigmaCore.dll"
+          test -f "$INSTALL_DIR/lib/EnigmaCore.lib"
+          test -f "$INSTALL_DIR/bin/EnigmaMachineCore.exe"
+        elif [ "${{ matrix.os }}" == "macos-latest" ]; then
+          test -f "$INSTALL_DIR/lib/libEnigmaCore.dylib"
+          test -f "$INSTALL_DIR/bin/EnigmaMachineCore"
+        else
+          test -f "$INSTALL_DIR/lib/libEnigmaCore.so"
+          test -f "$INSTALL_DIR/bin/EnigmaMachineCore"
+        fi
+        test -f "$INSTALL_DIR/include/EnigmaMachineCore/EnigmaCore.hpp"
+        test -f "$INSTALL_DIR/share/EnigmaMachineCore/assets/EnigmaMachineConfig1.toml"
+
+    - name: Setup Consumer App
+      shell: bash
+      run: |
+        mkdir -p "$GITHUB_WORKSPACE/consumer_app"
+        cd "$GITHUB_WORKSPACE/consumer_app"
+        cat > main.cpp <<EOF
+        #include <EnigmaMachineCore/EnigmaCore.hpp>
+        #include <iostream>
+        #include <cassert>
+
+        int main() {
+            // Using default constructor which relies on installed assets
+            EnigmaMachine machine;
+            int input = 7; // 'H'
+            int output = machine.keyTransform(input);
+            
+            std::cout << "Input: " << input << " -> Output: " << output << std::endl;
+            
+            // Basic sanity check: Encryption should produce a valid index
+            assert(output >= 0 && output < 26);
+            assert(output != input); // Enigma never maps a letter to itself
+            
+            std::cout << "Consumer Linkage Success!" << std::endl;
+            return 0;
+        }
+        EOF
+
+        cat > CMakeLists.txt <<EOF
+        cmake_minimum_required(VERSION 3.15)
+        project(EnigmaConsumer CXX)
+        set(CMAKE_CXX_STANDARD 20)
+        
+        # Find the installed package
+        find_package(EnigmaMachineCore REQUIRED)
+        
+        add_executable(consumer_app main.cpp)
+        target_link_libraries(consumer_app PRIVATE EnigmaMachineCore::EnigmaCore)
+        EOF
+
+    - name: Build Consumer App
+      shell: bash
+      run: |
+        cmake -S "$GITHUB_WORKSPACE/consumer_app" -B "$GITHUB_WORKSPACE/consumer_build" \
+          -DCMAKE_BUILD_TYPE=Release \
+          -DCMAKE_PREFIX_PATH="$GITHUB_WORKSPACE/install_dir"
+        cmake --build "$GITHUB_WORKSPACE/consumer_build" --config Release
+
+    - name: Run Consumer App (Asset Verification)
+      shell: bash
+      run: |
+        # Run from a different directory to ensure it doesn't find local 'assets/'
+        mkdir -p "$GITHUB_WORKSPACE/run_test"
+        cd "$GITHUB_WORKSPACE/run_test"
+        
+        if [ "${{ matrix.os }}" == "windows-latest" ]; then
+          # On Windows, the DLL must be in the same folder as the EXE or in PATH
+          cp "$GITHUB_WORKSPACE/install_dir/bin/EnigmaCore.dll" "$GITHUB_WORKSPACE/consumer_build/Release/"
+          "$GITHUB_WORKSPACE/consumer_build/Release/consumer_app.exe"
+        else
+          # On Unix, use the generated build folder
+          "$GITHUB_WORKSPACE/consumer_build/consumer_app"
+        fi

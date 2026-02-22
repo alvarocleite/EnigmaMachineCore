@@ -40,14 +40,17 @@ For more detailed build configurations and VS Code integration, see [docs/Buildi
 
 ## Library Usage
 
-To use `EnigmaCore` as a library in your own project, include the public API gateway:
+To use `EnigmaCore` as a library in your own project, include the namespaced public API gateway:
 
 ```cpp
-#include "EnigmaCore.hpp"
+#include <EnigmaMachineCore/EnigmaCore.hpp>
 
 int main() {
-    // 1. Initialize with a configuration file and assets path
-    EnigmaMachine machine("EnigmaMachineConfig1.toml", "./assets");
+    // 1. Initialize a standard machine (auto-resolves assets if installed)
+    EnigmaMachine machine;
+
+    // OR initialize with a specific configuration file
+    // EnigmaMachine machine("EnigmaMachineConfig1.toml", "./assets");
 
     // 2. Transform a character (0-25 index)
     int encrypted = machine.keyTransform(7); // 'H' -> ?
@@ -56,7 +59,34 @@ int main() {
 }
 ```
 
+### Integration via CMake
+If the library is installed on your system, you can find it using `find_package`:
+
+```cmake
+find_package(EnigmaMachineCore REQUIRED)
+target_link_libraries(your_app PRIVATE EnigmaMachineCore::EnigmaCore)
+```
+
 Refer to the [Library API Specification](docs/Library_API.md) for full interface details.
+
+## Installation
+
+You can install the library and CLI globally on your system:
+
+```bash
+cmake -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build
+sudo cmake --install build
+```
+
+This will install:
+- **Headers:** `/usr/local/include/EnigmaMachineCore/`
+- **Library:** `/usr/local/lib/libEnigmaCore.so` (or `.dll`/`.dylib`)
+- **CLI:** `/usr/local/bin/EnigmaMachineCore`
+- **Assets:** `/usr/local/share/EnigmaMachineCore/assets/`
+
+The installed CLI and Library are intelligent enough to find their assets in the system's `share/` directory if a local `assets/` folder is not present.
+
 
 ## Running Tests
 

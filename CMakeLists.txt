@@ -9,6 +9,9 @@ endif()
 # Define project name, version, and language
 project(EnigmaMachineCore VERSION 0.0.1 LANGUAGES CXX)
 
+# --- GNU Install Directories ---
+include(GNUInstallDirs)
+
 # --- Submodule Support & Options ---
 # Check if this project is the top-level project
 if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
@@ -75,13 +78,28 @@ target_include_directories(EnigmaCore_OBJ PUBLIC ${INCLUDE_DIRS})
 target_link_libraries(EnigmaCore_OBJ PUBLIC toml11::toml11)
 set_target_properties(EnigmaCore_OBJ PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
+# Define the installed assets path for the library fallback
+target_compile_definitions(EnigmaCore_OBJ PRIVATE 
+    ENIGMA_INSTALL_ASSETS_PATH="${CMAKE_INSTALL_FULL_DATADIR}/EnigmaMachineCore/assets/"
+)
+
+# On Windows, when building a shared library, the object files must also 
+# have the EXPORTS definition so they know to export symbols rather than import them.
+if(BUILD_SHARED_LIBS)
+    target_compile_definitions(EnigmaCore_OBJ PRIVATE EnigmaCore_EXPORTS)
+endif()
+
 # 2. Create the final EnigmaCore library target (Static or Shared)
 # This target ONLY exports symbols annotated with ENIGMACORE_EXPORT.
 add_library(EnigmaCore
     $<TARGET_OBJECTS:EnigmaCore_OBJ>
 )
-target_link_libraries(EnigmaCore PUBLIC toml11::toml11)
-target_include_directories(EnigmaCore PUBLIC ${INCLUDE_DIRS})
+target_link_libraries(EnigmaCore PRIVATE $<BUILD_INTERFACE:toml11::toml11>)
+target_include_directories(EnigmaCore 
+    PUBLIC 
+        $<BUILD_INTERFACE:${INCLUDE_DIRS}>
+        $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+)
 
 # Create namespaced alias for safer consumption
 add_library(EnigmaMachineCore::EnigmaCore ALIAS EnigmaCore)
@@ -90,7 +108,15 @@ add_library(EnigmaMachineCore::EnigmaCore ALIAS EnigmaCore)
 include(GenerateExportHeader)
 generate_export_header(EnigmaCore
     BASE_NAME ENIGMACORE
-    EXPORT_FILE_NAME ${CMAKE_CURRENT_SOURCE_DIR}/include/EnigmaCore_EXPORT.hpp
+    EXPORT_FILE_NAME ${CMAKE_CURRENT_BINARY_DIR}/generated/EnigmaCore_EXPORT.hpp
+)
+
+# Add the generated directory to include paths
+target_include_directories(EnigmaCore_OBJ PUBLIC 
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/generated>
+)
+target_include_directories(EnigmaCore PUBLIC 
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/generated>
 )
 
 # --- Compiler Warnings ---
@@ -136,8 +162,16 @@ if(ENIGMA_BUILD_CLI)
         ${APP_SOURCES}
     )
 
+    # Add include directories directly to the executable to ensure it can find headers
+    target_include_directories(${PROJECT_NAME} PRIVATE ${INCLUDE_DIRS})
+
     # Link the core library logic to the executable
     target_link_libraries(${PROJECT_NAME} PRIVATE EnigmaMachineCore::EnigmaCore CLI11::CLI11)
+
+    # Define the installed assets path for the CLI fallback
+    target_compile_definitions(${PROJECT_NAME} PRIVATE 
+        ENIGMA_INSTALL_ASSETS_PATH="${CMAKE_INSTALL_FULL_DATADIR}/EnigmaMachineCore/assets/"
+    )
 
     # --- Asset Handling ---
     # Copy assets to build directory after build
@@ -205,3 +239,74 @@ if(CLANG_FORMAT_EXE)
 else()
     message(WARNING "clang-format not found. The 'enigma_format' target will not be available.")
 endif()
+
+# --- Installation Rules ---
+
+# 1. Install EnigmaCore library
+install(TARGETS EnigmaCore
+    EXPORT EnigmaMachineCoreTargets
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+    INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+)
+
+# 2. Install public headers
+set(PUBLIC_HEADERS
+    include/EnigmaCore.hpp
+    EnigmaMachine/include/EnigmaMachine.hpp
+    EnigmaMachine/include/IEnigmaObserver.hpp
+    EnigmaMachine/include/IAssetProvider.hpp
+)
+
+install(FILES ${PUBLIC_HEADERS}
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/EnigmaMachineCore
+)
+
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/generated/EnigmaCore_EXPORT.hpp
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/EnigmaMachineCore
+)
+
+# 3. Install assets
+install(DIRECTORY assets/
+    DESTINATION ${CMAKE_INSTALL_DATADIR}/EnigmaMachineCore/assets
+)
+
+# 4. Install CLI executable
+if(ENIGMA_BUILD_CLI)
+    install(TARGETS ${PROJECT_NAME}
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+    )
+endif()
+
+# --- Package Export (find_package support) ---
+
+# 1. Install the export set
+install(EXPORT EnigmaMachineCoreTargets
+    FILE EnigmaMachineCoreTargets.cmake
+    NAMESPACE EnigmaMachineCore::
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/EnigmaMachineCore
+)
+
+# 2. Generate and install the Config and Version files
+include(CMakePackageConfigHelpers)
+
+write_basic_package_version_file(
+    "${CMAKE_CURRENT_BINARY_DIR}/EnigmaMachineCoreConfigVersion.cmake"
+    VERSION ${PROJECT_VERSION}
+    COMPATIBILITY SameMajorVersion
+)
+
+configure_package_config_file(
+    "${CMAKE_CURRENT_SOURCE_DIR}/cmake/EnigmaMachineCoreConfig.cmake.in"
+    "${CMAKE_CURRENT_BINARY_DIR}/EnigmaMachineCoreConfig.cmake"
+    INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/EnigmaMachineCore
+)
+
+install(FILES
+    "${CMAKE_CURRENT_BINARY_DIR}/EnigmaMachineCoreConfig.cmake"
+    "${CMAKE_CURRENT_BINARY_DIR}/EnigmaMachineCoreConfigVersion.cmake"
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/EnigmaMachineCore
+)
+
+
