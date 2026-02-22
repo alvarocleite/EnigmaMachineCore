@@ -28,35 +28,37 @@ jobs:
           -DBUILD_SHARED_LIBS=ON \
           -DENIGMA_BUILD_TESTS=OFF \
           -DENIGMA_BUILD_CLI=ON \
-          -DCMAKE_INSTALL_PREFIX=${{ github.workspace }}/install_dir
+          -DCMAKE_INSTALL_PREFIX="$GITHUB_WORKSPACE/install_dir"
         cmake --build build --config Release
 
     - name: Install to Local Prefix
       shell: bash
       run: |
-        cmake --install build --config Release --prefix install_dir
+        cmake --install build --config Release --prefix "$GITHUB_WORKSPACE/install_dir"
 
     - name: Verify Installed Files
       shell: bash
       run: |
+        INSTALL_DIR="$GITHUB_WORKSPACE/install_dir"
         if [ "${{ matrix.os }}" == "windows-latest" ]; then
-          test -f install_dir/bin/EnigmaCore.dll
-          test -f install_dir/lib/EnigmaCore.lib
-          test -f install_dir/bin/EnigmaMachineCore.exe
+          test -f "$INSTALL_DIR/bin/EnigmaCore.dll"
+          test -f "$INSTALL_DIR/lib/EnigmaCore.lib"
+          test -f "$INSTALL_DIR/bin/EnigmaMachineCore.exe"
         elif [ "${{ matrix.os }}" == "macos-latest" ]; then
-          test -f install_dir/lib/libEnigmaCore.dylib
-          test -f install_dir/bin/EnigmaMachineCore
+          test -f "$INSTALL_DIR/lib/libEnigmaCore.dylib"
+          test -f "$INSTALL_DIR/bin/EnigmaMachineCore"
         else
-          test -f install_dir/lib/libEnigmaCore.so
-          test -f install_dir/bin/EnigmaMachineCore
+          test -f "$INSTALL_DIR/lib/libEnigmaCore.so"
+          test -f "$INSTALL_DIR/bin/EnigmaMachineCore"
         fi
-        test -f install_dir/include/EnigmaMachineCore/EnigmaCore.hpp
-        test -f install_dir/share/EnigmaMachineCore/assets/EnigmaMachineConfig1.toml
+        test -f "$INSTALL_DIR/include/EnigmaMachineCore/EnigmaCore.hpp"
+        test -f "$INSTALL_DIR/share/EnigmaMachineCore/assets/EnigmaMachineConfig1.toml"
 
     - name: Setup Consumer App
       shell: bash
       run: |
-        mkdir consumer_app && cd consumer_app
+        mkdir -p "$GITHUB_WORKSPACE/consumer_app"
+        cd "$GITHUB_WORKSPACE/consumer_app"
         cat > main.cpp <<EOF
         #include <EnigmaMachineCore/EnigmaCore.hpp>
         #include <iostream>
@@ -94,22 +96,23 @@ jobs:
     - name: Build Consumer App
       shell: bash
       run: |
-        cmake -S consumer_app -B consumer_build \
+        cmake -S "$GITHUB_WORKSPACE/consumer_app" -B "$GITHUB_WORKSPACE/consumer_build" \
           -DCMAKE_BUILD_TYPE=Release \
-          -DCMAKE_PREFIX_PATH=${{ github.workspace }}/install_dir
-        cmake --build consumer_build --config Release
+          -DCMAKE_PREFIX_PATH="$GITHUB_WORKSPACE/install_dir"
+        cmake --build "$GITHUB_WORKSPACE/consumer_build" --config Release
 
     - name: Run Consumer App (Asset Verification)
       shell: bash
       run: |
         # Run from a different directory to ensure it doesn't find local 'assets/'
-        mkdir run_test && cd run_test
+        mkdir -p "$GITHUB_WORKSPACE/run_test"
+        cd "$GITHUB_WORKSPACE/run_test"
         
         if [ "${{ matrix.os }}" == "windows-latest" ]; then
           # On Windows, the DLL must be in the same folder as the EXE or in PATH
-          cp ../../install_dir/bin/EnigmaCore.dll ../consumer_build/Release/
-          ../consumer_build/Release/consumer_app.exe
+          cp "$GITHUB_WORKSPACE/install_dir/bin/EnigmaCore.dll" "$GITHUB_WORKSPACE/consumer_build/Release/"
+          "$GITHUB_WORKSPACE/consumer_build/Release/consumer_app.exe"
         else
           # On Unix, use the generated build folder
-          ../consumer_build/consumer_app
+          "$GITHUB_WORKSPACE/consumer_build/consumer_app"
         fi
