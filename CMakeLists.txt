@@ -148,6 +148,9 @@ if(ENIGMA_BUILD_CLI)
         ${APP_SOURCES}
     )
 
+    # Add include directories directly to the executable to ensure it can find headers
+    target_include_directories(${PROJECT_NAME} PRIVATE ${INCLUDE_DIRS})
+
     # Link the core library logic to the executable
     target_link_libraries(${PROJECT_NAME} PRIVATE EnigmaMachineCore::EnigmaCore CLI11::CLI11)
 
