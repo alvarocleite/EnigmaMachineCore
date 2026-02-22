@@ -19,7 +19,7 @@ To ensure long-term binary stability (ABI) and security, EnigmaCore enforces a c
 The `EnigmaMachine` class is the primary entry point for all encryption operations.
 
 ### **Constructors**
-*   `EnigmaMachine()`: Initializes a standard machine with default rotors (I, II, III) and no plugboard swaps.
+*   `EnigmaMachine()`: Initializes a standard machine with default rotors (I, II, III). If the library is installed, it automatically attempts to find these assets in the system's `share/` directory.
 *   `EnigmaMachine(string_view fileName, string_view assetPath)`: Standard file-based initialization.
 *   `EnigmaMachine(IAssetProvider& provider, string_view fileName, string_view assetPath)`: Dependency-injected initialization for custom environments.
 
@@ -67,19 +67,19 @@ public:
 ## 5. Usage Example
 
 ```cpp
-#include <EnigmaCore.hpp>
+#include <EnigmaMachineCore/EnigmaCore.hpp>
 #include <iostream>
 
 class MyLogger : public IEnigmaObserver {
     void onRotorStepped(int idx, int pos) override { 
-        std::cout << "Rotor " << idx << " moved to " << pos << "
-"; 
+        std::cout << "Rotor " << idx << " moved to " << pos << "\n"; 
     }
     void onCharEncrypted(char in, char out) override {}
 };
 
 int main() {
     // 1. Initialize
+    // If installed, this can also resolve assets automatically
     EnigmaMachine machine("config.toml", "./assets");
     
     // 2. Observe

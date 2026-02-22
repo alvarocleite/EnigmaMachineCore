@@ -41,6 +41,7 @@ To support robust testing and modularity, the project uses a "Library + Runner" 
 
 1.  **EnigmaCore (Shared/Static Library):**
     *   **Content:** The final distributable binary. It contains only the **Public API** symbols.
+    *   **Visibility:** Symbols are hidden by default to ensure binary stability. Only interfaces annotated with `ENIGMACORE_EXPORT` are visible.
     *   **Purpose:** The production-ready engine for external applications.
     *   **Library Type:** Generic (respects `BUILD_SHARED_LIBS`).
 
@@ -139,7 +140,38 @@ ctest --output-on-failure
 ./build/release/EnigmaMachineCore -m "HELLO" --assets ./my_assets --debug
 ```
 
-*Note: By default, the application looks for assets in the `assets/` directory relative to the executable (automatically copied by the build system).*
+*Note: The application first looks for assets in a local `assets/` directory. If it doesn't find them, it automatically falls back to the system's installation path (e.g., `/usr/local/share/EnigmaMachineCore/assets/`).*
+
+---
+
+## Installation & Distribution
+
+To install the project globally on your system:
+
+```bash
+# 1. Configure and Build
+cmake -DCMAKE_BUILD_TYPE=Release -S . -B build/release
+cmake --build build/release
+
+# 2. Install
+# Default prefix is /usr/local on Linux/macOS or C:\Program Files on Windows
+sudo cmake --install build/release
+```
+
+### Consuming the Library (find_package)
+Once installed, your own C++ projects can easily integrate the library:
+
+```cmake
+# CMakeLists.txt
+find_package(EnigmaMachineCore REQUIRED)
+add_executable(my_app main.cpp)
+target_link_libraries(my_app PRIVATE EnigmaMachineCore::EnigmaCore)
+```
+
+```cpp
+// main.cpp
+#include <EnigmaMachineCore/EnigmaCore.hpp>
+```
 
 ---
 

@@ -1,0 +1,86 @@
+name: Install Verification
+
+on:
+  push:
+    branches: [ "main", "development" ]
+  pull_request:
+    branches: [ "main", "development" ]
+
+jobs:
+  verify-install:
+    name: Verify Installation & Consumer Linking (Linux)
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: recursive
+
+    - name: Configure and Build
+      run: |
+        cmake -B build \
+          -DCMAKE_BUILD_TYPE=Release \
+          -DBUILD_SHARED_LIBS=ON \
+          -DENIGMA_BUILD_TESTS=OFF \
+          -DENIGMA_BUILD_CLI=ON
+        cmake --build build --config Release
+
+    - name: Install to Local Prefix
+      run: |
+        cmake --install build --prefix install_dir
+
+    - name: Verify Installed Files
+      run: |
+        test -f install_dir/lib/libEnigmaCore.so
+        test -f install_dir/bin/EnigmaMachineCore
+        test -f install_dir/include/EnigmaMachineCore/EnigmaCore.hpp
+        test -f install_dir/share/EnigmaMachineCore/assets/EnigmaMachineConfig1.toml
+
+    - name: Setup Consumer App
+      run: |
+        mkdir consumer_app && cd consumer_app
+        cat > main.cpp <<EOF
+        #include <EnigmaMachineCore/EnigmaCore.hpp>
+        #include <iostream>
+        #include <cassert>
+
+        int main() {
+            // Using default constructor which relies on installed assets
+            EnigmaMachine machine;
+            int input = 7; // 'H'
+            int output = machine.keyTransform(input);
+            
+            std::cout << "Input: " << input << " -> Output: " << output << std::endl;
+            
+            // Basic sanity check: Encryption should produce a valid index
+            assert(output >= 0 && output < 26);
+            assert(output != input); // Enigma never maps a letter to itself
+            
+            std::cout << "Consumer Linkage Success!" << std::endl;
+            return 0;
+        }
+        EOF
+
+        cat > CMakeLists.txt <<EOF
+        cmake_minimum_required(VERSION 3.15)
+        project(EnigmaConsumer CXX)
+        set(CMAKE_CXX_STANDARD 20)
+        
+        # Find the installed package
+        find_package(EnigmaMachineCore REQUIRED)
+        
+        add_executable(consumer_app main.cpp)
+        target_link_libraries(consumer_app PRIVATE EnigmaMachineCore::EnigmaCore)
+        EOF
+
+    - name: Build Consumer App
+      run: |
+        cmake -S consumer_app -B consumer_build \
+          -DCMAKE_PREFIX_PATH=${{ github.workspace }}/install_dir
+        cmake --build consumer_build
+
+    - name: Run Consumer App (Asset Verification)
+      run: |
+        # Run from a different directory to ensure it doesn't find local 'assets/'
+        mkdir run_test && cd run_test
+        ../consumer_build/consumer_app
