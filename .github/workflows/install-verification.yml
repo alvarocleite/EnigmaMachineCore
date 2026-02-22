@@ -8,8 +8,12 @@ on:
 
 jobs:
   verify-install:
-    name: Verify Installation & Consumer Linking (Linux)
-    runs-on: ubuntu-latest
+    name: Verify Installation (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
 
     steps:
     - uses: actions/checkout@v4
@@ -17,6 +21,7 @@ jobs:
         submodules: recursive
 
     - name: Configure and Build
+      shell: bash
       run: |
         cmake -B build \
           -DCMAKE_BUILD_TYPE=Release \
@@ -27,17 +32,29 @@ jobs:
         cmake --build build --config Release
 
     - name: Install to Local Prefix
+      shell: bash
       run: |
-        cmake --install build --prefix install_dir
+        cmake --install build --config Release --prefix install_dir
 
     - name: Verify Installed Files
+      shell: bash
       run: |
-        test -f install_dir/lib/libEnigmaCore.so
-        test -f install_dir/bin/EnigmaMachineCore
+        if [ "${{ matrix.os }}" == "windows-latest" ]; then
+          test -f install_dir/bin/EnigmaCore.dll
+          test -f install_dir/lib/EnigmaCore.lib
+          test -f install_dir/bin/EnigmaMachineCore.exe
+        elif [ "${{ matrix.os }}" == "macos-latest" ]; then
+          test -f install_dir/lib/libEnigmaCore.dylib
+          test -f install_dir/bin/EnigmaMachineCore
+        else
+          test -f install_dir/lib/libEnigmaCore.so
+          test -f install_dir/bin/EnigmaMachineCore
+        fi
         test -f install_dir/include/EnigmaMachineCore/EnigmaCore.hpp
         test -f install_dir/share/EnigmaMachineCore/assets/EnigmaMachineConfig1.toml
 
     - name: Setup Consumer App
+      shell: bash
       run: |
         mkdir consumer_app && cd consumer_app
         cat > main.cpp <<EOF
@@ -75,13 +92,24 @@ jobs:
         EOF
 
     - name: Build Consumer App
+      shell: bash
       run: |
         cmake -S consumer_app -B consumer_build \
+          -DCMAKE_BUILD_TYPE=Release \
           -DCMAKE_PREFIX_PATH=${{ github.workspace }}/install_dir
-        cmake --build consumer_build
+        cmake --build consumer_build --config Release
 
     - name: Run Consumer App (Asset Verification)
+      shell: bash
       run: |
         # Run from a different directory to ensure it doesn't find local 'assets/'
         mkdir run_test && cd run_test
-        ../consumer_build/consumer_app
+        
+        if [ "${{ matrix.os }}" == "windows-latest" ]; then
+          # On Windows, the DLL must be in the same folder as the EXE or in PATH
+          cp ../../install_dir/bin/EnigmaCore.dll ../consumer_build/Release/
+          ../consumer_build/Release/consumer_app.exe
+        else
+          # On Unix, use the generated build folder
+          ../consumer_build/consumer_app
+        fi
