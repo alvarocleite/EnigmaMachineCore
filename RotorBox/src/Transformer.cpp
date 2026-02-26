@@ -9,7 +9,7 @@
 #include <stdexcept>
 #include <string>
 
-Transformer::Transformer() { type = TransformerType::NotDefined; }
+Transformer::Transformer() { type = TransformerType::Undefined; }
 
 int Transformer::sizeOfLookupTable() const {
     return static_cast<int>(lookupTable.size()) * static_cast<int>(lookupTable[0].size());

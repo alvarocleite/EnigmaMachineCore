@@ -15,7 +15,7 @@ public:
 
 TEST(TransformerTests, DefaultInitialization) {
     ConcreteTransformer transformer;
-    EXPECT_EQ(transformer.getType(), TransformerType::NotDefined);
+    EXPECT_EQ(transformer.getType(), TransformerType::Undefined);
 }
 
 TEST(TransformerTests, LUTSize) {

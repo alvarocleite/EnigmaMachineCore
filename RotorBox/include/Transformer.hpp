@@ -14,7 +14,7 @@
 /**
  * @brief Enum representing the type of transformer.
  */
-enum class TransformerType { NotDefined = 0, Rotor, Reflector };
+enum class TransformerType { Undefined = 0, Rotor, Reflector };
 
 /**
  * @brief Base class for transformers (rotors and reflectors).
