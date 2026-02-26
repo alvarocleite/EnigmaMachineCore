@@ -36,10 +36,10 @@ RotorBox::RotorBox(int count, const std::vector<int>& rotorPositions, const std:
     }
 
     // Will throw if initialization fails
-    initTransformerVec(count, rotors, reflector);
+    initTransformers(count, rotors, reflector);
 
     for (int i = 0; i < count; i++) {
-        transformerVec.at(i)->setPosition(this->rotorPositions.at(i));
+        transformers.at(i)->setPosition(this->rotorPositions.at(i));
     }
 }
 
@@ -57,9 +57,9 @@ void RotorBox::removeObserver(IEnigmaObserver* observer) {
  * must contain exactly rotorCount rotors followed by one reflector at the end.
  * Memory is managed via std::unique_ptr to ensure proper cleanup.
  */
-void RotorBox::initTransformerVec(int count, const std::vector<RotorConfig>& rotors, const ReflectorConfig& reflector) {
-    transformerVec.clear();
-    transformerVec.reserve(count + 1);
+void RotorBox::initTransformers(int count, const std::vector<RotorConfig>& rotors, const ReflectorConfig& reflector) {
+    transformers.clear();
+    transformers.reserve(count + 1);
 
     // Validate input size: n Rotors
     if (rotors.size() != (size_t)count) {
@@ -67,13 +67,13 @@ void RotorBox::initTransformerVec(int count, const std::vector<RotorConfig>& rot
     }
 
     for (const auto& rotorConfig : rotors) {
-        transformerVec.push_back(std::make_unique<Rotor>(rotorConfig));
+        transformers.push_back(std::make_unique<Rotor>(rotorConfig));
     }
-    transformerVec.push_back(std::make_unique<Reflector>(reflector));
+    transformers.push_back(std::make_unique<Reflector>(reflector));
 }
 
-void RotorBox::printTransformerVec() const {
-    for (auto& transformer : transformerVec) {
+void RotorBox::printTransformers() const {
+    for (auto& transformer : transformers) {
         std::cout << "Transformer Type: " << static_cast<int>(transformer->getType()) << "\n";
     }
 }
@@ -92,16 +92,16 @@ int RotorBox::keyTransform(int input) {
     bool reverse = false;
     int newPosition = input;
     for (int i = 0; i < rotorCount; i++) {
-        newPosition = transformerVec.at(i)->transform(newPosition, reverse);
+        newPosition = transformers.at(i)->transform(newPosition, reverse);
     }
 
     // reflector
-    newPosition = transformerVec.at(rotorCount)->transform(newPosition, reverse);
+    newPosition = transformers.at(rotorCount)->transform(newPosition, reverse);
 
     // transform through rotors in reverse
     reverse = true;
     for (int i = rotorCount - 1; i >= 0; i--) {
-        newPosition = transformerVec.at(i)->transform(newPosition, reverse);
+        newPosition = transformers.at(i)->transform(newPosition, reverse);
     }
 
     return newPosition;
@@ -121,7 +121,7 @@ void RotorBox::updateRotors() {
     // Storing notch states BEFORE stepping
     std::vector<bool> atNotch(rotorCount, false);
     for (int i = 0; i < rotorCount; i++) {
-        auto* rotor = static_cast<Rotor*>(transformerVec.at(i).get());
+        auto* rotor = static_cast<Rotor*>(transformers.at(i).get());
         int pos = rotor->getPosition();
         atNotch[i] = rotor->isNotchPosition(pos);
     }
@@ -129,20 +129,20 @@ void RotorBox::updateRotors() {
     //  Step rotors according to Enigma mechanics
 
     // Rightmost rotor always steps
-    transformerVec.at(0)->rotate();
+    transformers.at(0)->rotate();
 
     // Remaining rotors
     for (int i = 1; i < rotorCount; i++) {
         bool carried = atNotch[i - 1];
         bool doubleStep = (i < rotorCount - 1) && atNotch[i];
         if (carried || doubleStep) {
-            transformerVec.at(i)->rotate();
+            transformers.at(i)->rotate();
         }
     }
 
     // Notify observers
     for (int i = 0; i < rotorCount; i++) {
-        int pos = transformerVec.at(i)->getPosition();
+        int pos = transformers.at(i)->getPosition();
         for (auto* obs : observers) {
             obs->onRotorStepped(i, pos);
         }
