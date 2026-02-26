@@ -17,13 +17,13 @@
 class Rotor : public Transformer {
 private:
     int notchPosition;
-    int rotorRotationCount;
+    int rotationCount;
 
     /**
      * @brief Generates the reverse transformation lookup table.
      * @throws std::runtime_error If reverse mapping generation fails.
      */
-    void initReverseTransformLUT();
+    void initReverseLookupTable();
 
     /**
      * @brief Initializes the rotor position.

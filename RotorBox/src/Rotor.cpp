@@ -15,13 +15,13 @@
  * 1. Setting the notch position and initial rotation count.
  * 2. Validating the wiring size against TRANSFORMER_SIZE.
  * 3. Populating the forward transformation table.
- * 4. Generating the reverse transformation table via `initReverseTransformLUT`.
+ * 4. Generating the reverse transformation table via `initReverseLookupTable`.
  *
  * @throws std::runtime_error If the wiring size in the config is incorrect.
  */
 Rotor::Rotor(const RotorConfig& config) {
     notchPosition = config.notchPosition;
-    rotorRotationCount = 0;
+    rotationCount = 0;
     type = TransformerType::Rotor;
 
     // Set forward wiring from config
@@ -33,7 +33,7 @@ Rotor::Rotor(const RotorConfig& config) {
         setTransformValue(0, static_cast<int>(i), config.wiring[i]);
     }
 
-    initReverseTransformLUT();
+    initReverseLookupTable();
     initRotorPosition();
 }
 
@@ -43,7 +43,7 @@ Rotor::Rotor(const RotorConfig& config) {
  * back through the rotors after being reflected. It iterates through the forward LUT
  * to map outputs back to inputs.
  */
-void Rotor::initReverseTransformLUT() {
+void Rotor::initReverseLookupTable() {
     const auto& forwardRow = getTransformRow(0);
     std::vector<bool> seen(TRANSFORMER_SIZE, false);
 
@@ -71,7 +71,7 @@ void Rotor::initReverseTransformLUT() {
  * @details Sets the internal rotation counter to the specified offset.
  */
 int Rotor::initRotorPosition(int offset) {
-    rotorRotationCount = offset;
+    rotationCount = offset;
     return 0;
 }
 
@@ -87,9 +87,9 @@ bool Rotor::isNotchPosition(int position) { return (position == notchPosition); 
  * effectively changes the entry and exit pins of the signal.
  */
 int Rotor::transform(int position, bool reverse) {
-    position = (position + rotorRotationCount) % TRANSFORMER_SIZE;
+    position = (position + rotationCount) % TRANSFORMER_SIZE;
     position = getTransformValue((int)reverse, position);
-    position = (position - rotorRotationCount + TRANSFORMER_SIZE) % TRANSFORMER_SIZE;
+    position = (position - rotationCount + TRANSFORMER_SIZE) % TRANSFORMER_SIZE;
 
     return position;
 }
@@ -101,14 +101,14 @@ int Rotor::transform(int position, bool reverse) {
  * @return 1 if the rotor is now at the notch position (triggering a carry), 0 otherwise.
  */
 int Rotor::rotate() {
-    rotorRotationCount = (rotorRotationCount + 1) % TRANSFORMER_SIZE;
-    return isNotchPosition(rotorRotationCount) ? 1 : 0;
+    rotationCount = (rotationCount + 1) % TRANSFORMER_SIZE;
+    return isNotchPosition(rotationCount) ? 1 : 0;
 }
 
 /**
  * @details Manually sets the current rotational position of the rotor.
  * This is used for setting up the initial machine state key.
  */
-void Rotor::setPosition(int position) { rotorRotationCount = position; }
+void Rotor::setPosition(int position) { rotationCount = position; }
 
-int Rotor::getPosition() const { return rotorRotationCount; }
+int Rotor::getPosition() const { return rotationCount; }

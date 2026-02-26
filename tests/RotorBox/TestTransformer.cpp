@@ -21,5 +21,5 @@ TEST(TransformerTests, DefaultInitialization) {
 TEST(TransformerTests, LUTSize) {
     ConcreteTransformer transformer;
     // TRANSFORMER_SIZE is 26, LUT is [2][26] = 52 elements
-    EXPECT_EQ(transformer.sizeOfTransformLUT(), 52);
+    EXPECT_EQ(transformer.sizeOfLookupTable(), 52);
 }

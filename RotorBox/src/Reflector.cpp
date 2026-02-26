@@ -33,6 +33,6 @@ Reflector::Reflector(const ReflectorConfig& config) {
  */
 int Reflector::transform(int position, bool reverse) {
     int newPosition = getTransformValue((int)reverse, position);
-    // transformLUT[reverse][position] = -1,  when reverse is true
+    // lookupTable[reverse][position] = -1,  when reverse is true
     return newPosition;
 }
