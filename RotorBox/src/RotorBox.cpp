@@ -17,7 +17,7 @@
  * @details Initializes a standard 3-rotor configuration with empty/default wiring.
  * Note: usage of this constructor is discouraged without subsequent initialization.
  */
-RotorBox::RotorBox() { nRotorCount = 0; }
+RotorBox::RotorBox() { rotorCount = 0; }
 
 /**
  * @details Initializes a custom rotor configuration.
@@ -30,7 +30,7 @@ RotorBox::RotorBox(int count, const std::vector<int>& rotorPositions, const std:
         throw std::invalid_argument("Error: Number of rotors and number of rotor positions do not match.");
     }
 
-    this->nRotorCount = count;
+    this->rotorCount = count;
     for (const auto& position : rotorPositions) {
         this->rotorPositions.push_back(position);
     }
@@ -54,7 +54,7 @@ void RotorBox::removeObserver(IEnigmaObserver* observer) {
  * @details Populates the internal transformer vector with unique pointers to Rotor and Reflector objects.
  *
  * @internal This method enforces the architectural constraint that the transformer vector
- * must contain exactly nRotorCount rotors followed by one reflector at the end.
+ * must contain exactly rotorCount rotors followed by one reflector at the end.
  * Memory is managed via std::unique_ptr to ensure proper cleanup.
  */
 void RotorBox::initTransformerVec(int count, const std::vector<RotorConfig>& rotors, const ReflectorConfig& reflector) {
@@ -91,16 +91,16 @@ int RotorBox::keyTransform(int input) {
     // transform through rotors forward
     bool reverse = false;
     int newPosition = input;
-    for (int i = 0; i < nRotorCount; i++) {
+    for (int i = 0; i < rotorCount; i++) {
         newPosition = transformerVec.at(i)->transform(newPosition, reverse);
     }
 
     // reflector
-    newPosition = transformerVec.at(nRotorCount)->transform(newPosition, reverse);
+    newPosition = transformerVec.at(rotorCount)->transform(newPosition, reverse);
 
     // transform through rotors in reverse
     reverse = true;
-    for (int i = nRotorCount - 1; i >= 0; i--) {
+    for (int i = rotorCount - 1; i >= 0; i--) {
         newPosition = transformerVec.at(i)->transform(newPosition, reverse);
     }
 
@@ -116,11 +116,11 @@ int RotorBox::keyTransform(int input) {
  * After stepping, observers are notified of the new rotor positions.
  */
 void RotorBox::updateRotors() {
-    if (nRotorCount < 1) return;
+    if (rotorCount < 1) return;
 
     // Storing notch states BEFORE stepping
-    std::vector<bool> atNotch(nRotorCount, false);
-    for (int i = 0; i < nRotorCount; i++) {
+    std::vector<bool> atNotch(rotorCount, false);
+    for (int i = 0; i < rotorCount; i++) {
         auto* rotor = static_cast<Rotor*>(transformerVec.at(i).get());
         int pos = rotor->getPosition();
         atNotch[i] = rotor->isNotchPosition(pos);
@@ -132,16 +132,16 @@ void RotorBox::updateRotors() {
     transformerVec.at(0)->rotate();
 
     // Remaining rotors
-    for (int i = 1; i < nRotorCount; i++) {
+    for (int i = 1; i < rotorCount; i++) {
         bool carried = atNotch[i - 1];
-        bool doubleStep = (i < nRotorCount - 1) && atNotch[i];
+        bool doubleStep = (i < rotorCount - 1) && atNotch[i];
         if (carried || doubleStep) {
             transformerVec.at(i)->rotate();
         }
     }
 
     // Notify observers
-    for (int i = 0; i < nRotorCount; i++) {
+    for (int i = 0; i < rotorCount; i++) {
         int pos = transformerVec.at(i)->getPosition();
         for (auto* obs : observers) {
             obs->onRotorStepped(i, pos);

@@ -40,13 +40,13 @@ public:
 TEST_F(RotorBoxTests, DefaultConstructor) {
     // Default constructor uses Rotor1, 2, 3 and Reflector at positions 0, 0, 0
     RotorBox rb;
-    // rb is now empty (nRotorCount = 0) because I updated the default constructor to be empty
+    // rb is now empty (rotorCount = 0) because I updated the default constructor to be empty
     // But let's verify it constructs safely
 
     // We can't transform with empty box easily unless it handles it (it loops 0 times).
     int input = 0;
-    // However, keyTransform accesses transformerVec.at(nRotorCount) for reflector.
-    // If nRotorCount is 0, it accesses at(0). If vector is empty, it throws out_of_range.
+    // However, keyTransform accesses transformerVec.at(rotorCount) for reflector.
+    // If rotorCount is 0, it accesses at(0). If vector is empty, it throws out_of_range.
     // So default constructed RotorBox is effectively unusable.
     // I should probably skip this test or update it to use the parameterized constructor.
 }

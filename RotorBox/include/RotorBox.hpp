@@ -19,7 +19,7 @@
  */
 class RotorBox {
 private:
-    int nRotorCount;
+    int rotorCount;
     std::vector<int> rotorPositions;
     std::vector<std::unique_ptr<Transformer>> transformerVec;
     std::vector<IEnigmaObserver*> observers;
