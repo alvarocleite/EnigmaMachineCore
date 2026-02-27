@@ -37,7 +37,7 @@ TEST_F(RotorTests, Reciprocity) {
     rotor.setPosition(0);
 
     // Verify that the Reverse LUT is the exact inverse of the Forward LUT
-    // This explicitly tests the logic in initReverseTransformLUT()
+    // This explicitly tests the logic in initReverseLookupTable()
     for (int i = 0; i < 26; i++) {
         int forward = rotor.transform(i, false);
         int reverse = rotor.transform(forward, true);

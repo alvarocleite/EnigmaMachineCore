@@ -14,7 +14,7 @@
 /**
  * @brief Enum representing the type of transformer.
  */
-enum class TransformerType { NotDefined = 0, Rotor, Reflector };
+enum class TransformerType { Undefined = 0, Rotor, Reflector };
 
 /**
  * @brief Base class for transformers (rotors and reflectors).
@@ -22,7 +22,7 @@ enum class TransformerType { NotDefined = 0, Rotor, Reflector };
  */
 class Transformer {
 private:
-    std::array<std::array<int, TRANSFORMER_SIZE>, 2> transformLUT;
+    std::array<std::array<int, TRANSFORMER_SIZE>, 2> lookupTable;
 
 protected:
     TransformerType type;
@@ -80,7 +80,7 @@ public:
      *
      * @return int Returns the size of the transformation lookup table.
      */
-    int sizeOfTransformLUT() const;
+    int sizeOfLookupTable() const;
 
     /**
      * @brief Returns the type of the transformer.
