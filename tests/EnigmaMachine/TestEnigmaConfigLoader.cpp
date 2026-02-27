@@ -63,7 +63,7 @@ TEST_F(EnigmaConfigLoaderTests, RotorConfigProperties) {
 // Mock implementation to test error handling for malformed content
 class MalformedAssetProvider : public IAssetProvider {
 public:
-    std::string loadAsset(std::string_view assetName) override {
+    std::string loadAsset(std::string_view assetName) const override {
         if (assetName == "bad_rotor.toml") {
             // Missing 'forward' wiring array
             return "[rotor]\nnotchPosition = 0\ntype = \"rotor\"\nsize = 26";

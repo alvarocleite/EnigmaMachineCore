@@ -16,5 +16,5 @@ public:
      * @return std::string The file content.
      * @throws std::runtime_error If the file cannot be opened.
      */
-    std::string loadAsset(std::string_view assetName) override;
+    std::string loadAsset(std::string_view assetName) const override;
 };
