@@ -4,6 +4,7 @@
  */
 
 #include <iostream>
+#include <ranges>
 #include <stdexcept>
 #include <string>
 #include <utility>
@@ -88,20 +89,18 @@ void RotorBox::printTransformers() const {
 int RotorBox::keyTransform(int input) {
     updateRotors();
 
-    // transform through rotors forward
-    bool reverse = false;
     int newPosition = input;
-    for (int i = 0; i < rotorCount; i++) {
-        newPosition = transformers.at(i)->transform(newPosition, reverse);
+    // transform through rotors forward
+    for (const auto& transformer : transformers | std::views::take(rotorCount)) {
+        newPosition = transformer->transform(newPosition, false);
     }
 
     // reflector
-    newPosition = transformers.at(rotorCount)->transform(newPosition, reverse);
+    newPosition = transformers.at(rotorCount)->transform(newPosition, false);
 
     // transform through rotors in reverse
-    reverse = true;
-    for (int i = rotorCount - 1; i >= 0; i--) {
-        newPosition = transformers.at(i)->transform(newPosition, reverse);
+    for (const auto& transformer : transformers | std::views::take(rotorCount) | std::views::reverse) {
+        newPosition = transformer->transform(newPosition, true);
     }
 
     return newPosition;
@@ -125,6 +124,13 @@ void RotorBox::updateRotors() {
         int pos = rotor->getPosition();
         atNotch[i] = rotor->isNotchPosition(pos);
     }
+
+    std::ranges::for_each(atNotch, []())
+    // for (const auto& transformer : transformers | std::views::take(rotorCount)) {
+    //     auto* rotor = static_cast<Rotor*>(transformer.get());
+    //     int pos = rotor->getPosition();
+    //     atNotch.emplace_back(rotor->isNotchPosition(pos));
+    // }
 
     //  Step rotors according to Enigma mechanics
 
