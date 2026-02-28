@@ -71,10 +71,11 @@ public:
     virtual ~Transformer() = default;
 
     /**
-     * @details this method is const-qualified, ensuring that the signal transformation does not modify the internal state of the transformer.
+     * @details this method is const-qualified, ensuring that the signal transformation does not modify the internal
+     * state of the transformer.
      */
     virtual int transform(int position, bool reverse = false) const = 0;
-    
+
     virtual int rotate() = 0;
     virtual void setPosition(int /*position*/) {};
     virtual int getPosition() const { return 0; };
