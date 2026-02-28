@@ -20,5 +20,5 @@ public:
      * @return std::string The content of the asset.
      * @throws std::runtime_error If the asset cannot be found or read.
      */
-    virtual std::string loadAsset(std::string_view assetName) = 0;
+    virtual std::string loadAsset(std::string_view assetName) const = 0;
 };

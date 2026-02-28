@@ -50,7 +50,7 @@ public:
      * @param fileName The path to the TOML configuration file.
      * @param assetPath Optional base directory for assets.
      */
-    EnigmaMachine(IAssetProvider& provider, std::string_view fileName, std::string_view assetPath = "");
+    EnigmaMachine(const IAssetProvider& provider, std::string_view fileName, std::string_view assetPath = "");
 
     /**
      * @brief File-based Constructor.

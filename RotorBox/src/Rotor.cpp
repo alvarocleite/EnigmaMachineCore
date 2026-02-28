@@ -75,7 +75,7 @@ int Rotor::initRotorPosition(int offset) {
     return 0;
 }
 
-bool Rotor::isNotchPosition(int position) { return (position == notchPosition); }
+bool Rotor::isNotchPosition(int position) const { return (position == notchPosition); }
 
 /**
  * @details Handles the relative coordinate shift caused by the rotor's rotation.
@@ -86,7 +86,7 @@ bool Rotor::isNotchPosition(int position) { return (position == notchPosition); 
  * @internal This logic ensures that the physical rotation of the rotor
  * effectively changes the entry and exit pins of the signal.
  */
-int Rotor::transform(int position, bool reverse) {
+int Rotor::transform(int position, bool reverse) const {
     position = (position + rotationCount) % TRANSFORMER_SIZE;
     position = getTransformValue((int)reverse, position);
     position = (position - rotationCount + TRANSFORMER_SIZE) % TRANSFORMER_SIZE;
