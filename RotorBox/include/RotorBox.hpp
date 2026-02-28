@@ -19,9 +19,9 @@
  */
 class RotorBox {
 private:
-    int nRotorCount;
+    int rotorCount;
     std::vector<int> rotorPositions;
-    std::vector<std::unique_ptr<Transformer>> transformerVec;
+    std::vector<std::unique_ptr<Transformer>> transformers;
     std::vector<IEnigmaObserver*> observers;
 
     /**
@@ -31,7 +31,7 @@ private:
      * @param rotors A vector containing the configuration for each rotor.
      * @param reflector Configuration for the reflector.
      */
-    void initTransformerVec(int count, const std::vector<RotorConfig>& rotors, const ReflectorConfig& reflector);
+    void initTransformers(int count, const std::vector<RotorConfig>& rotors, const ReflectorConfig& reflector);
 
     /**
      * @brief Updates the positions of the rotors.
@@ -87,7 +87,7 @@ public:
      * @brief Prints the types of transformers in the transformer vector.
      * This function iterates through the transformer vector and prints the type of each transformer.
      */
-    void printTransformerVec() const;
+    void printTransformers() const;
 
     /**
      * @brief Transforms the input key through the rotor box.

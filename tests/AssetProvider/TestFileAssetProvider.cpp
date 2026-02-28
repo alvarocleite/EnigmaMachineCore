@@ -26,7 +26,7 @@ TEST_F(FileAssetProviderTests, LoadNonExistentFile) {
 // Mock implementation to verify Interface usage
 class MockAssetProvider : public IAssetProvider {
 public:
-    std::string loadAsset(std::string_view assetName) override {
+    std::string loadAsset(std::string_view assetName) const override {
         if (assetName == "mock_rotor") {
             return "[rotor]\nnotchPosition = 0\nforward = [0, 1, 2]";
         }

@@ -45,7 +45,7 @@ public:
      * @return EnigmaMachineConfig A fully populated configuration object.
      * @throws std::runtime_error If parsing fails or validation checks fail.
      */
-    static EnigmaMachineConfig load(IAssetProvider& provider, const FileName& fileName,
+    static EnigmaMachineConfig load(const IAssetProvider& provider, const FileName& fileName,
                                     const AssetPath& assetPath = AssetPath());
 
     /**
@@ -55,7 +55,7 @@ public:
      * @param fileName The path to the rotor configuration file.
      * @return RotorConfig The parsed rotor configuration.
      */
-    static RotorConfig loadRotor(IAssetProvider& provider, const FileName& fileName);
+    static RotorConfig loadRotor(const IAssetProvider& provider, const FileName& fileName);
 
     /**
      * @brief Loads a single reflector configuration from a TOML file.
@@ -64,5 +64,5 @@ public:
      * @param fileName The path to the reflector configuration file.
      * @return ReflectorConfig The parsed reflector configuration.
      */
-    static ReflectorConfig loadReflector(IAssetProvider& provider, const FileName& fileName);
+    static ReflectorConfig loadReflector(const IAssetProvider& provider, const FileName& fileName);
 };

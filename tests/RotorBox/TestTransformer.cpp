@@ -9,17 +9,17 @@ public:
     ConcreteTransformer() : Transformer() {}
 
     // Minimal implementations of pure virtual methods
-    int transform(int position, bool /*reverse*/ = false) override { return position; }
+    int transform(int position, bool /*reverse*/ = false) const override { return position; }
     int rotate() override { return 0; }
 };
 
 TEST(TransformerTests, DefaultInitialization) {
     ConcreteTransformer transformer;
-    EXPECT_EQ(transformer.getType(), TransformerType::NotDefined);
+    EXPECT_EQ(transformer.getType(), TransformerType::Undefined);
 }
 
 TEST(TransformerTests, LUTSize) {
     ConcreteTransformer transformer;
     // TRANSFORMER_SIZE is 26, LUT is [2][26] = 52 elements
-    EXPECT_EQ(transformer.sizeOfTransformLUT(), 52);
+    EXPECT_EQ(transformer.sizeOfLookupTable(), 52);
 }

@@ -5,7 +5,7 @@
 
 FileAssetProvider::~FileAssetProvider() = default;
 
-std::string FileAssetProvider::loadAsset(std::string_view assetName) {
+std::string FileAssetProvider::loadAsset(std::string_view assetName) const {
     std::ifstream file(std::string(assetName), std::ios::in | std::ios::binary);
     if (!file) {
         throw std::runtime_error("FileAssetProvider: Could not open file " + std::string(assetName));

@@ -31,8 +31,8 @@ Reflector::Reflector(const ReflectorConfig& config) {
  * @internal The 'reverse' parameter is ignored for reflectors as they
  * occupy the 'turn-around' point in the signal path.
  */
-int Reflector::transform(int position, bool reverse) {
+int Reflector::transform(int position, bool reverse) const {
     int newPosition = getTransformValue((int)reverse, position);
-    // transformLUT[reverse][position] = -1,  when reverse is true
+    // lookupTable[reverse][position] = -1,  when reverse is true
     return newPosition;
 }

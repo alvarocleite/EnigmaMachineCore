@@ -32,8 +32,10 @@ public:
      * @param position The input position to be transformed.
      * @param reverse It should not be set to true.
      * @return int The transformed position. Returns "-1" if the position is not found in the LUT when reverse is true.
+     * @details This method is const-qualified, ensuring that the signal transformation does not modify the internal
+     * state of the reflector.
      */
-    int transform(int position, bool reverse = false) override;
+    int transform(int position, bool reverse = false) const override;
 
     /**
      * @brief Reflector does not rotate.
