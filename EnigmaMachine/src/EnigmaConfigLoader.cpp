@@ -36,7 +36,7 @@ void validateTransformerConfig(const toml::value& data, const std::string& expec
 }
 }  // namespace
 
-RotorConfig EnigmaConfigLoader::loadRotor(IAssetProvider& provider, const FileName& fileName) {
+RotorConfig EnigmaConfigLoader::loadRotor(const IAssetProvider& provider, const FileName& fileName) {
     std::istringstream stream(provider.loadAsset(fileName.string()));
     // Parse from stream, pass filename for error reporting
     auto rotorData = toml::parse(stream, fileName.string());
@@ -52,7 +52,7 @@ RotorConfig EnigmaConfigLoader::loadRotor(IAssetProvider& provider, const FileNa
     return rotorConfig;
 }
 
-ReflectorConfig EnigmaConfigLoader::loadReflector(IAssetProvider& provider, const FileName& fileName) {
+ReflectorConfig EnigmaConfigLoader::loadReflector(const IAssetProvider& provider, const FileName& fileName) {
     std::istringstream stream(provider.loadAsset(fileName.string()));
     auto reflectorData = toml::parse(stream, fileName.string());
     validateTransformerConfig(reflectorData, "reflector", fileName.string());
@@ -65,9 +65,8 @@ ReflectorConfig EnigmaConfigLoader::loadReflector(IAssetProvider& provider, cons
     return reflectorConfig;
 }
 
-EnigmaMachineConfig EnigmaConfigLoader::load(IAssetProvider& provider, const FileName& fileName,
+EnigmaMachineConfig EnigmaConfigLoader::load(const IAssetProvider& provider, const FileName& fileName,
                                              const AssetPath& assetPath) {
-    EnigmaMachineConfig config;
     std::istringstream stream(provider.loadAsset(fileName.string()));
     auto data = toml::parse(stream, fileName.string());
 

@@ -50,6 +50,7 @@ public:
      * @param position The current position in the rotor.
      * @param reverse If true, transforms using the reverse LUT; otherwise, uses the forward LUT.
      * @return int The transformed position.
+     * @details This method is const-qualified, ensuring that the signal transformation does not modify the internal state of the rotor.
      */
     int transform(int position, bool reverse = false) const override;
 

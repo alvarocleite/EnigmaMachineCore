@@ -65,7 +65,7 @@ EnigmaMachine::EnigmaMachine() {
     }
 }
 
-EnigmaMachine::EnigmaMachine(IAssetProvider& provider, std::string_view fileName, std::string_view assetPath)
+EnigmaMachine::EnigmaMachine(const IAssetProvider& provider, std::string_view fileName, std::string_view assetPath)
     : EnigmaMachine(EnigmaConfigLoader::load(provider, FileName(fileName), AssetPath(assetPath))) {}
 
 EnigmaMachine::EnigmaMachine(const EnigmaMachineConfig& config)
