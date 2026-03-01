@@ -3,6 +3,7 @@
  * @brief Implementation of the RotorBox class.
  */
 
+#include <algorithm>
 #include <iostream>
 #include <ranges>
 #include <stdexcept>
@@ -67,14 +68,14 @@ void RotorBox::initTransformers(int count, const std::vector<RotorConfig>& rotor
         throw std::runtime_error("Error: Mismatch between rotor count and provided configurations.");
     }
 
-    for (const auto& rotorConfig : rotors) {
-        transformers.push_back(std::make_unique<Rotor>(rotorConfig));
-    }
-    transformers.push_back(std::make_unique<Reflector>(reflector));
+    std::ranges::transform(rotors, std::back_inserter(transformers), [](const auto& rotorConfig) {
+        return std::make_unique<Rotor>(rotorConfig);
+    });
+    transformers.emplace_back(std::make_unique<Reflector>(reflector));
 }
 
 void RotorBox::printTransformers() const {
-    for (auto& transformer : transformers) {
+    for (const auto& transformer : transformers) {
         std::cout << "Transformer Type: " << static_cast<int>(transformer->getType()) << "\n";
     }
 }
@@ -115,42 +116,31 @@ int RotorBox::keyTransform(int input) {
  * After stepping, observers are notified of the new rotor positions.
  */
 void RotorBox::updateRotors() {
-    if (rotorCount < 1) return;
-
-    // Storing notch states BEFORE stepping
-    std::vector<bool> atNotch(rotorCount, false);
-    for (int i = 0; i < rotorCount; i++) {
-        auto* rotor = static_cast<Rotor*>(transformers.at(i).get());
-        int pos = rotor->getPosition();
-        atNotch[i] = rotor->isNotchPosition(pos);
+    if (rotorCount < 1) {
+        return;
     }
 
-    std::ranges::for_each(atNotch, []())
-    // for (const auto& transformer : transformers | std::views::take(rotorCount)) {
-    //     auto* rotor = static_cast<Rotor*>(transformer.get());
-    //     int pos = rotor->getPosition();
-    //     atNotch.emplace_back(rotor->isNotchPosition(pos));
-    // }
+    // Storing notch states BEFORE stepping
+    std::vector<char> atNotch(rotorCount, 0);
+    std::ranges::transform(transformers | std::views::take(rotorCount), atNotch.begin(), [](const auto& transformer) {
+        auto* rotor = static_cast<Rotor*>(transformer.get());
+        return rotor->isNotchPosition(rotor->getPosition()) ? 1 : 0;
+    });
 
     //  Step rotors according to Enigma mechanics
-
-    // Rightmost rotor always steps
-    transformers.at(0)->rotate();
-
-    // Remaining rotors
-    for (int i = 1; i < rotorCount; i++) {
-        bool carried = atNotch[i - 1];
-        bool doubleStep = (i < rotorCount - 1) && atNotch[i];
-        if (carried || doubleStep) {
+    for (int i = 0; i < rotorCount - 1; i++) {
+        bool carried = atNotch[i - 1] != 0;
+        bool doubleStep = atNotch[i] != 0;
+        if (carried || doubleStep || i == 0) { // Rightmost rotor always steps (i == 0)
             transformers.at(i)->rotate();
         }
     }
 
     // Notify observers
-    for (int i = 0; i < rotorCount; i++) {
-        int pos = transformers.at(i)->getPosition();
-        for (auto* obs : observers) {
-            obs->onRotorStepped(i, pos);
-        }
-    }
+    std::ranges::for_each(std::views::iota(0, rotorCount), [this](int index) {
+        const int position = transformers.at(index)->getPosition();
+        std::ranges::for_each(observers, [index, position](auto* observer) {
+            observer->onRotorStepped(index, position);
+        });
+    });
 }

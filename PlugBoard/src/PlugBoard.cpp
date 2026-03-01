@@ -5,14 +5,13 @@
 
 #include "PlugBoard.hpp"
 #include <iostream>
+#include <numeric>
 #include <stdexcept>
 #include <string>
 #include "config.hpp"
 
 PlugBoard::PlugBoard() {
-    for (int i = 0; i < TRANSFORMER_SIZE; ++i) {
-        mapping.at(i) = i;
-    }
+    std::iota(mapping.begin(), mapping.end(), 0);
 }
 
 /**
@@ -23,7 +22,7 @@ PlugBoard::PlugBoard() {
  *
  * @throws std::invalid_argument If a port index is out of range or if there is a mapping conflict.
  */
-PlugBoard::PlugBoard(std::array<PlugBoardPair, PLUGBOARD_MAX_PAIRS> pairs) : PlugBoard() {
+PlugBoard::PlugBoard(const std::array<PlugBoardPair, PLUGBOARD_MAX_PAIRS>& pairs) : PlugBoard() {
     for (const auto& [sourcePortIndex, destinationPortIndex] : pairs) {
         // Skip uninitialized/empty pairs
         if (sourcePortIndex == -1 || destinationPortIndex == -1) {
