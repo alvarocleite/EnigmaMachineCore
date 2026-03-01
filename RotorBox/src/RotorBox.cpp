@@ -19,7 +19,13 @@
  * @details Initializes a standard 3-rotor configuration with empty/default wiring.
  * Note: usage of this constructor is discouraged without subsequent initialization.
  */
-RotorBox::RotorBox() { rotorCount = 0; }
+RotorBox::RotorBox() {
+    rotorCount = 3;
+    rotorPositions = std::vector<int>(rotorCount, 0);
+
+    std::vector<RotorConfig> defaultRotors(rotorCount);
+    initTransformers(defaultRotors, ReflectorConfig{});
+}
 
 /**
  * @details Initializes a custom rotor configuration.
