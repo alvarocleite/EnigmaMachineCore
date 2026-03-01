@@ -1,12 +1,6 @@
 {
     "cmake.buildDirectory": "${workspaceFolder}/build/debug",
     "cmake.configureOnOpen": true,
-    "cmake.configureSettings": {
-        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
-    },
-    "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
-    "C_Cpp.default.compileCommands": "${workspaceFolder}/build/debug/compile_commands.json",
-    "C_Cpp.default.cppStandard": "c++20",
     "files.associations": {
         "numeric": "cpp",
         "optional": "cpp",
