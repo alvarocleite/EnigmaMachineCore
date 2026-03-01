@@ -10,9 +10,7 @@
 #include <string>
 #include "config.hpp"
 
-PlugBoard::PlugBoard() {
-    std::iota(mapping.begin(), mapping.end(), 0);
-}
+PlugBoard::PlugBoard() { std::iota(mapping.begin(), mapping.end(), 0); }
 
 /**
  * @details Validates the provided pairs before mapping them.

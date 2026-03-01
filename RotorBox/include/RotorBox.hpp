@@ -27,11 +27,10 @@ private:
     /**
      * @brief Initializes the transformer vector with rotors and a reflector.
      *
-     * @param count The number of rotors to be initialized.
      * @param rotors A vector containing the configuration for each rotor.
      * @param reflector Configuration for the reflector.
      */
-    void initTransformers(int count, const std::vector<RotorConfig>& rotors, const ReflectorConfig& reflector);
+    void initTransformers(const std::vector<RotorConfig>& rotors, const ReflectorConfig& reflector);
 
     /**
      * @brief Updates the positions of the rotors.
@@ -51,14 +50,13 @@ public:
      * @brief Constructor for the RotorBox class.
      * Initializes the rotor box with a specified number of rotors, their positions, and configurations.
      *
-     * @param count The number of rotors in the rotor box.
      * @param rotorPositions A vector containing the initial positions of each rotor.
      * @param rotors A vector containing the configuration for each rotor.
      * @param reflector Configuration for the reflector.
      * @throws std::invalid_argument If the number of rotors does not match the number of positions.
      * @throws std::runtime_error If initialization of transformers fails.
      */
-    RotorBox(int count, const std::vector<int>& rotorPositions, const std::vector<RotorConfig>& rotors,
+    RotorBox(const std::vector<int>& rotorPositions, const std::vector<RotorConfig>& rotors,
              const ReflectorConfig& reflector);
 
     // Disable Copy

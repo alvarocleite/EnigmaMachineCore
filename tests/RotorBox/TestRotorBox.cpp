@@ -53,7 +53,7 @@ TEST_F(RotorBoxTests, DefaultConstructor) {
 
 TEST_F(RotorBoxTests, ParameterizedConstructor) {
     std::vector<int> positions = {0, 0, 0};
-    RotorBox rb(3, positions, rotors, reflector);
+    RotorBox rb(positions, rotors, reflector);
 
     int output = rb.keyTransform(0);
     EXPECT_GE(output, 0);
@@ -70,13 +70,13 @@ TEST_F(RotorBoxTests, RoundTrip) {
 
     {
         std::vector<int> positions = {0, 0, 0};
-        RotorBox rb(3, positions, rotors, reflector);
+        RotorBox rb(positions, rotors, reflector);
         ciphertext = rb.keyTransform(input);
     }
 
     {
         std::vector<int> positions = {0, 0, 0};
-        RotorBox rb(3, positions, rotors, reflector);
+        RotorBox rb(positions, rotors, reflector);
         decrypted = rb.keyTransform(ciphertext);
     }
 
@@ -91,7 +91,7 @@ TEST_F(RotorBoxTests, SteppingMechanism) {
     // 3. Transform the signal.
 
     std::vector<int> startPos = {25, 0, 0};
-    RotorBox rb(3, startPos, rotors, reflector);
+    RotorBox rb(startPos, rotors, reflector);
 
     // This transform will cause stepping
     int out1 = rb.keyTransform(0);
@@ -105,7 +105,7 @@ TEST_F(RotorBoxTests, MultiStepCarry) {
     // 1st transform: R1 -> 0 (notch), R2 -> 0 (notch), R3 -> 1.
 
     std::vector<int> startPos = {25, 25, 0};
-    RotorBox rb(3, startPos, rotors, reflector);
+    RotorBox rb(startPos, rotors, reflector);
 
     int out = rb.keyTransform(0);
     EXPECT_GE(out, 0);
@@ -113,7 +113,7 @@ TEST_F(RotorBoxTests, MultiStepCarry) {
 
 TEST_F(RotorBoxTests, DoubleSteppingMechanism_1) {
     std::vector<int> startPos = {0, 1, 0};
-    RotorBox rb(3, startPos, rotors, reflector);
+    RotorBox rb(startPos, rotors, reflector);
     EnigmaObserverTest observer(3);
     rb.registerObserver(&observer);
 
@@ -125,7 +125,7 @@ TEST_F(RotorBoxTests, DoubleSteppingMechanism_1) {
 
 TEST_F(RotorBoxTests, DoubleSteppingMechanism_2) {
     std::vector<int> startPos = {0, 0, 0};
-    RotorBox rb(3, startPos, rotors, reflector);
+    RotorBox rb(startPos, rotors, reflector);
     EnigmaObserverTest observer(3);
     rb.registerObserver(&observer);
 
@@ -137,7 +137,7 @@ TEST_F(RotorBoxTests, DoubleSteppingMechanism_2) {
 
 TEST_F(RotorBoxTests, DoubleSteppingMechanism_3) {
     std::vector<int> startPos = {1, 0, 2};
-    RotorBox rb(3, startPos, rotors, reflector);
+    RotorBox rb(startPos, rotors, reflector);
     EnigmaObserverTest observer(3);
     rb.registerObserver(&observer);
 
