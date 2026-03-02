@@ -81,16 +81,16 @@ class PlugBoard {
 }
 
 class RotorBox {
-    - nRotorCount : int
+    - rotorCount : int
     - rotorPositions : std::vector<int>
-    - transformerVec : std::vector<std::unique_ptr<Transformer>>
+    - transformers : std::vector<std::unique_ptr<Transformer>>
     - observers : std::vector<IEnigmaObserver*>
-    - initTransformerVec(nRotorCount: int, rotors: std::vector<RotorConfig>, reflector: ReflectorConfig) : void
+    - initTransformers(rotors: std::vector<RotorConfig>, reflector: ReflectorConfig) : void
     - updateRotors() : void
     + RotorBox()
-    + RotorBox(nRotorCount: int, rotorPositions: std::vector<int>, rotors: std::vector<RotorConfig>, reflector: ReflectorConfig)
+    + RotorBox(rotorPositions: std::vector<int>, rotors: std::vector<RotorConfig>, reflector: ReflectorConfig)
     + ~RotorBox()
-    + printTransformerVec() : void
+    + printTransformers() : void
     + keyTransform(input: int) : int
     + registerObserver(observer: IEnigmaObserver*) : void
     + removeObserver(observer: IEnigmaObserver*) : void

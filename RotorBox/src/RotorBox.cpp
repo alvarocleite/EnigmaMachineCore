@@ -3,7 +3,9 @@
  * @brief Implementation of the RotorBox class.
  */
 
+#include <algorithm>
 #include <iostream>
+#include <ranges>
 #include <stdexcept>
 #include <string>
 #include <utility>
@@ -17,29 +19,35 @@
  * @details Initializes a standard 3-rotor configuration with empty/default wiring.
  * Note: usage of this constructor is discouraged without subsequent initialization.
  */
-RotorBox::RotorBox() { rotorCount = 0; }
+RotorBox::RotorBox() {
+    rotorCount = 3;
+    rotorPositions = std::vector<int>(rotorCount, 0);
+
+    std::vector<RotorConfig> defaultRotors(rotorCount);
+    initTransformers(defaultRotors, ReflectorConfig{});
+}
 
 /**
  * @details Initializes a custom rotor configuration.
  * Validates that the number of provided positions matches the rotor count before
  * proceeding with transformer initialization and position setting.
  */
-RotorBox::RotorBox(int count, const std::vector<int>& rotorPositions, const std::vector<RotorConfig>& rotors,
+RotorBox::RotorBox(const std::vector<int>& rotorPositions, const std::vector<RotorConfig>& rotors,
                    const ReflectorConfig& reflector) {
-    if (std::cmp_not_equal(count, rotorPositions.size())) {
+    if (std::cmp_not_equal(rotorPositions.size(), rotors.size())) {
         throw std::invalid_argument("Error: Number of rotors and number of rotor positions do not match.");
     }
 
-    this->rotorCount = count;
+    rotorCount = (int)rotorPositions.size();
+    this->rotorPositions.reserve(rotorCount);
     for (const auto& position : rotorPositions) {
         this->rotorPositions.push_back(position);
     }
 
-    // Will throw if initialization fails
-    initTransformers(count, rotors, reflector);
+    initTransformers(rotors, reflector);
 
-    for (int i = 0; i < count; i++) {
-        transformers.at(i)->setPosition(this->rotorPositions.at(i));
+    for (int i = 0; i < rotorCount; i++) {
+        transformers.at(i)->setPosition(rotorPositions.at(i));
     }
 }
 
@@ -57,23 +65,17 @@ void RotorBox::removeObserver(IEnigmaObserver* observer) {
  * must contain exactly rotorCount rotors followed by one reflector at the end.
  * Memory is managed via std::unique_ptr to ensure proper cleanup.
  */
-void RotorBox::initTransformers(int count, const std::vector<RotorConfig>& rotors, const ReflectorConfig& reflector) {
+void RotorBox::initTransformers(const std::vector<RotorConfig>& rotors, const ReflectorConfig& reflector) {
     transformers.clear();
-    transformers.reserve(count + 1);
+    transformers.reserve(rotorCount + 1);
 
-    // Validate input size: n Rotors
-    if (rotors.size() != (size_t)count) {
-        throw std::runtime_error("Error: Mismatch between rotor count and provided configurations.");
-    }
-
-    for (const auto& rotorConfig : rotors) {
-        transformers.push_back(std::make_unique<Rotor>(rotorConfig));
-    }
-    transformers.push_back(std::make_unique<Reflector>(reflector));
+    std::ranges::transform(rotors, std::back_inserter(transformers),
+                           [](const auto& rotorConfig) { return std::make_unique<Rotor>(rotorConfig); });
+    transformers.emplace_back(std::make_unique<Reflector>(reflector));
 }
 
 void RotorBox::printTransformers() const {
-    for (auto& transformer : transformers) {
+    for (const auto& transformer : transformers) {
         std::cout << "Transformer Type: " << static_cast<int>(transformer->getType()) << "\n";
     }
 }
@@ -88,20 +90,18 @@ void RotorBox::printTransformers() const {
 int RotorBox::keyTransform(int input) {
     updateRotors();
 
-    // transform through rotors forward
-    bool reverse = false;
     int newPosition = input;
-    for (int i = 0; i < rotorCount; i++) {
-        newPosition = transformers.at(i)->transform(newPosition, reverse);
+    // transform through rotors forward
+    for (const auto& transformer : transformers | std::views::take(rotorCount)) {
+        newPosition = transformer->transform(newPosition, false);
     }
 
     // reflector
-    newPosition = transformers.at(rotorCount)->transform(newPosition, reverse);
+    newPosition = transformers.at(rotorCount)->transform(newPosition, false);
 
     // transform through rotors in reverse
-    reverse = true;
-    for (int i = rotorCount - 1; i >= 0; i--) {
-        newPosition = transformers.at(i)->transform(newPosition, reverse);
+    for (const auto& transformer : transformers | std::views::take(rotorCount) | std::views::reverse) {
+        newPosition = transformer->transform(newPosition, true);
     }
 
     return newPosition;
@@ -116,35 +116,34 @@ int RotorBox::keyTransform(int input) {
  * After stepping, observers are notified of the new rotor positions.
  */
 void RotorBox::updateRotors() {
-    if (rotorCount < 1) return;
-
-    // Storing notch states BEFORE stepping
-    std::vector<bool> atNotch(rotorCount, false);
-    for (int i = 0; i < rotorCount; i++) {
-        auto* rotor = static_cast<Rotor*>(transformers.at(i).get());
-        int pos = rotor->getPosition();
-        atNotch[i] = rotor->isNotchPosition(pos);
+    if (rotorCount < 1) {
+        return;
     }
 
+    // Storing notch states BEFORE stepping
+    std::vector<char> atNotch(rotorCount, 0);
+    std::ranges::transform(transformers | std::views::take(rotorCount), atNotch.begin(), [](const auto& transformer) {
+        auto* rotor = static_cast<Rotor*>(transformer.get());
+        return rotor->isNotchPosition(rotor->getPosition()) ? 1 : 0;
+    });
+
     //  Step rotors according to Enigma mechanics
-
-    // Rightmost rotor always steps
-    transformers.at(0)->rotate();
-
-    // Remaining rotors
-    for (int i = 1; i < rotorCount; i++) {
-        bool carried = atNotch[i - 1];
-        bool doubleStep = (i < rotorCount - 1) && atNotch[i];
+    for (int i = 0; i < rotorCount; i++) {
+        if (i == 0) {  // Rightmost rotor always steps (i == 0)
+            transformers.at(i)->rotate();
+            continue;
+        }
+        bool carried = atNotch[i - 1] != 0;
+        bool doubleStep = (i < rotorCount - 1) && (atNotch[i] != 0);
         if (carried || doubleStep) {
             transformers.at(i)->rotate();
         }
     }
 
     // Notify observers
-    for (int i = 0; i < rotorCount; i++) {
-        int pos = transformers.at(i)->getPosition();
-        for (auto* obs : observers) {
-            obs->onRotorStepped(i, pos);
-        }
-    }
+    std::ranges::for_each(std::views::iota(0, rotorCount), [this](int index) {
+        const int position = transformers.at(index)->getPosition();
+        std::ranges::for_each(observers,
+                              [index, position](auto* observer) { observer->onRotorStepped(index, position); });
+    });
 }
