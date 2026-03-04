@@ -39,14 +39,10 @@ int Reflector::transform(int position, bool reverse) const {
  * @details Reflects the input signal back towards the rotors.
  * @internal This operation uses the primary transformation mapping (row 0).
  */
-int Reflector::transformForward(int position) const {
-    return getTransformValue(0, position);
-}
+int Reflector::transformForward(int position) const { return getTransformValue(0, position); }
 
 /**
  * @details Returns -1 for Reflector reverse transformations.
  * @internal Reflectors are unidirectional; the signal only enters from the forward side.
  */
-int Reflector::transformReverse(int position) const {
-    return getTransformValue(1, position);
-}
+int Reflector::transformReverse(int position) const { return getTransformValue(1, position); }

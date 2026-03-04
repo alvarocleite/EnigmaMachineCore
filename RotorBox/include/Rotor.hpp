@@ -59,7 +59,7 @@ public:
      * @brief Transforms the given position forward using the forward LUT.
      * @param position The current position in the rotor (0 to TRANSFORMER_SIZE - 1).
      * @return int The transformed position (0 to TRANSFORMER_SIZE - 1).
-     * @details Implements the forward signal path through the rotor's specific wiring, 
+     * @details Implements the forward signal path through the rotor's specific wiring,
      * accounting for current rotation offset.
      */
     int transformForward(int position) const override;
@@ -68,7 +68,7 @@ public:
      * @brief Transforms the given position in reverse using the reverse LUT.
      * @param position The current position in the rotor (0 to TRANSFORMER_SIZE - 1).
      * @return int The transformed position (0 to TRANSFORMER_SIZE - 1).
-     * @details Implements the return signal path through the rotor's specific wiring, 
+     * @details Implements the return signal path through the rotor's specific wiring,
      * accounting for current rotation offset.
      */
     int transformReverse(int position) const override;
