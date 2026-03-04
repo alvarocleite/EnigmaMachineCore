@@ -97,9 +97,15 @@ int Rotor::transform(int position, bool reverse) const {
  * 3. Adjust output back to the machine's absolute reference frame.
  */
 int Rotor::transformForward(int position) const {
-    position = (position + rotationCount) % TRANSFORMER_SIZE;
+    position = (position + rotationCount);
+    if (position >= TRANSFORMER_SIZE) {
+        position -= TRANSFORMER_SIZE;
+    }
     position = getTransformValue(0, position);
-    position = (position - rotationCount + TRANSFORMER_SIZE) % TRANSFORMER_SIZE;
+    position = (position - rotationCount + TRANSFORMER_SIZE);
+    if (position >= TRANSFORMER_SIZE) {
+        position -= TRANSFORMER_SIZE;
+    }
 
     return position;
 }
@@ -111,9 +117,15 @@ int Rotor::transformForward(int position) const {
  * 3. Adjust output back to the machine's absolute reference frame.
  */
 int Rotor::transformReverse(int position) const {
-    position = (rotationCount + position) % TRANSFORMER_SIZE;
+    position = (rotationCount + position);
+    if (position >= TRANSFORMER_SIZE) {
+        position -= TRANSFORMER_SIZE;
+    }
     position = getTransformValue(1, position);
-    position = (position - rotationCount + TRANSFORMER_SIZE) % TRANSFORMER_SIZE;
+    position = (position - rotationCount + TRANSFORMER_SIZE);
+    if (position >= TRANSFORMER_SIZE) {
+        position -= TRANSFORMER_SIZE;
+    }
 
     return position;
 }
@@ -125,7 +137,10 @@ int Rotor::transformReverse(int position) const {
  * @return 1 if the rotor is now at the notch position (triggering a carry), 0 otherwise.
  */
 int Rotor::rotate() {
-    rotationCount = (rotationCount + 1) % TRANSFORMER_SIZE;
+    rotationCount = (rotationCount + 1);
+    if (rotationCount >= TRANSFORMER_SIZE) {
+        rotationCount -= TRANSFORMER_SIZE;
+    }
     return isNotchPosition(rotationCount) ? 1 : 0;
 }
 
