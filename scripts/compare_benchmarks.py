@@ -22,19 +22,23 @@ class BenchmarkComparison:
             # Percentage change: negative is bad for throughput
             self.diff_percent = ((self.curr_val - self.base_val) / self.base_val) * 100
             self.is_regression = self.diff_percent < -THRESHOLD_PERCENT
+            self.is_improvement = self.diff_percent > THRESHOLD_PERCENT
         else:
             self.base_val = base_entry['cpu_time']
             self.curr_val = curr_entry['cpu_time']
             # Percentage change: positive is bad for latency
             self.diff_percent = ((self.curr_val - self.base_val) / self.base_val) * 100
             self.is_regression = self.diff_percent > THRESHOLD_PERCENT
-            
+            self.is_improvement = self.diff_percent < -THRESHOLD_PERCENT
+
         self.status_icon = self._get_status_icon()
 
     def _get_status_icon(self) -> str:
-        if abs(self.diff_percent) <= THRESHOLD_PERCENT:
-            return "✅"
-        return "❌" if self.is_regression else "⚠️"
+        if self.is_regression:
+            return "❌"
+        if self.is_improvement:
+            return "🚀"
+        return "✅"
 
     def format_value(self, value: float) -> str:
         return f"{value/MIB_FACTOR:.2f} MiB/s" if self.is_throughput else f"{value:.1f} ns"
