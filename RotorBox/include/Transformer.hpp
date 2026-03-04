@@ -76,6 +76,22 @@ public:
      */
     virtual int transform(int position, bool reverse = false) const = 0;
 
+    /**
+     * @brief Transforms the given position forward.
+     * @param position The current position (0 to TRANSFORMER_SIZE - 1).
+     * @return int The transformed position (0 to TRANSFORMER_SIZE - 1).
+     * @details This method defines the primary signal path from right to left through the transformer.
+     */
+    virtual int transformForward(int position) const = 0;
+
+    /**
+     * @brief Transforms the given position in reverse.
+     * @param position The current position (0 to TRANSFORMER_SIZE - 1).
+     * @return int The transformed position (0 to TRANSFORMER_SIZE - 1).
+     * @details This method defines the return signal path from left to right through the transformer.
+     */
+    virtual int transformReverse(int position) const = 0;
+
     virtual int rotate() = 0;
     virtual void setPosition(int /*position*/) {};
     virtual int getPosition() const { return 0; };

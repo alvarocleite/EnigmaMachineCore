@@ -87,9 +87,45 @@ bool Rotor::isNotchPosition(int position) const { return (position == notchPosit
  * effectively changes the entry and exit pins of the signal.
  */
 int Rotor::transform(int position, bool reverse) const {
-    position = (position + rotationCount) % TRANSFORMER_SIZE;
-    position = getTransformValue((int)reverse, position);
-    position = (position - rotationCount + TRANSFORMER_SIZE) % TRANSFORMER_SIZE;
+    return reverse ? transformReverse(position) : transformForward(position);
+}
+
+/**
+ * @details Performs the forward signal pass (right-to-left).
+ * 1. Adjust input position by current rotation offset.
+ * 2. Look up the internal wiring map (row 0).
+ * 3. Adjust output back to the machine's absolute reference frame.
+ */
+int Rotor::transformForward(int position) const {
+    position = (position + rotationCount);
+    if (position >= TRANSFORMER_SIZE) {
+        position -= TRANSFORMER_SIZE;
+    }
+    position = getTransformValue(0, position);
+    position = (position - rotationCount + TRANSFORMER_SIZE);
+    if (position >= TRANSFORMER_SIZE) {
+        position -= TRANSFORMER_SIZE;
+    }
+
+    return position;
+}
+
+/**
+ * @details Performs the reverse signal pass (left-to-right).
+ * 1. Adjust input position by current rotation offset.
+ * 2. Look up the internal wiring map (row 1 - inverse).
+ * 3. Adjust output back to the machine's absolute reference frame.
+ */
+int Rotor::transformReverse(int position) const {
+    position = (rotationCount + position);
+    if (position >= TRANSFORMER_SIZE) {
+        position -= TRANSFORMER_SIZE;
+    }
+    position = getTransformValue(1, position);
+    position = (position - rotationCount + TRANSFORMER_SIZE);
+    if (position >= TRANSFORMER_SIZE) {
+        position -= TRANSFORMER_SIZE;
+    }
 
     return position;
 }
@@ -101,7 +137,10 @@ int Rotor::transform(int position, bool reverse) const {
  * @return 1 if the rotor is now at the notch position (triggering a carry), 0 otherwise.
  */
 int Rotor::rotate() {
-    rotationCount = (rotationCount + 1) % TRANSFORMER_SIZE;
+    rotationCount = (rotationCount + 1);
+    if (rotationCount >= TRANSFORMER_SIZE) {
+        rotationCount -= TRANSFORMER_SIZE;
+    }
     return isNotchPosition(rotationCount) ? 1 : 0;
 }
 

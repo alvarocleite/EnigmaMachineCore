@@ -32,7 +32,17 @@ Reflector::Reflector(const ReflectorConfig& config) {
  * occupy the 'turn-around' point in the signal path.
  */
 int Reflector::transform(int position, bool reverse) const {
-    int newPosition = getTransformValue((int)reverse, position);
-    // lookupTable[reverse][position] = -1,  when reverse is true
-    return newPosition;
+    return reverse ? transformReverse(position) : transformForward(position);
 }
+
+/**
+ * @details Reflects the input signal back towards the rotors.
+ * @internal This operation uses the primary transformation mapping (row 0).
+ */
+int Reflector::transformForward(int position) const { return getTransformValue(0, position); }
+
+/**
+ * @details Returns -1 for Reflector reverse transformations.
+ * @internal Reflectors are unidirectional; the signal only enters from the forward side.
+ */
+int Reflector::transformReverse(int position) const { return getTransformValue(1, position); }
