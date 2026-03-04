@@ -38,6 +38,21 @@ public:
     int transform(int position, bool reverse = false) const override;
 
     /**
+     * @brief Transforms the given position forward.
+     * @param position The current position (0 to TRANSFORMER_SIZE - 1).
+     * @return int The transformed position (0 to TRANSFORMER_SIZE - 1).
+     * @details Implements the signal reflection at the end of the rotor sequence.
+     */
+    int transformForward(int position) const override;
+
+    /**
+     * @brief Transforms the given position in reverse.
+     * @param position The current position (0 to TRANSFORMER_SIZE - 1).
+     * @return int Returns -1 since reflectors are symmetric and do not have separate reverse paths.
+     */
+    int transformReverse(int position) const override;
+
+    /**
      * @brief Reflector does not rotate.
      *
      * @return int Always returns 0.

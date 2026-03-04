@@ -56,6 +56,24 @@ public:
     int transform(int position, bool reverse = false) const override;
 
     /**
+     * @brief Transforms the given position forward using the forward LUT.
+     * @param position The current position in the rotor (0 to TRANSFORMER_SIZE - 1).
+     * @return int The transformed position (0 to TRANSFORMER_SIZE - 1).
+     * @details Implements the forward signal path through the rotor's specific wiring, 
+     * accounting for current rotation offset.
+     */
+    int transformForward(int position) const override;
+
+    /**
+     * @brief Transforms the given position in reverse using the reverse LUT.
+     * @param position The current position in the rotor (0 to TRANSFORMER_SIZE - 1).
+     * @return int The transformed position (0 to TRANSFORMER_SIZE - 1).
+     * @details Implements the return signal path through the rotor's specific wiring, 
+     * accounting for current rotation offset.
+     */
+    int transformReverse(int position) const override;
+
+    /**
      * @brief Rotates the rotor by one position.
      * If the rotor reaches the notch position, it returns 1, indicating that the next rotor should rotate.
      * Otherwise, it returns 0.
@@ -67,14 +85,14 @@ public:
     /**
      * @brief Sets the rotor to a specific position.
      *
-     * @param position The position to set the rotor to (0-25).
+     * @param position The position to set the rotor to (0 to TRANSFORMER_SIZE - 1).
      */
     void setPosition(int position) override;
 
     /**
      * @brief Gets the current position of the rotor.
      *
-     * @return int The current position (0-25).
+     * @return int The current position (0 to TRANSFORMER_SIZE - 1).
      */
     int getPosition() const override;
 

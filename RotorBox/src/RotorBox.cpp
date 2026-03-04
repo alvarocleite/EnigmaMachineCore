@@ -93,15 +93,15 @@ int RotorBox::keyTransform(int input) {
     int newPosition = input;
     // transform through rotors forward
     for (const auto& transformer : transformers | std::views::take(rotorCount)) {
-        newPosition = transformer->transform(newPosition, false);
+        newPosition = transformer->transformForward(newPosition);
     }
 
     // reflector
-    newPosition = transformers.at(rotorCount)->transform(newPosition, false);
+    newPosition = transformers.at(rotorCount)->transformForward(newPosition);
 
     // transform through rotors in reverse
     for (const auto& transformer : transformers | std::views::take(rotorCount) | std::views::reverse) {
-        newPosition = transformer->transform(newPosition, true);
+        newPosition = transformer->transformReverse(newPosition);
     }
 
     return newPosition;

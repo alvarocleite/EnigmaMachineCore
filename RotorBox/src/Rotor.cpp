@@ -87,8 +87,32 @@ bool Rotor::isNotchPosition(int position) const { return (position == notchPosit
  * effectively changes the entry and exit pins of the signal.
  */
 int Rotor::transform(int position, bool reverse) const {
+    return reverse ? transformReverse(position) : transformForward(position);
+}
+
+/**
+ * @details Performs the forward signal pass (right-to-left).
+ * 1. Adjust input position by current rotation offset.
+ * 2. Look up the internal wiring map (row 0).
+ * 3. Adjust output back to the machine's absolute reference frame.
+ */
+int Rotor::transformForward(int position) const {
     position = (position + rotationCount) % TRANSFORMER_SIZE;
-    position = getTransformValue((int)reverse, position);
+    position = getTransformValue(0, position);
+    position = (position - rotationCount + TRANSFORMER_SIZE) % TRANSFORMER_SIZE;
+
+    return position;
+}
+
+/**
+ * @details Performs the reverse signal pass (left-to-right).
+ * 1. Adjust input position by current rotation offset.
+ * 2. Look up the internal wiring map (row 1 - inverse).
+ * 3. Adjust output back to the machine's absolute reference frame.
+ */
+int Rotor::transformReverse(int position) const {
+    position = (rotationCount + position) % TRANSFORMER_SIZE;
+    position = getTransformValue(1, position);
     position = (position - rotationCount + TRANSFORMER_SIZE) % TRANSFORMER_SIZE;
 
     return position;

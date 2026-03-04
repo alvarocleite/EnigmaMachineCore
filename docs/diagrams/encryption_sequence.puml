@@ -46,23 +46,23 @@ activate EM
         deactivate RB
         
         note right of RB: 2.2 Forward Pass (0 -> 1 -> 2)
-        RB -> R0: transform(char, reverse=false)
+        RB -> R0: transformForward(char)
         R0 --> RB: c1
-        RB -> R1: transform(c1, reverse=false)
+        RB -> R1: transformForward(c1)
         R1 --> RB: c2
-        RB -> R2: transform(c2, reverse=false)
+        RB -> R2: transformForward(c2)
         R2 --> RB: c3
 
         note right of RB: 2.3 Reflection
-        RB -> REF: transform(c3)
+        RB -> REF: transformForward(c3)
         REF --> RB: c4
 
         note right of RB: 2.4 Reverse Pass (2 -> 1 -> 0)
-        RB -> R2: transform(c4, reverse=true)
+        RB -> R2: transformReverse(c4)
         R2 --> RB: c5
-        RB -> R1: transform(c5, reverse=true)
+        RB -> R1: transformReverse(c5)
         R1 --> RB: c6
-        RB -> R0: transform(c6, reverse=true)
+        RB -> R0: transformReverse(c6)
         R0 --> RB: c7
 
     RB --> EM: outputChar

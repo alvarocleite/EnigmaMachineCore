@@ -23,7 +23,7 @@ state "Engage Notch" as Notch {
 }
 
 state "Rotate" as Rotate {
-    note "Rotate rotor\nIncrement position (mod 26)" as N4
+    note "Rotate rotor\nIncrement position (mod TRANSFORMER_SIZE)" as N4
 }
 
 Idle --> CheckPos : Input Signal (Before Encrypting)

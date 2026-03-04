@@ -62,8 +62,8 @@ The core engine does not access the filesystem directly.
 ### 3.3. Core Domain (Facade)
 
 *   **EnigmaMachine:** Acts as a **Facade**, providing a simple API (`keyTransform`) while hiding the complexity of the internal components.
-*   **RotorBox:** Manages the mechanical rules (rotor sequence, stepping logic).
-*   **Transformer:** Uses the **Strategy Pattern** to treat Rotors and Reflectors uniformly as signal transformers. Defined in `RotorBox/include/Transformer.hpp`.
+*   **RotorBox:** Manages the mechanical rules (rotor sequence, stepping logic) and orchestrates the signal path.
+*   **Transformer:** Uses the **Strategy Pattern** to treat Rotors and Reflectors uniformly. It provides dedicated `transformForward` and `transformReverse` paths to optimize CPU branch prediction. Defined in `RotorBox/include/Transformer.hpp`.
 
 ### 3.4. Event Handling (Observer Pattern)
 
