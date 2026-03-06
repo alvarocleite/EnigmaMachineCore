@@ -59,7 +59,7 @@ App -> EM: EnigmaMachine(config)
 activate EM
     
     create RB
-    EM -> RB: RotorBox(config.rotors, config.reflector)
+    EM -> RB: RotorBox(config.rotorPositions, config.rotors, config.reflector)
     
     create PB
     EM -> PB: PlugBoard(config.plugBoardPairs)

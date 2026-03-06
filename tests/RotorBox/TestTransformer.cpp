@@ -9,7 +9,11 @@ public:
     ConcreteTransformer() : Transformer() {}
 
     // Minimal implementations of pure virtual methods
-    int transform(int position, bool /*reverse*/ = false) const override { return position; }
+    int transform(int position, bool reverse = false) const override {
+        return reverse ? transformReverse(position) : transformForward(position);
+    }
+    int transformForward(int position) const override { return position; }
+    int transformReverse(int position) const override { return position; }
     int rotate() override { return 0; }
 };
 

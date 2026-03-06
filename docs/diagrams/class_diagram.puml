@@ -7,7 +7,7 @@ skinparam linetype ortho
 
 ' Enums and Structs
 enum TransformerType {
-    NotDefined
+    Undefined
     Rotor
     Reflector
 }
@@ -81,23 +81,23 @@ class PlugBoard {
 }
 
 class RotorBox {
-    - nRotorCount : int
+    - rotorCount : int
     - rotorPositions : std::vector<int>
-    - transformerVec : std::vector<std::unique_ptr<Transformer>>
+    - transformers : std::vector<std::unique_ptr<Transformer>>
     - observers : std::vector<IEnigmaObserver*>
-    - initTransformerVec(nRotorCount: int, rotors: std::vector<RotorConfig>, reflector: ReflectorConfig) : void
+    - initTransformers(rotors: std::vector<RotorConfig>, reflector: ReflectorConfig) : void
     - updateRotors() : void
     + RotorBox()
-    + RotorBox(nRotorCount: int, rotorPositions: std::vector<int>, rotors: std::vector<RotorConfig>, reflector: ReflectorConfig)
+    + RotorBox(rotorPositions: std::vector<int>, rotors: std::vector<RotorConfig>, reflector: ReflectorConfig)
     + ~RotorBox()
-    + printTransformerVec() : void
+    + printTransformers() : void
     + keyTransform(input: int) : int
     + registerObserver(observer: IEnigmaObserver*) : void
     + removeObserver(observer: IEnigmaObserver*) : void
 }
 
 abstract class Transformer {
-    - transformLUT : std::array<std::array<int, TRANSFORMER_SIZE>, 2>
+    - lookupTable : std::array<std::array<int, TRANSFORMER_SIZE>, 2>
     # type : TransformerType
     # setTransformValue(row: int, col: int, value: int) : void
     # getTransformValue(row: int, col: int) : int
@@ -106,21 +106,25 @@ abstract class Transformer {
     + Transformer()
     + {abstract} ~Transformer()
     + {abstract} transform(position: int, reverse: bool) : int
+    + {abstract} transformForward(position: int) : int
+    + {abstract} transformReverse(position: int) : int
     + {abstract} rotate() : int
     + {abstract} setPosition(position: int) : void
     + getPosition() : int
-    + sizeOfTransformLUT() : int
+    + sizeOfLookupTable() : int
     + getType() : TransformerType
 }
 
 class Rotor {
     - notchPosition : int
-    - rotorRotationCount : int
-    - initReverseTransformLUT() : void
+    - rotationCount : int
+    - initReverseLookupTable() : void
     + isNotchPosition(position: int) : bool
     + Rotor(config: RotorConfig)
     + ~Rotor()
     + transform(position: int, reverse: bool) : int
+    + transformForward(position: int) : int
+    + transformReverse(position: int) : int
     + rotate() : int
     + setPosition(position: int) : void
     + getPosition() : int
@@ -130,6 +134,8 @@ class Reflector {
     + Reflector(config: ReflectorConfig)
     + ~Reflector()
     + transform(position: int, reverse: bool) : int
+    + transformForward(position: int) : int
+    + transformReverse(position: int) : int
     + rotate() : int
 }
 

@@ -10,6 +10,7 @@
  * @brief Configuration structure for an individual Rotor.
  */
 struct RotorConfig {
+    RotorConfig();
     /** @brief The position (0 - (TRANSFORMER_SIZE - 1)) at which the rotor triggers the turnover of the next rotor. */
     int notchPosition = 0;
     /** @brief The internal wiring permutation array (forward direction). Must be of size TRANSFORMER_SIZE. */
@@ -20,6 +21,7 @@ struct RotorConfig {
  * @brief Configuration structure for a Reflector.
  */
 struct ReflectorConfig {
+    ReflectorConfig();
     /** @brief The internal wiring permutation array (reflection map). Must be of size TRANSFORMER_SIZE. */
     std::vector<int> wiring;
 };

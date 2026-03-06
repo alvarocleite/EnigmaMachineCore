@@ -38,22 +38,19 @@ public:
 };
 
 TEST_F(RotorBoxTests, DefaultConstructor) {
-    // Default constructor uses Rotor1, 2, 3 and Reflector at positions 0, 0, 0
+    // Default constructor initializes 3 default rotors and 1 default reflector.
     RotorBox rb;
-    // rb is now empty (rotorCount = 0) because I updated the default constructor to be empty
-    // But let's verify it constructs safely
 
-    // We can't transform with empty box easily unless it handles it (it loops 0 times).
-    int input = 0;
-    // However, keyTransform accesses transformers.at(rotorCount) for reflector.
-    // If rotorCount is 0, it accesses at(0). If vector is empty, it throws out_of_range.
-    // So default constructed RotorBox is effectively unusable.
-    // I should probably skip this test or update it to use the parameterized constructor.
+    // With default identity rotors and default reverse reflector map, 0 -> 25.
+    EXPECT_EQ(rb.keyTransform(0), 25);
+
+    int output = rb.keyTransform(8);
+    EXPECT_EQ(output, 17);
 }
 
 TEST_F(RotorBoxTests, ParameterizedConstructor) {
     std::vector<int> positions = {0, 0, 0};
-    RotorBox rb(3, positions, rotors, reflector);
+    RotorBox rb(positions, rotors, reflector);
 
     int output = rb.keyTransform(0);
     EXPECT_GE(output, 0);
@@ -70,13 +67,13 @@ TEST_F(RotorBoxTests, RoundTrip) {
 
     {
         std::vector<int> positions = {0, 0, 0};
-        RotorBox rb(3, positions, rotors, reflector);
+        RotorBox rb(positions, rotors, reflector);
         ciphertext = rb.keyTransform(input);
     }
 
     {
         std::vector<int> positions = {0, 0, 0};
-        RotorBox rb(3, positions, rotors, reflector);
+        RotorBox rb(positions, rotors, reflector);
         decrypted = rb.keyTransform(ciphertext);
     }
 
@@ -91,7 +88,7 @@ TEST_F(RotorBoxTests, SteppingMechanism) {
     // 3. Transform the signal.
 
     std::vector<int> startPos = {25, 0, 0};
-    RotorBox rb(3, startPos, rotors, reflector);
+    RotorBox rb(startPos, rotors, reflector);
 
     // This transform will cause stepping
     int out1 = rb.keyTransform(0);
@@ -105,7 +102,7 @@ TEST_F(RotorBoxTests, MultiStepCarry) {
     // 1st transform: R1 -> 0 (notch), R2 -> 0 (notch), R3 -> 1.
 
     std::vector<int> startPos = {25, 25, 0};
-    RotorBox rb(3, startPos, rotors, reflector);
+    RotorBox rb(startPos, rotors, reflector);
 
     int out = rb.keyTransform(0);
     EXPECT_GE(out, 0);
@@ -113,7 +110,7 @@ TEST_F(RotorBoxTests, MultiStepCarry) {
 
 TEST_F(RotorBoxTests, DoubleSteppingMechanism_1) {
     std::vector<int> startPos = {0, 1, 0};
-    RotorBox rb(3, startPos, rotors, reflector);
+    RotorBox rb(startPos, rotors, reflector);
     EnigmaObserverTest observer(3);
     rb.registerObserver(&observer);
 
@@ -125,7 +122,7 @@ TEST_F(RotorBoxTests, DoubleSteppingMechanism_1) {
 
 TEST_F(RotorBoxTests, DoubleSteppingMechanism_2) {
     std::vector<int> startPos = {0, 0, 0};
-    RotorBox rb(3, startPos, rotors, reflector);
+    RotorBox rb(startPos, rotors, reflector);
     EnigmaObserverTest observer(3);
     rb.registerObserver(&observer);
 
@@ -137,7 +134,7 @@ TEST_F(RotorBoxTests, DoubleSteppingMechanism_2) {
 
 TEST_F(RotorBoxTests, DoubleSteppingMechanism_3) {
     std::vector<int> startPos = {1, 0, 2};
-    RotorBox rb(3, startPos, rotors, reflector);
+    RotorBox rb(startPos, rotors, reflector);
     EnigmaObserverTest observer(3);
     rb.registerObserver(&observer);
 
