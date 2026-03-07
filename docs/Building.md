@@ -229,7 +229,7 @@ The project supports LLVM/Clang Sanitizers to detect memory errors, uninitialize
     ./scripts/run_sanitizers.sh build
     ```
 
-*Note: Sanitizers are automatically excluded from the Unit Test suite to maintain performance. They are applied to the core engine and CLI application.*
+*Note: Sanitizers are automatically excluded from the Unit Test suite to maintain performance. They are applied to the core engine and CLI application. In CI, these checks are centralized in the `code-analysis.yml` workflow.*
 
 ---
 

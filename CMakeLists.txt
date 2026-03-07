@@ -67,8 +67,8 @@ set(INCLUDE_DIRS
 add_subdirectory(external/toml11)
 
 # Ensure toml11 headers are treated as SYSTEM to suppress warnings and sanitizer noise
-get_target_property(TOML11_INCLUDE_DIRS toml11::toml11 INTERFACE_INCLUDE_DIRECTORIES)
-set_target_properties(toml11::toml11 PROPERTIES INTERFACE_SYSTEM_INCLUDE_DIRECTORIES "${TOML11_INCLUDE_DIRS}")
+get_target_property(TOML11_INCLUDE_DIRS toml11 INTERFACE_INCLUDE_DIRECTORIES)
+set_target_properties(toml11 PROPERTIES INTERFACE_SYSTEM_INCLUDE_DIRECTORIES "${TOML11_INCLUDE_DIRS}")
 
 # --- Core Targets ---
 
@@ -198,8 +198,8 @@ if(ENIGMA_BUILD_CLI)
     add_subdirectory(external/CLI11)
 
     # Ensure CLI11 headers are treated as SYSTEM
-    get_target_property(CLI11_INCLUDE_DIRS CLI11::CLI11 INTERFACE_INCLUDE_DIRECTORIES)
-    set_target_properties(CLI11::CLI11 PROPERTIES INTERFACE_SYSTEM_INCLUDE_DIRECTORIES "${CLI11_INCLUDE_DIRS}")
+    get_target_property(CLI11_INCLUDE_DIRS CLI11 INTERFACE_INCLUDE_DIRECTORIES)
+    set_target_properties(CLI11 PROPERTIES INTERFACE_SYSTEM_INCLUDE_DIRECTORIES "${CLI11_INCLUDE_DIRS}")
 
     # The EnigmaMachineCore application executable, which is just a wrapper around the EnigmaCore
     add_executable(${PROJECT_NAME}

@@ -122,7 +122,11 @@ To run the same scenarios as the CI locally, use the provided helper script:
 *   **Performance:** Sanitizers introduce runtime overhead (typically 2x-4x) and should be used during development or in specific CI pipelines rather than production builds.
 
 ### CI Integration
-A dedicated GitHub Actions workflow (`sanitizers.yml`) runs on every push and pull request. It performs a build with each sanitizer enabled and runs the application through multiple scenarios. Results are reported in the **GitHub Job Summary** without failing the build, allowing the team to monitor and fix issues asynchronously.
+Code analysis is centralized in the **Code Analysis** workflow (`code-analysis.yml`), which runs on every push and pull request. It orchestrates parallel jobs for:
+*   **Static Analysis:** Running Clang-Tidy on the core logic.
+*   **Runtime Sanitizers:** Executing ASan, UBSan, and MSan checks via the reusable `sanitizers.yml` workflow.
+
+Results are aggregated into a single **GitHub Job Summary** without failing the build, allowing the team to monitor and fix issues asynchronously.
 
 ## GoogleTest Dependency
 The project uses CMake's `FetchContent` to download GoogleTest automatically.
