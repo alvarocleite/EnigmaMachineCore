@@ -13,6 +13,7 @@ To build and run this project, you will need the following tools and libraries:
 *   **Git:** Required for version control and to manage the project's submodules.
 *   **[clang-format](https://clang.llvm.org/docs/ClangFormat.html):** Recommended for maintaining consistent code style.
 *   **[clang-tidy](https://clang.llvm.org/extra/clang-tidy/):** Used for static analysis during the build process.
+*   **[LLVM/Clang Sanitizers](https://clang.llvm.org/docs/index.html):** Used for runtime analysis (ASan, UBSan, MSan). Requires `clang` and `llvm` (for `llvm-symbolizer`).
 
 ### Libraries
 *   **[toml11](https://github.com/ToruNiina/toml11):** A powerful C++11 header-only library for TOML.
@@ -199,6 +200,36 @@ Static analysis is performed using **clang-tidy** and is integrated into the CMa
 *   **Execution:** Once enabled, clang-tidy will run on every source file during compilation (`make`).
 *   **Identifying Issues:** Clang-tidy output is interleaved with compiler output. You can distinguish them by the bracketed check name at the end of the line (e.g., `[modernize-use-auto]`). Standard compiler warnings typically start with `-W`.
 *   **Configuration:** The list of active checks is defined in `CMakeLists.txt`.
+
+---
+
+## Sanitizers (Runtime Analysis)
+
+The project supports LLVM/Clang Sanitizers to detect memory errors, uninitialized reads, and undefined behavior at runtime.
+
+### Requirements
+*   **Compiler:** Requires `clang` / `clang++`.
+*   **Tools:** `llvm` (specifically `llvm-symbolizer`) is recommended for descriptive backtraces.
+
+### Available Options
+| Option | Sanitizer |
+| :--- | :--- |
+| `ENIGMA_USE_ASAN` | AddressSanitizer (ASan) |
+| `ENIGMA_USE_UBSAN` | UndefinedBehaviorSanitizer (UBSan) |
+| `ENIGMA_USE_MSAN` | MemorySanitizer (MSan) |
+
+### Usage
+1.  **Configure with Clang and Sanitizers:**
+    ```bash
+    cmake -DCMAKE_CXX_COMPILER=clang++ -DENIGMA_USE_ASAN=ON -S . -B build
+    ```
+2.  **Build and Run:**
+    ```bash
+    cmake --build build
+    ./scripts/run_sanitizers.sh build
+    ```
+
+*Note: Sanitizers are automatically excluded from the Unit Test suite to maintain performance. They are applied to the core engine and CLI application. In CI, these checks are centralized in the `code-analysis.yml` workflow.*
 
 ---
 
