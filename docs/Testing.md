@@ -88,6 +88,42 @@ add_executable(EnigmaTests
 ### 3. Build and Run
 Re-run your build command. CMake will automatically detect the new tests.
 
+## Sanitizers (Clang)
+
+To improve code reliability and detect memory errors or undefined behavior, the project integrates LLVM/Clang Sanitizers.
+
+### Requirements
+*   **Compiler:** `clang` / `clang++` must be used for sanitizer builds.
+
+### Enabling Sanitizers
+You can enable sanitizers individually during the CMake configuration step:
+
+| Option | Sanitizer | Description |
+| :--- | :--- | :--- |
+| `ENIGMA_USE_ASAN` | AddressSanitizer (ASan) | Detects heap/stack buffer overflows, use-after-free, and memory leaks. |
+| `ENIGMA_USE_UBSAN` | UndefinedBehaviorSanitizer (UBSan) | Detects signed integer overflow, null pointer dereference, and other C++ undefined behaviors. |
+| `ENIGMA_USE_MSAN` | MemorySanitizer (MSan) | Detects uninitialized memory reads. |
+
+**Example Command:**
+```bash
+cmake -DCMAKE_CXX_COMPILER=clang++ -DENIGMA_USE_ASAN=ON -B build
+cmake --build build
+```
+
+### Local Verification
+To run the same scenarios as the CI locally, use the provided helper script:
+```bash
+# Ensure you have built the CLI with sanitizers enabled
+./scripts/run_sanitizers.sh build
+```
+
+### Constraints
+*   **Exclusion of Tests:** By design, sanitizers are applied to the core engine and the CLI application but are **excluded** from the Unit Test suite targets. This is achieved by using a separate non-instrumented object library for tests when sanitizers are active, reducing noise and execution time for the test suite.
+*   **Performance:** Sanitizers introduce runtime overhead (typically 2x-4x) and should be used during development or in specific CI pipelines rather than production builds.
+
+### CI Integration
+A dedicated GitHub Actions workflow (`sanitizers.yml`) runs on every push and pull request. It performs a build with each sanitizer enabled and runs the application through multiple scenarios. Results are reported in the **GitHub Job Summary** without failing the build, allowing the team to monitor and fix issues asynchronously.
+
 ## GoogleTest Dependency
 The project uses CMake's `FetchContent` to download GoogleTest automatically.
 *   **Offline Mode:** You must run the initial CMake configuration while online. After that, the library is stored in `build/<build_type>/_deps` and can be used offline.

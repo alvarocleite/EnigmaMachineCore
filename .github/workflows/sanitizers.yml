@@ -1,0 +1,102 @@
+name: Sanitizers
+
+on:
+  push:
+    branches: [ "main", "development" ]
+  pull_request:
+    branches: [ "main", "development" ]
+
+jobs:
+  sanitize:
+    name: ${{ matrix.sanitizer }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - sanitizer: ASan
+            cmake_flag: -DENIGMA_USE_ASAN=ON
+          - sanitizer: UBSan
+            cmake_flag: -DENIGMA_USE_UBSAN=ON
+          - sanitizer: MSan
+            cmake_flag: -DENIGMA_USE_MSAN=ON
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: recursive
+
+    - name: Install Clang
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y clang llvm
+
+    - name: Configure CMake
+      run: |
+        cmake -B build \
+          -DCMAKE_CXX_COMPILER=clang++ \
+          -DCMAKE_C_COMPILER=clang \
+          -DCMAKE_BUILD_TYPE=Debug \
+          ${{ matrix.cmake_flag }} \
+          -DENIGMA_BUILD_CLI=ON \
+          -DENIGMA_BUILD_TESTS=OFF
+
+    - name: Build
+      run: cmake --build build
+
+    - name: Run Application (Sanitizer Check)
+      shell: bash
+      run: |
+        # Ensure assets are available in the current directory if needed
+        # (CMake already copies them to build/assets/ but app/main.cpp looks for "assets" locally first)
+        
+        # Scenario 1: Help
+        ./build/EnigmaMachineCore --help > /dev/null 2> sanitizer_help.log || true
+        
+        # Scenario 2: Simple encoding/decoding
+        # Note: app/main.cpp expects assetPath to contain Rotor1.toml etc.
+        ./build/EnigmaMachineCore -c build/assets/EnigmaMachineConfig1.toml -a build/assets/ -m "THEQUICKBROWNFOXJUMPSOVERTHELAZYDOG" --encode --decode > /dev/null 2> sanitizer_run.log || true
+        
+        # Scenario 3: Debug mode enabled
+        ./build/EnigmaMachineCore -c build/assets/EnigmaMachineConfig1.toml -a build/assets/ -m "ENIGMA" --debug > /dev/null 2> sanitizer_debug.log || true
+        
+        cat sanitizer_help.log sanitizer_run.log sanitizer_debug.log > sanitizer_all.log
+        echo "--- Sanitizer Output Log ---"
+        cat sanitizer_all.log
+
+    - name: Generate Sanitizer Summary
+      if: always()
+      shell: bash
+      run: |
+        # Count issues
+        ASAN_COUNT=$(grep -c "AddressSanitizer" sanitizer_all.log || echo 0)
+        UBSAN_COUNT=$(grep -c "runtime error:" sanitizer_all.log || echo 0)
+        MSAN_COUNT=$(grep -c "MemorySanitizer" sanitizer_all.log || echo 0)
+        TOTAL=$((ASAN_COUNT + UBSAN_COUNT + MSAN_COUNT))
+        
+        echo "## Sanitizer Report: ${{ matrix.sanitizer }}" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "| Issue Type | Count |" >> $GITHUB_STEP_SUMMARY
+        echo "| :--- | :--- |" >> $GITHUB_STEP_SUMMARY
+        echo "| AddressSanitizer (ASan) | $ASAN_COUNT |" >> $GITHUB_STEP_SUMMARY
+        echo "| UndefinedBehavior (UBSan) | $UBSAN_COUNT |" >> $GITHUB_STEP_SUMMARY
+        echo "| MemorySanitizer (MSan) | $MSAN_COUNT |" >> $GITHUB_STEP_SUMMARY
+        echo "| **Total Issues** | **$TOTAL** |" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        
+        if [ $TOTAL -gt 0 ]; then
+          echo "⚠️ **Sanitizer detected $TOTAL issues.** Please review the build logs for details." >> $GITHUB_STEP_SUMMARY
+          echo "### Log Preview" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          head -n 30 sanitizer_all.log >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+        else
+          echo "✅ No issues detected by ${{ matrix.sanitizer }}." >> $GITHUB_STEP_SUMMARY
+        fi
+
+    - name: Upload Sanitizer Logs
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: sanitizer-logs-${{ matrix.sanitizer }}
+        path: sanitizer_all.log

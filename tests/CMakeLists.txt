@@ -12,7 +12,11 @@ add_executable(EnigmaTests
 
 # Link against the Core Logic (Object Library) and GTest
 # Linking against the OBJ library allows access to hidden internal symbols
-target_link_libraries(EnigmaTests PRIVATE EnigmaCore_OBJ GTest::gtest_main)
+if(TARGET EnigmaCore_NoSan_OBJ)
+    target_link_libraries(EnigmaTests PRIVATE EnigmaCore_NoSan_OBJ GTest::gtest_main)
+else()
+    target_link_libraries(EnigmaTests PRIVATE EnigmaCore_OBJ GTest::gtest_main)
+endif()
 
 # Register tests so CTest can find them
 include(GoogleTest)

@@ -66,6 +66,10 @@ set(INCLUDE_DIRS
 # Initialize toml11 library (header-only submodule)
 add_subdirectory(external/toml11)
 
+# Ensure toml11 headers are treated as SYSTEM to suppress warnings and sanitizer noise
+get_target_property(TOML11_INCLUDE_DIRS toml11::toml11 INTERFACE_INCLUDE_DIRECTORIES)
+set_target_properties(toml11::toml11 PROPERTIES INTERFACE_SYSTEM_INCLUDE_DIRECTORIES "${TOML11_INCLUDE_DIRS}")
+
 # --- Core Targets ---
 
 # 1. Create Object Library for all core logic
@@ -147,6 +151,42 @@ if(ENIGMA_ENABLE_CLANG_TIDY)
     endif()
 endif()
 
+# --- Sanitizers ---
+option(ENIGMA_USE_ASAN "Enable AddressSanitizer" OFF)
+option(ENIGMA_USE_UBSAN "Enable UndefinedBehaviorSanitizer" OFF)
+option(ENIGMA_USE_MSAN "Enable MemorySanitizer (Clang only)" OFF)
+
+set(SANITIZER_FLAGS "")
+if(ENIGMA_USE_ASAN OR ENIGMA_USE_UBSAN OR ENIGMA_USE_MSAN)
+    if(NOT CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+        message(WARNING "Sanitizers are intended for use with Clang as per project requirements.")
+    endif()
+
+    # Sanitizer Ignore List (excludes external libraries from instrumentation)
+    set(IGNORE_LIST_FILE "${CMAKE_CURRENT_SOURCE_DIR}/.sanitizer_ignorelist.txt")
+    set(IGNORE_LIST_FLAG "-fsanitize-ignorelist=${IGNORE_LIST_FILE}")
+
+    if(ENIGMA_USE_ASAN)
+        list(APPEND SANITIZER_FLAGS "-fsanitize=address" "${IGNORE_LIST_FLAG}")
+    endif()
+    if(ENIGMA_USE_UBSAN)
+        list(APPEND SANITIZER_FLAGS "-fsanitize=undefined" "-fno-sanitize-recover=all" "${IGNORE_LIST_FLAG}")
+    endif()
+    if(ENIGMA_USE_MSAN)
+        list(APPEND SANITIZER_FLAGS "-fsanitize=memory" "-fsanitize-memory-track-origins" "-fno-omit-frame-pointer" "${IGNORE_LIST_FLAG}")
+    endif()
+
+    if(SANITIZER_FLAGS)
+        message(STATUS "Enabling Sanitizers: ${SANITIZER_FLAGS}")
+        
+        # Apply to core object library
+        target_compile_options(EnigmaCore_OBJ PRIVATE ${SANITIZER_FLAGS})
+        
+        # Apply to core library (linkage)
+        target_link_options(EnigmaCore PRIVATE ${SANITIZER_FLAGS})
+    endif()
+endif()
+
 # --- Main Executable Target ---
 if(ENIGMA_BUILD_CLI)
     # Application entry point
@@ -156,6 +196,10 @@ if(ENIGMA_BUILD_CLI)
 
     # Initialize and link CLI11 library (Only needed for the CLI app)
     add_subdirectory(external/CLI11)
+
+    # Ensure CLI11 headers are treated as SYSTEM
+    get_target_property(CLI11_INCLUDE_DIRS CLI11::CLI11 INTERFACE_INCLUDE_DIRECTORIES)
+    set_target_properties(CLI11::CLI11 PROPERTIES INTERFACE_SYSTEM_INCLUDE_DIRECTORIES "${CLI11_INCLUDE_DIRS}")
 
     # The EnigmaMachineCore application executable, which is just a wrapper around the EnigmaCore
     add_executable(${PROJECT_NAME}
@@ -167,6 +211,12 @@ if(ENIGMA_BUILD_CLI)
 
     # Link the core library logic to the executable
     target_link_libraries(${PROJECT_NAME} PRIVATE EnigmaMachineCore::EnigmaCore CLI11::CLI11)
+
+    # Apply sanitizers to CLI if enabled
+    if(SANITIZER_FLAGS)
+        target_compile_options(${PROJECT_NAME} PRIVATE ${SANITIZER_FLAGS})
+        target_link_options(${PROJECT_NAME} PRIVATE ${SANITIZER_FLAGS})
+    endif()
 
     # Define the installed assets path for the CLI fallback
     target_compile_definitions(${PROJECT_NAME} PRIVATE 
@@ -201,6 +251,24 @@ if(ENIGMA_BUILD_TESTS)
     FetchContent_MakeAvailable(googletest)
 
     enable_testing()
+
+    # Create a separate non-instrumented object library for tests if sanitizers are active
+    # to satisfy the requirement: "ensure these sanitizers do not run on the Unit Test suite targets"
+    if(SANITIZER_FLAGS)
+        add_library(EnigmaCore_NoSan_OBJ OBJECT ${CORE_SOURCES})
+        target_include_directories(EnigmaCore_NoSan_OBJ PUBLIC ${INCLUDE_DIRS})
+        target_link_libraries(EnigmaCore_NoSan_OBJ PUBLIC toml11::toml11)
+        set_target_properties(EnigmaCore_NoSan_OBJ PROPERTIES POSITION_INDEPENDENT_CODE ON)
+        target_compile_definitions(EnigmaCore_NoSan_OBJ PRIVATE 
+            ENIGMA_INSTALL_ASSETS_PATH="${CMAKE_INSTALL_FULL_DATADIR}/EnigmaMachineCore/assets/"
+        )
+        if(MSVC)
+            target_compile_options(EnigmaCore_NoSan_OBJ PRIVATE /W4)
+        else()
+            target_compile_options(EnigmaCore_NoSan_OBJ PRIVATE -Wall -Wextra -Wpedantic)
+        endif()
+    endif()
+
     add_subdirectory(tests)
 endif()
 
