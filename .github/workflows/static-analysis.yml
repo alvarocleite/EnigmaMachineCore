@@ -60,7 +60,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: checkout@v4
       with:
         submodules: recursive
 
@@ -73,28 +73,46 @@ jobs:
       run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=Debug -DENIGMA_ENABLE_CPPCHECK=ON
 
     - name: Run CppCheck
-      run: cmake --build ${{github.workspace}}/build --target enigma_cppcheck 2>&1 | tee cppcheck.log
+      run: |
+        # Use a template to ensure consistent output format for parsing
+        cmake --build ${{github.workspace}}/build --target enigma_cppcheck 2>&1 | tee cppcheck.log
 
     - name: Generate Summary
       if: always()
       run: |
         echo "## CppCheck Analysis Summary" >> $GITHUB_STEP_SUMMARY
         
-        # CppCheck output for errors/warnings typically contains [style], [performance], etc.
-        TOTAL_ISSUES=$(grep -c "\[" cppcheck.log || echo 0)
+        # CppCheck output format: filepath:line:col: severity: message [id]
+        # We filter for lines that look like actual findings (starting with / or alphanumeric path)
+        grep -E "^[^[:space:]]+:[0-9]+:[0-9]+: " cppcheck.log > findings.log || true
+        
+        TOTAL_ISSUES=$(wc -l < findings.log)
         echo "**Total Issues Found:** $TOTAL_ISSUES" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
 
         if [ "$TOTAL_ISSUES" -gt 0 ]; then
-          echo "| Issue Type | Count |" >> $GITHUB_STEP_SUMMARY
+          echo "### 📊 Severity Breakdown" >> $GITHUB_STEP_SUMMARY
+          echo "| Severity | Count |" >> $GITHUB_STEP_SUMMARY
           echo "| :--- | :---: |" >> $GITHUB_STEP_SUMMARY
           
-          # Extract the category in brackets (e.g., [style], [performance])
-          # The pattern is usually like: [file:line]: (style) message [id]
-          # Or similar. Let's try to extract the (category) or [id]
-          grep -o "(\(style\|performance\|portability\|warning\|error\))" cppcheck.log | tr -d '()' | sort | uniq -c | sort -nr | while read count type; do
+          # Extract severity and count
+          sed -n 's/^[^:]*:[0-9]*:[0-9]*: \([^:]*\):.*/\1/p' findings.log | sort | uniq -c | sort -nr | while read count type; do
             echo "| \`$type\` | $count |" >> $GITHUB_STEP_SUMMARY
           done
+          
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 🔍 Detailed Findings" >> $GITHUB_STEP_SUMMARY
+          echo "<details><summary>Click to expand all $TOTAL_ISSUES findings</summary>" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| File | Line | Severity | Message |" >> $GITHUB_STEP_SUMMARY
+          echo "| :--- | :--- | :--- | :--- |" >> $GITHUB_STEP_SUMMARY
+          
+          # Format issues into table rows
+          # We escape | characters in messages to avoid breaking the markdown table
+          sed -n 's/^\([^:]*\):\([0-9]*\):[0-9]*: \([^:]*\): \(.*\)/\1 | \2 | \3 | \4/p' findings.log | sed 's/|/\\|/g' | sed 's/ \\| / | /g' >> $GITHUB_STEP_SUMMARY
+          
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "</details>" >> $GITHUB_STEP_SUMMARY
         else
           echo "✅ No CppCheck issues found!" >> $GITHUB_STEP_SUMMARY
         fi
