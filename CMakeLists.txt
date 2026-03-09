@@ -151,6 +151,42 @@ if(ENIGMA_ENABLE_CLANG_TIDY)
     endif()
 endif()
 
+# --- Static Analysis (cppcheck) ---
+option(ENIGMA_ENABLE_CPPCHECK "Enable static analysis with cppcheck" OFF)
+
+if(ENIGMA_ENABLE_CPPCHECK)
+    find_program(CPPCHECK_EXE cppcheck)
+    if(CPPCHECK_EXE)
+        message(STATUS "cppcheck found: ${CPPCHECK_EXE}")
+        
+        # Define include directories for cppcheck to use
+        set(CPPCHECK_INCLUDES "")
+        foreach(inc ${INCLUDE_DIRS})
+            list(APPEND CPPCHECK_INCLUDES "-I${inc}")
+        endforeach()
+
+        # Add custom target to run cppcheck
+        # Using --project=compile_commands.json is usually better but requires CMAKE_EXPORT_COMPILE_COMMANDS=ON
+        add_custom_target(enigma_cppcheck
+            COMMAND ${CPPCHECK_EXE}
+                --enable=performance,portability,style,unusedFunction
+                --std=c++20
+                --inline-suppr
+                --suppress=missingIncludeSystem
+                --force
+                --quiet
+                --error-exitcode=1
+                ${CPPCHECK_INCLUDES}
+                ${CORE_SOURCES}
+                app/main.cpp
+            WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+            COMMENT "Running cppcheck on core sources and application"
+        )
+    else()
+        message(WARNING "cppcheck not found. The 'enigma_cppcheck' target will not be available.")
+    endif()
+endif()
+
 # --- Sanitizers ---
 option(ENIGMA_USE_ASAN "Enable AddressSanitizer" OFF)
 option(ENIGMA_USE_UBSAN "Enable UndefinedBehaviorSanitizer" OFF)

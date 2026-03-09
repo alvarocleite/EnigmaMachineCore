@@ -13,6 +13,7 @@ To build and run this project, you will need the following tools and libraries:
 *   **Git:** Required for version control and to manage the project's submodules.
 *   **[clang-format](https://clang.llvm.org/docs/ClangFormat.html):** Recommended for maintaining consistent code style.
 *   **[clang-tidy](https://clang.llvm.org/extra/clang-tidy/):** Used for static analysis during the build process.
+*   **[cppcheck](http://cppcheck.sourceforge.net/):** Used for deeper static analysis, specifically performance, style, and portability.
 *   **[Valgrind](https://valgrind.org/):** Essential for memory leak detection and profiling on Linux.
 *   **[LLVM/Clang Sanitizers](https://clang.llvm.org/docs/index.html):** Used for runtime analysis (ASan, UBSan, MSan). Requires `clang` and `llvm` (for `llvm-symbolizer`).
 
@@ -192,8 +193,9 @@ This will automatically format all source and header files in the project.
 
 ## Static Analysis
 
-Static analysis is performed using **clang-tidy** and is integrated into the CMake build system.
+Static analysis is performed using **clang-tidy** and **cppcheck**, both of which are integrated into the CMake build system.
 
+### Clang-Tidy
 *   **How to Enable:** By default, static analysis is disabled to ensure fast build times. To enable it, use the `ENIGMA_ENABLE_CLANG_TIDY` flag during configuration:
     ```bash
     cmake -DENIGMA_ENABLE_CLANG_TIDY=ON -S . -B build
@@ -201,6 +203,18 @@ Static analysis is performed using **clang-tidy** and is integrated into the CMa
 *   **Execution:** Once enabled, clang-tidy will run on every source file during compilation (`make`).
 *   **Identifying Issues:** Clang-tidy output is interleaved with compiler output. You can distinguish them by the bracketed check name at the end of the line (e.g., `[modernize-use-auto]`). Standard compiler warnings typically start with `-W`.
 *   **Configuration:** The list of active checks is defined in `CMakeLists.txt`.
+
+### CppCheck
+*   **How to Enable:** Use the `ENIGMA_ENABLE_CPPCHECK` flag during configuration:
+    ```bash
+    cmake -DENIGMA_ENABLE_CPPCHECK=ON -S . -B build
+    ```
+*   **Execution:** Unlike clang-tidy, cppcheck is run via a dedicated custom target:
+    ```bash
+    cmake --build build --target enigma_cppcheck
+    ```
+*   **Purpose:** It focuses on performance, portability, style, and unused functions.
+*   **CI Enforcement:** In the GitHub Actions pipeline, `enigma_cppcheck` is run on every push/PR within the `Code Analysis` workflow.
 
 ---
 
