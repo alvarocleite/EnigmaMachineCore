@@ -29,9 +29,9 @@ protected:
 
 class EnigmaObserverTest : public IEnigmaObserver {
 public:
-    std::vector<int> pos;
+    std::vector<AlphabetIndex> pos;
     EnigmaObserverTest(int rotorCount) { pos.resize(rotorCount, 0); }
-    void onRotorStepped(int rotorIndex, int position) override { pos[rotorIndex] = position; }
+    void onRotorStepped(int rotorIndex, AlphabetIndex position) override { pos[rotorIndex] = position; }
     void onCharEncrypted(char input, char output) override {
         // Not used in this test however needs to override as IEnigmaObserver is pure virtual
     }

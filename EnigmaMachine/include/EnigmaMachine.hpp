@@ -6,10 +6,12 @@
 #pragma once
 
 #include <memory>
+#include <span>
 #include <string_view>
 #include <vector>
 
 #include "EnigmaCore_EXPORT.hpp"
+#include "EnigmaTypes.hpp"
 #include "IEnigmaObserver.hpp"
 
 // Forward declarations for internal implementation details
@@ -28,20 +30,24 @@ protected:
     /**
      * @brief Internal constructor using the configuration struct.
      * Accessible to tests and benchmarks, but hidden from the public API.
+     * @param config The machine configuration.
+     * @param logger Optional logger for event reporting.
      */
-    explicit EnigmaMachine(const EnigmaMachineConfig& config);
+    explicit EnigmaMachine(const EnigmaMachineConfig& config, ILogger* logger = nullptr);
 
 private:
     std::unique_ptr<RotorBox> rotorBox;
     std::unique_ptr<PlugBoard> plugBoard;
     std::vector<IEnigmaObserver*> observers;
+    ILogger* logger = nullptr;
 
 public:
     /**
      * @brief Default Constructor.
      * Initializes a standard Enigma Machine (3 Rotors, standard Reflector).
+     * @param logger Optional logger for event reporting.
      */
-    EnigmaMachine();
+    explicit EnigmaMachine(ILogger* logger = nullptr);
 
     /**
      * @brief File-based Constructor using a specific Asset Provider.
@@ -49,8 +55,10 @@ public:
      * @param provider The asset provider to use for loading configuration.
      * @param fileName The path to the TOML configuration file.
      * @param assetPath Optional base directory for assets.
+     * @param logger Optional logger for event reporting.
      */
-    EnigmaMachine(const IAssetProvider& provider, std::string_view fileName, std::string_view assetPath = "");
+    EnigmaMachine(const IAssetProvider& provider, std::string_view fileName, std::string_view assetPath = "",
+                  ILogger* logger = nullptr);
 
     /**
      * @brief File-based Constructor.
@@ -58,8 +66,9 @@ public:
      *
      * @param fileName The path to the TOML configuration file.
      * @param assetPath Optional base directory for assets.
+     * @param logger Optional logger for event reporting.
      */
-    EnigmaMachine(std::string_view fileName, std::string_view assetPath = "");
+    explicit EnigmaMachine(std::string_view fileName, std::string_view assetPath = "", ILogger* logger = nullptr);
 
     // Rule of Five (Required due to unique_ptr)
     ~EnigmaMachine() override;
@@ -72,9 +81,21 @@ public:
      * @brief Transforms the input key through the rotor box.
      *
      * @param input The input key to be transformed.
-     * @return int The transformed output key.
+     * @return AlphabetIndex The transformed output key.
      */
-    int keyTransform(int input);
+    AlphabetIndex keyTransform(AlphabetIndex input);
+
+    /**
+     * @brief Processes a buffer of alphabet indexes in-place.
+     * @param buffer The span of characters to transform.
+     */
+    void processBuffer(std::span<AlphabetIndex> buffer);
+
+    /**
+     * @brief Sets the logger for the machine.
+     * @param logger The logger to use.
+     */
+    void setLogger(ILogger* logger);
 
     /**
      * @brief Registers an observer to receive notifications.
@@ -89,6 +110,6 @@ public:
     void removeObserver(IEnigmaObserver* observer);
 
     // IEnigmaObserver implementation
-    void onRotorStepped(int rotorIndex, int position) override;
+    void onRotorStepped(int rotorIndex, AlphabetIndex position) override;
     void onCharEncrypted(char input, char output) override;
 };

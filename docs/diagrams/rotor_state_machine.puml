@@ -11,7 +11,7 @@ title Rotor State Machine (Stepping Logic)
 [*] --> Idle
 
 state Idle {
-    note "Waiting for Input Signal" as N1
+    note "Waiting for Input (AlphabetIndex)" as N1
 }
 
 state "Check Position" as CheckPos {
@@ -26,7 +26,7 @@ state "Rotate" as Rotate {
     note "Rotate rotor\nIncrement position (mod TRANSFORMER_SIZE)" as N4
 }
 
-Idle --> CheckPos : Input Signal (Before Encrypting)
+Idle --> CheckPos : Input Received (Before Encrypting)
 
 CheckPos --> Rotate : Rightmost rotor\n(always steps)
 CheckPos --> Notch : Carry or Double-step condition met

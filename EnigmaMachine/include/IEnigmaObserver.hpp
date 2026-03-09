@@ -1,6 +1,7 @@
 #pragma once
 
 #include "EnigmaCore_EXPORT.hpp"
+#include "EnigmaTypes.hpp"
 
 /**
  * @brief Interface for observing Enigma Machine events.
@@ -14,7 +15,7 @@ struct ENIGMACORE_EXPORT IEnigmaObserver {
      * @param rotorIndex The index of the rotor (0 is the rightmost/fastest).
      * @param position The new position of the rotor (0-25).
      */
-    virtual void onRotorStepped(int rotorIndex, int position) = 0;
+    virtual void onRotorStepped(int rotorIndex, AlphabetIndex position) = 0;
 
     /**
      * @brief Called when a character is encrypted/decrypted.
