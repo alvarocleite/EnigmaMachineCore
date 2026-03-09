@@ -52,6 +52,7 @@ jobs:
           test -f "$INSTALL_DIR/bin/EnigmaMachineCore"
         fi
         test -f "$INSTALL_DIR/include/EnigmaMachineCore/EnigmaCore.hpp"
+        test -f "$INSTALL_DIR/include/EnigmaMachineCore/EnigmaTypes.hpp"
         test -f "$INSTALL_DIR/share/EnigmaMachineCore/assets/EnigmaMachineConfig1.toml"
 
     - name: Setup Consumer App
@@ -67,13 +68,13 @@ jobs:
         int main() {
             // Using default constructor which relies on installed assets
             EnigmaMachine machine;
-            int input = 7; // 'H'
-            int output = machine.keyTransform(input);
+            AlphabetIndex input = 7; // 'H'
+            AlphabetIndex output = machine.keyTransform(input);
             
             std::cout << "Input: " << input << " -> Output: " << output << std::endl;
             
             // Basic sanity check: Encryption should produce a valid index
-            assert(output >= 0 && output < 26);
+            assert(output >= 0 && output < TRANSFORMER_SIZE);
             assert(output != input); // Enigma never maps a letter to itself
             
             std::cout << "Consumer Linkage Success!" << std::endl;
