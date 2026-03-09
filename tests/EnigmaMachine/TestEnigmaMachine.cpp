@@ -85,13 +85,13 @@ TEST_F(EnigmaMachineTests, PlugBoardEffect) {
     int out2 = mDefault.keyTransform(input);
 
     EXPECT_NE(out1, out2) << "Different configurations (with/without plugs) should yield different results.";
-    }
+}
 
-    /**
-    * @brief Mock logger for testing ILogger integration.
-    */
-    class TestLogger : public ILogger {
-    public:
+/**
+ * @brief Mock logger for testing ILogger integration.
+ */
+class TestLogger : public ILogger {
+public:
     struct LogEntry {
         LogLevel level;
         std::string message;
@@ -99,9 +99,9 @@ TEST_F(EnigmaMachineTests, PlugBoardEffect) {
     std::vector<LogEntry> logs;
 
     void log(LogLevel level, std::string_view message) override { logs.push_back({level, std::string(message)}); }
-    };
+};
 
-    TEST_F(EnigmaMachineTests, ProcessBufferSpan) {
+TEST_F(EnigmaMachineTests, ProcessBufferSpan) {
     EnigmaMachine m1;
     EnigmaMachine m2;
 
@@ -119,9 +119,9 @@ TEST_F(EnigmaMachineTests, PlugBoardEffect) {
     for (size_t i = 0; i < buffer.size(); ++i) {
         EXPECT_EQ(buffer[i], individual_results[i]) << "Span processing result mismatch at index " << i;
     }
-    }
+}
 
-    TEST_F(EnigmaMachineTests, LoggerInjectionAndPropagation) {
+TEST_F(EnigmaMachineTests, LoggerInjectionAndPropagation) {
     TestLogger logger;
     // Inject logger via constructor
     EnigmaMachine machine(&logger);
@@ -140,4 +140,4 @@ TEST_F(EnigmaMachineTests, PlugBoardEffect) {
         }
     }
     EXPECT_TRUE(foundSteppingLog) << "Should find a log entry related to rotor stepping.";
-    }
+}
