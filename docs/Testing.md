@@ -117,6 +117,26 @@ To run the same scenarios as the CI locally, use the provided helper script:
 ./scripts/run_sanitizers.sh build
 ```
 
+## Valgrind (Memory Leak Detection)
+
+The project includes a custom CMake target to run the entire test suite through Valgrind.
+
+### Usage
+1.  **Configure with Tests Enabled:**
+    ```bash
+    cmake -DENIGMA_BUILD_TESTS=ON -S . -B build
+    ```
+2.  **Run Valgrind Target:**
+    ```bash
+    cmake --build build --target Enigma_valgrind
+    ```
+
+This will execute `EnigmaTests` with `--leak-check=full` and will return a non-zero exit code if any leaks or memory errors are detected, making it suitable for both local development and CI gates.
+
+### Constraints
+*   **Linux Only:** Valgrind is currently only supported on Linux environments.
+*   **Performance:** Running through Valgrind is significantly slower than native execution.
+
 ### Constraints
 *   **Exclusion of Tests:** By design, sanitizers are applied to the core engine and the CLI application but are **excluded** from the Unit Test suite targets. This is achieved by using a separate non-instrumented object library for tests when sanitizers are active, reducing noise and execution time for the test suite.
 *   **Performance:** Sanitizers introduce runtime overhead (typically 2x-4x) and should be used during development or in specific CI pipelines rather than production builds.

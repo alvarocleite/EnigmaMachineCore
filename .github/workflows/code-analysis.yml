@@ -12,3 +12,6 @@ jobs:
     
   runtime-sanitizers:
     uses: ./.github/workflows/sanitizers.yml
+
+  valgrind-analysis:
+    uses: ./.github/workflows/valgrind.yml

@@ -29,3 +29,16 @@ add_custom_command(TARGET EnigmaTests POST_BUILD
         ${CMAKE_BINARY_DIR}/tests/assets
     COMMENT "Copying assets to test build directory"
 )
+
+# --- Valgrind Memory Profiling ---
+find_program(VALGRIND_EXE valgrind)
+if(VALGRIND_EXE)
+    add_custom_target(Enigma_valgrind
+        COMMAND ${VALGRIND_EXE} --leak-check=full --error-exitcode=1 ./EnigmaTests
+        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+        DEPENDS EnigmaTests
+        COMMENT "Running test suite through Valgrind for memory leak detection"
+    )
+else()
+    message(STATUS "Valgrind not found. The 'Enigma_valgrind' target will not be available.")
+endif()
