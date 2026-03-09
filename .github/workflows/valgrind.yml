@@ -1,0 +1,76 @@
+name: Valgrind Analysis
+
+on:
+  workflow_call:
+
+jobs:
+  valgrind:
+    name: Valgrind Memory Check
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: recursive
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y valgrind
+
+    - name: Configure CMake
+      run: cmake -B build -DCMAKE_BUILD_TYPE=Debug -DENIGMA_BUILD_TESTS=ON
+
+    - name: Build Tests
+      run: cmake --build build --target EnigmaTests
+
+    - name: Run Valgrind
+      shell: bash
+      run: |
+        # Run valgrind and capture output. 
+        # We use the custom target but redirect output to a file for summary generation.
+        # We don't fail immediately here so we can generate the summary.
+        cmake --build build --target Enigma_valgrind 2>&1 | tee valgrind.log || true
+
+    - name: Generate Summary
+      if: always()
+      shell: bash
+      run: |
+        echo "## Valgrind Memory Analysis Summary" >> $GITHUB_STEP_SUMMARY
+        
+        # Extract key metrics from valgrind output
+        LEAK_SUMMARY=$(grep "LEAK SUMMARY:" valgrind.log -A 5 || true)
+        ERROR_SUMMARY=$(grep "ERROR SUMMARY:" valgrind.log || true)
+        
+        # Count total errors
+        ERRORS=$(echo "$ERROR_SUMMARY" | awk '{print $4}' || echo 0)
+        
+        echo "### Quick Stats" >> $GITHUB_STEP_SUMMARY
+        echo "| Metric | Value |" >> $GITHUB_STEP_SUMMARY
+        echo "| :--- | :--- |" >> $GITHUB_STEP_SUMMARY
+        echo "| **Total Errors** | **$ERRORS** |" >> $GITHUB_STEP_SUMMARY
+        
+        if [ "$ERRORS" -gt 0 ]; then
+          echo "### Leak Details" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          echo "$LEAK_SUMMARY" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          
+          echo "### Error Summary" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          echo "$ERROR_SUMMARY" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          
+          echo "⚠️ **Valgrind detected $ERRORS issues.** Please review the full log artifact for details." >> $GITHUB_STEP_SUMMARY
+          # Fail the job if errors were found
+          exit 1
+        else
+          echo "✅ No memory leaks or errors detected by Valgrind!" >> $GITHUB_STEP_SUMMARY
+        fi
+
+    - name: Upload Valgrind Log
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: valgrind-log
+        path: valgrind.log

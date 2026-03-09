@@ -13,6 +13,7 @@ To build and run this project, you will need the following tools and libraries:
 *   **Git:** Required for version control and to manage the project's submodules.
 *   **[clang-format](https://clang.llvm.org/docs/ClangFormat.html):** Recommended for maintaining consistent code style.
 *   **[clang-tidy](https://clang.llvm.org/extra/clang-tidy/):** Used for static analysis during the build process.
+*   **[Valgrind](https://valgrind.org/):** Essential for memory leak detection and profiling on Linux.
 *   **[LLVM/Clang Sanitizers](https://clang.llvm.org/docs/index.html):** Used for runtime analysis (ASan, UBSan, MSan). Requires `clang` and `llvm` (for `llvm-symbolizer`).
 
 ### Libraries
