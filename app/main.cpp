@@ -42,16 +42,37 @@ struct AppConfig {
 };
 
 /**
- * @brief Observer that logs Enigma machine events to the console.
+ * @brief Observer that logs Enigma machine events and engine messages to the console.
  */
-class ConsoleObserver : public IEnigmaObserver {
+class ConsoleObserver : public IEnigmaObserver, public ILogger {
 public:
-    void onRotorStepped(int rotorIndex, int position) override {
+    // IEnigmaObserver implementation
+    void onRotorStepped(int rotorIndex, AlphabetIndex position) override {
         std::cout << "[Event] Rotor " << rotorIndex << " stepped to position " << position << "\n";
     }
 
     void onCharEncrypted(char input, char output) override {
         std::cout << "[Event] Encrypted: " << input << " -> " << output << "\n";
+    }
+
+    // ILogger implementation
+    void log(LogLevel level, std::string_view message) override {
+        std::string prefix = "[Log]";
+        switch (level) {
+            case LogLevel::Debug:
+                prefix = "[DEBUG]";
+                break;
+            case LogLevel::Info:
+                prefix = "[INFO]";
+                break;
+            case LogLevel::Warning:
+                prefix = "[WARN]";
+                break;
+            case LogLevel::Error:
+                prefix = "[ERROR]";
+                break;
+        }
+        std::cout << prefix << " " << message << "\n";
     }
 };
 
@@ -66,7 +87,7 @@ std::string processMessage(EnigmaMachine& machine, const std::string& input, boo
             continue;  // Skip non-alphabetic characters
         }
         char upperC = std::toupper(c);
-        char res = machine.keyTransform(upperC - 'A') + 'A';
+        char res = static_cast<char>(machine.keyTransform(upperC - 'A') + 'A');
         output += res;
     }
     return output;
@@ -108,13 +129,18 @@ AppConfig parseArguments(int argc, char** argv) {
 }
 
 void runApplication(const AppConfig& config) {
-    EnigmaMachine machine(config.configPath, config.assetPath);
-
-    // Create and register observer if debug is enabled
+    // Create observer first so it can be used during machine initialization
     ConsoleObserver observer;
+
+    EnigmaMachine machine(config.configPath, config.assetPath, config.debug ? &observer : nullptr);
+
+    // Register observer for events if debug is enabled
     if (config.debug) {
         machine.registerObserver(&observer);
-        std::cout << "Debug mode enabled: Observer registered.\n";
+        std::cout << "Debug mode enabled: Observer and Logger registered.\n";
+        // machine.keyTransform(0); // Removed dummy call
+        // We can't call machine.printTransformers() because it's not in the public API.
+        // It's in RotorBox. But Issue 59 is about decoupling.
     }
 
     std::string currentMessage = config.message;
@@ -127,9 +153,9 @@ void runApplication(const AppConfig& config) {
 
     if (config.decode) {
         // Re-initialize for decryption (symmetric cipher starting from same state)
-        EnigmaMachine decodeMachine(config.configPath, config.assetPath);
+        EnigmaMachine decodeMachine(config.configPath, config.assetPath, config.debug ? &observer : nullptr);
 
-        // Register observer for the decode machine as well
+        // Register observer for the decode machine events as well
         if (config.debug) {
             decodeMachine.registerObserver(&observer);
         }

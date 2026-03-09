@@ -19,9 +19,9 @@
  * @details Initializes a standard 3-rotor configuration with empty/default wiring.
  * Note: usage of this constructor is discouraged without subsequent initialization.
  */
-RotorBox::RotorBox() {
+RotorBox::RotorBox(ILogger* logger) : logger(logger) {
     rotorCount = 3;
-    rotorPositions = std::vector<int>(rotorCount, 0);
+    rotorPositions = std::vector<AlphabetIndex>(rotorCount, 0);
 
     std::vector<RotorConfig> defaultRotors(rotorCount);
     initTransformers(defaultRotors, ReflectorConfig{});
@@ -32,8 +32,9 @@ RotorBox::RotorBox() {
  * Validates that the number of provided positions matches the rotor count before
  * proceeding with transformer initialization and position setting.
  */
-RotorBox::RotorBox(const std::vector<int>& rotorPositions, const std::vector<RotorConfig>& rotors,
-                   const ReflectorConfig& reflector) {
+RotorBox::RotorBox(const std::vector<AlphabetIndex>& rotorPositions, const std::vector<RotorConfig>& rotors,
+                   const ReflectorConfig& reflector, ILogger* logger)
+    : logger(logger) {
     if (std::cmp_not_equal(rotorPositions.size(), rotors.size())) {
         throw std::invalid_argument("Error: Number of rotors and number of rotor positions do not match.");
     }
@@ -75,8 +76,12 @@ void RotorBox::initTransformers(const std::vector<RotorConfig>& rotors, const Re
 }
 
 void RotorBox::printTransformers() const {
-    for (const auto& transformer : transformers) {
-        std::cout << "Transformer Type: " << static_cast<int>(transformer->getType()) << "\n";
+    if (logger) {
+        for (size_t i = 0; i < transformers.size(); ++i) {
+            std::string msg = "Transformer " + std::to_string(i) +
+                              " Type: " + std::to_string(static_cast<int>(transformers[i]->getType()));
+            logger->log(LogLevel::Info, msg);
+        }
     }
 }
 
@@ -87,10 +92,10 @@ void RotorBox::printTransformers() const {
  * 3. Reflector: Swaps the character and sends it back.
  * 4. Reverse Pass: Left-to-Right back through the rotors using inverse mappings.
  */
-int RotorBox::keyTransform(int input) {
+AlphabetIndex RotorBox::keyTransform(AlphabetIndex input) {
     updateRotors();
 
-    int newPosition = input;
+    AlphabetIndex newPosition = input;
     // transform through rotors forward
     for (const auto& transformer : transformers | std::views::take(rotorCount)) {
         newPosition = transformer->transformForward(newPosition);
@@ -106,6 +111,8 @@ int RotorBox::keyTransform(int input) {
 
     return newPosition;
 }
+
+void RotorBox::setLogger(ILogger* log) { this->logger = log; }
 
 /**
  * @details Updates the rotor positions according to Enigma stepping mechanics.
@@ -123,7 +130,7 @@ void RotorBox::updateRotors() {
     // Storing notch states BEFORE stepping
     std::vector<char> atNotch(rotorCount, 0);
     std::ranges::transform(transformers | std::views::take(rotorCount), atNotch.begin(), [](const auto& transformer) {
-        auto* rotor = static_cast<Rotor*>(transformer.get());
+        const auto* rotor = static_cast<const Rotor*>(transformer.get());
         return rotor->isNotchPosition(rotor->getPosition()) ? 1 : 0;
     });
 
@@ -131,12 +138,17 @@ void RotorBox::updateRotors() {
     for (int i = 0; i < rotorCount; i++) {
         if (i == 0) {  // Rightmost rotor always steps (i == 0)
             transformers.at(i)->rotate();
+            if (logger) logger->log(LogLevel::Debug, "Rotor 0 stepped.");
             continue;
         }
         bool carried = atNotch[i - 1] != 0;
         bool doubleStep = (i < rotorCount - 1) && (atNotch[i] != 0);
         if (carried || doubleStep) {
             transformers.at(i)->rotate();
+            if (logger) {
+                std::string reason = carried ? "carry" : "double-step";
+                logger->log(LogLevel::Debug, "Rotor " + std::to_string(i) + " stepped due to " + reason + ".");
+            }
         }
     }
 

@@ -3,6 +3,7 @@
 #include <array>
 #include <string>
 #include <vector>
+#include "EnigmaTypes.hpp"
 #include "PlugBoardPair.hpp"  // For PlugBoardPair and PLUGBOARD_MAX_PAIRS
 #include "config.hpp"         // For TRANSFORMER_SIZE
 
@@ -12,9 +13,9 @@
 struct RotorConfig {
     RotorConfig();
     /** @brief The position (0 - (TRANSFORMER_SIZE - 1)) at which the rotor triggers the turnover of the next rotor. */
-    int notchPosition = 0;
+    AlphabetIndex notchPosition = 0;
     /** @brief The internal wiring permutation array (forward direction). Must be of size TRANSFORMER_SIZE. */
-    std::vector<int> wiring;
+    std::vector<AlphabetIndex> wiring;
 };
 
 /**
@@ -23,7 +24,7 @@ struct RotorConfig {
 struct ReflectorConfig {
     ReflectorConfig();
     /** @brief The internal wiring permutation array (reflection map). Must be of size TRANSFORMER_SIZE. */
-    std::vector<int> wiring;
+    std::vector<AlphabetIndex> wiring;
 };
 
 /**
@@ -37,7 +38,7 @@ struct EnigmaMachineConfig {
     /** @brief Number of rotors in the machine. */
     int rotorCount = 0;
     /** @brief Initial rotational positions of the rotors. */
-    std::vector<int> rotorPositions;
+    std::vector<AlphabetIndex> rotorPositions;
     /** @brief Configuration for each rotor (in order). */
     std::vector<RotorConfig> rotors;
     /** @brief Configuration for the reflector. */

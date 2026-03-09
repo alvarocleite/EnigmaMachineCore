@@ -7,12 +7,13 @@
 
 #include <array>
 
+#include "EnigmaTypes.hpp"
 #include "PlugBoardPair.hpp"
 #include "config.hpp"
 
 class PlugBoard {
 private:
-    std::array<int, TRANSFORMER_SIZE> mapping;  // Direct mapping: mapping[Input] = Output
+    std::array<AlphabetIndex, TRANSFORMER_SIZE> mapping;  // Direct mapping: mapping[Input] = Output
 
 public:
     /**
@@ -29,14 +30,14 @@ public:
      * @param pairs An array of pairs to initialize the plugboard with.
      * @throws std::invalid_argument If a port index is out of range or if there is a mapping conflict.
      */
-    PlugBoard(const std::array<PlugBoardPair, PLUGBOARD_MAX_PAIRS>& pairs);
+    explicit PlugBoard(const std::array<PlugBoardPair, PLUGBOARD_MAX_PAIRS>& pairs);
     ~PlugBoard() = default;
 
     /**
      * @brief Swaps the input key based on the plugboard pairs.
      *
      * @param key The input key to be swapped.
-     * @return int The swapped key.
+     * @return AlphabetIndex The swapped key.
      */
-    int swap(int key) const;
+    AlphabetIndex swap(AlphabetIndex key) const;
 };

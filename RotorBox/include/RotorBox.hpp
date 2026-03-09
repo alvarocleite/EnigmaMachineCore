@@ -9,6 +9,7 @@
 #include <vector>
 
 #include "EnigmaMachineConfig.hpp"
+#include "EnigmaTypes.hpp"
 #include "IEnigmaObserver.hpp"
 #include "Transformer.hpp"
 
@@ -20,9 +21,10 @@
 class RotorBox {
 private:
     int rotorCount;
-    std::vector<int> rotorPositions;
+    std::vector<AlphabetIndex> rotorPositions;
     std::vector<std::unique_ptr<Transformer>> transformers;
     std::vector<IEnigmaObserver*> observers;
+    ILogger* logger;
 
     /**
      * @brief Initializes the transformer vector with rotors and a reflector.
@@ -42,9 +44,10 @@ public:
      * @brief Constructor for the RotorBox class.
      * Initializes the rotor box with a default number of rotors (3) and their positions (all set to 0).
      *
+     * @param logger Optional logger for event reporting.
      * @throws std::runtime_error If initialization of transformers fails.
      */
-    RotorBox();
+    explicit RotorBox(ILogger* logger = nullptr);
 
     /**
      * @brief Constructor for the RotorBox class.
@@ -53,11 +56,12 @@ public:
      * @param rotorPositions A vector containing the initial positions of each rotor.
      * @param rotors A vector containing the configuration for each rotor.
      * @param reflector Configuration for the reflector.
+     * @param logger Optional logger for event reporting.
      * @throws std::invalid_argument If the number of rotors does not match the number of positions.
      * @throws std::runtime_error If initialization of transformers fails.
      */
-    RotorBox(const std::vector<int>& rotorPositions, const std::vector<RotorConfig>& rotors,
-             const ReflectorConfig& reflector);
+    RotorBox(const std::vector<AlphabetIndex>& rotorPositions, const std::vector<RotorConfig>& rotors,
+             const ReflectorConfig& reflector, ILogger* logger = nullptr);
 
     // Disable Copy
     RotorBox(const RotorBox&) = delete;
@@ -91,7 +95,13 @@ public:
      * @brief Transforms the input key through the rotor box.
      *
      * @param input The input key to be transformed.
-     * @return int The transformed output key.
+     * @return AlphabetIndex The transformed output key.
      */
-    int keyTransform(int input);
+    AlphabetIndex keyTransform(AlphabetIndex input);
+
+    /**
+     * @brief Sets the logger for the rotor box.
+     * @param logger The logger to use.
+     */
+    void setLogger(ILogger* logger);
 };

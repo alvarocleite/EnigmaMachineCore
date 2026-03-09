@@ -358,6 +358,7 @@ install(TARGETS EnigmaCore
 # 2. Install public headers
 set(PUBLIC_HEADERS
     include/EnigmaCore.hpp
+    include/EnigmaTypes.hpp
     EnigmaMachine/include/EnigmaMachine.hpp
     EnigmaMachine/include/IEnigmaObserver.hpp
     EnigmaMachine/include/IAssetProvider.hpp

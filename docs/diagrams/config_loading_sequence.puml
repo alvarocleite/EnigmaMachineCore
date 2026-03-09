@@ -25,7 +25,7 @@ activate Loader
     deactivate TOML
 
     Loader -> Loader: parseRotorCount()
-    Loader -> Loader: parseRotorPositions()
+    Loader -> Loader: parseRotorPositions() : vector<AlphabetIndex>
     
     loop for each Rotor file defined
         Loader -> Assets: loadAsset("RotorX.toml")
@@ -35,7 +35,7 @@ activate Loader
         
         Loader -> TOML: parse(rotorContent)
         TOML --> Loader: rotorData
-        Loader -> Loader: create RotorConfig
+        Loader -> Loader: create RotorConfig (uses AlphabetIndex)
     end
 
     Loader -> Assets: loadAsset("Reflector.toml")
@@ -45,7 +45,7 @@ activate Loader
     
     Loader -> TOML: parse(reflectorContent)
     TOML --> Loader: reflectorData
-    Loader -> Loader: create ReflectorConfig
+    Loader -> Loader: create ReflectorConfig (uses AlphabetIndex)
 
     Loader -> Loader: parsePlugBoardPairs()
 
@@ -55,11 +55,11 @@ activate Loader
 Loader --> App: EnigmaMachineConfig
 deactivate Loader
 
-App -> EM: EnigmaMachine(config)
+App -> EM: EnigmaMachine(config, logger)
 activate EM
     
     create RB
-    EM -> RB: RotorBox(config.rotorPositions, config.rotors, config.reflector)
+    EM -> RB: RotorBox(config.rotorPositions, config.rotors, config.reflector, logger)
     
     create PB
     EM -> PB: PlugBoard(config.plugBoardPairs)

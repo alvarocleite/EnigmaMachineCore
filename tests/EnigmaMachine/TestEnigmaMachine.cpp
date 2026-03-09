@@ -86,3 +86,58 @@ TEST_F(EnigmaMachineTests, PlugBoardEffect) {
 
     EXPECT_NE(out1, out2) << "Different configurations (with/without plugs) should yield different results.";
 }
+
+/**
+ * @brief Mock logger for testing ILogger integration.
+ */
+class TestLogger : public ILogger {
+public:
+    struct LogEntry {
+        LogLevel level;
+        std::string message;
+    };
+    std::vector<LogEntry> logs;
+
+    void log(LogLevel level, std::string_view message) override { logs.push_back({level, std::string(message)}); }
+};
+
+TEST_F(EnigmaMachineTests, ProcessBufferSpan) {
+    EnigmaMachine m1;
+    EnigmaMachine m2;
+
+    std::vector<AlphabetIndex> buffer = {0, 1, 2, 3, 4};  // ABCDE
+    std::vector<AlphabetIndex> individual_results;
+
+    for (auto val : buffer) {
+        individual_results.push_back(m1.keyTransform(val));
+    }
+
+    // Process identical buffer using the new span-based API
+    m2.processBuffer(buffer);
+
+    EXPECT_EQ(buffer.size(), individual_results.size());
+    for (size_t i = 0; i < buffer.size(); ++i) {
+        EXPECT_EQ(buffer[i], individual_results[i]) << "Span processing result mismatch at index " << i;
+    }
+}
+
+TEST_F(EnigmaMachineTests, LoggerInjectionAndPropagation) {
+    TestLogger logger;
+    // Inject logger via constructor
+    EnigmaMachine machine(&logger);
+
+    // Trigger an action that should log (rotor stepping)
+    machine.keyTransform(0);
+
+    // Verify logger received messages from the engine
+    EXPECT_FALSE(logger.logs.empty()) << "Logger should have captured internal engine events.";
+
+    bool foundSteppingLog = false;
+    for (const auto& entry : logger.logs) {
+        if (entry.message.find("Rotor") != std::string::npos && entry.message.find("stepped") != std::string::npos) {
+            foundSteppingLog = true;
+            break;
+        }
+    }
+    EXPECT_TRUE(foundSteppingLog) << "Should find a log entry related to rotor stepping.";
+}

@@ -31,7 +31,7 @@ Reflector::Reflector(const ReflectorConfig& config) {
  * @internal The 'reverse' parameter is ignored for reflectors as they
  * occupy the 'turn-around' point in the signal path.
  */
-int Reflector::transform(int position, bool reverse) const {
+AlphabetIndex Reflector::transform(AlphabetIndex position, bool reverse) const {
     return reverse ? transformReverse(position) : transformForward(position);
 }
 
@@ -39,10 +39,10 @@ int Reflector::transform(int position, bool reverse) const {
  * @details Reflects the input signal back towards the rotors.
  * @internal This operation uses the primary transformation mapping (row 0).
  */
-int Reflector::transformForward(int position) const { return getTransformValue(0, position); }
+AlphabetIndex Reflector::transformForward(AlphabetIndex position) const { return getTransformValue(0, position); }
 
 /**
  * @details Returns -1 for Reflector reverse transformations.
  * @internal Reflectors are unidirectional; the signal only enters from the forward side.
  */
-int Reflector::transformReverse(int position) const { return getTransformValue(1, position); }
+AlphabetIndex Reflector::transformReverse(AlphabetIndex position) const { return getTransformValue(1, position); }

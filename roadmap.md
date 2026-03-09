@@ -22,7 +22,7 @@ To provide a high-performance, zero-overhead, and platform-agnostic Enigma ciphe
 - [x] **CMake Modernization & Distribution:**
     - Support `BUILD_SHARED_LIBS` for Desktop/Android integration.
     - Implement `install()` rules and export `EnigmaMachineCoreConfig.cmake` for `find_package`.
-- [ ] **Memory Profiling:**
+- [x] **Memory Profiling:**
     - Use `Valgrind`/`Sanitizers` to ensure zero leaks in the core library.
 - [x] **Architecture Decision Records (ADRs):**
     - Document core design choices (e.g., Signal path, DI strategy) in [docs/adr/ADRs.md](docs/adr/ADRs.md).
@@ -35,7 +35,7 @@ To provide a high-performance, zero-overhead, and platform-agnostic Enigma ciphe
 - [ ] **Error Handling & Exception-Free Core:**
     - Transition from `throw` to `std::expected` (or `tl::expected`) for all public APIs.
     - Enable `-fno-exceptions` support for embedded and WASM targets.
-- [ ] **Logging & IO Abstraction (`ILogger` / `PAL`):**
+- [x] **Logging & IO Abstraction (`ILogger` / `PAL`):**
     - Remove `std::cout`/`std::cerr`.
     - Implement a `PAL` (Platform Abstraction Layer) for Logging (Logcat, UART, Console).
 - [ ] **POD Configuration & No-std Prep:**
