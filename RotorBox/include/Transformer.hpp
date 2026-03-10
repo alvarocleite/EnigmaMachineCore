@@ -55,6 +55,14 @@ protected:
     void fillTransformRow(int row, AlphabetIndex value);
 
     /**
+     * @brief Copies a whole array into a row of the transformation lookup table.
+     *
+     * @param row The row index to copy into.
+     * @param values The array of values to copy.
+     */
+    void copyTransformRow(int row, const std::array<AlphabetIndex, TRANSFORMER_SIZE>& values);
+
+    /**
      * @brief Gets a read-only reference to a row in the transformation lookup table.
      * Useful for using standard algorithms like std::find.
      *

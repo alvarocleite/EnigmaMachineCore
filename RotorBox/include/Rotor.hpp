@@ -42,6 +42,7 @@ public:
      * @param config The RotorConfig structure containing wiring and notch info.
      */
     explicit Rotor(const RotorConfig& config);
+    explicit Rotor(RotorConfig&& config);
     ~Rotor() override = default;
 
     /**

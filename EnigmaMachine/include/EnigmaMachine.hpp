@@ -35,6 +35,13 @@ protected:
      */
     explicit EnigmaMachine(const EnigmaMachineConfig& config, ILogger* logger = nullptr);
 
+    /**
+     * @brief Internal constructor using the configuration struct (move version).
+     * @param config The machine configuration.
+     * @param logger Optional logger for event reporting.
+     */
+    explicit EnigmaMachine(EnigmaMachineConfig&& config, ILogger* logger = nullptr);
+
 private:
     std::unique_ptr<RotorBox> rotorBox;
     std::unique_ptr<PlugBoard> plugBoard;

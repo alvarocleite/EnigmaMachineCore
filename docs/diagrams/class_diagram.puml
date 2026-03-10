@@ -19,11 +19,11 @@ class PlugBoardPair <<struct>> {
 
 class RotorConfig <<struct>> {
     + AlphabetIndex notchPosition
-    + std::vector<AlphabetIndex> wiring
+    + std::array<AlphabetIndex, TRANSFORMER_SIZE> wiring
 }
 
 class ReflectorConfig <<struct>> {
-    + std::vector<AlphabetIndex> wiring
+    + std::array<AlphabetIndex, TRANSFORMER_SIZE> wiring
 }
 
 ' Interfaces
@@ -65,7 +65,8 @@ class EnigmaMachine {
     - plugBoard : std::unique_ptr<PlugBoard>
     - observers : std::vector<IEnigmaObserver*>
     - logger : ILogger*
-    # EnigmaMachine(config: EnigmaMachineConfig)
+    # EnigmaMachine(config: const EnigmaMachineConfig&)
+    # EnigmaMachine(config: EnigmaMachineConfig&&)
     + EnigmaMachine(logger: ILogger* = nullptr)
     + EnigmaMachine(fileName: std::string_view, assetPath: std::string_view, logger: ILogger* = nullptr)
     + EnigmaMachine(provider: IAssetProvider, fileName: std::string_view, assetPath: std::string_view, logger: ILogger* = nullptr)
@@ -93,10 +94,11 @@ class RotorBox {
     - transformers : std::vector<std::unique_ptr<Transformer>>
     - observers : std::vector<IEnigmaObserver*>
     - logger : ILogger*
-    - initTransformers(rotors: std::vector<RotorConfig>, reflector: ReflectorConfig) : void
+    - initTransformers(rotors: const std::vector<RotorConfig>&, reflector: const ReflectorConfig&) : void
     - updateRotors() : void
     + RotorBox(logger: ILogger* = nullptr)
-    + RotorBox(rotorPositions: std::vector<AlphabetIndex>, rotors: std::vector<RotorConfig>, reflector: ReflectorConfig, logger: ILogger* = nullptr)
+    + RotorBox(rotorPositions: const std::vector<AlphabetIndex>&, rotors: const std::vector<RotorConfig>&, reflector: const ReflectorConfig&, logger: ILogger* = nullptr)
+    + RotorBox(rotorPositions: std::vector<AlphabetIndex>&&, rotors: std::vector<RotorConfig>&&, reflector: ReflectorConfig&&, logger: ILogger* = nullptr)
     + ~RotorBox()
     + printTransformers() : void
     + keyTransform(input: AlphabetIndex) : AlphabetIndex
@@ -110,6 +112,7 @@ abstract class Transformer {
     # setTransformValue(row: int, col: int, value: AlphabetIndex) : void
     # getTransformValue(row: int, col: int) : AlphabetIndex
     # fillTransformRow(row: int, value: AlphabetIndex) : void
+    # copyTransformRow(row: int, values: const std::array<AlphabetIndex, TRANSFORMER_SIZE>&) : void
     # getTransformRow(row: int) : const std::array<AlphabetIndex, TRANSFORMER_SIZE>&
     + Transformer()
     + {abstract} ~Transformer()
@@ -128,7 +131,8 @@ class Rotor {
     - rotationCount : AlphabetIndex
     - initReverseLookupTable() : void
     + isNotchPosition(position: AlphabetIndex) : bool
-    + Rotor(config: RotorConfig)
+    + Rotor(config: const RotorConfig&)
+    + Rotor(config: RotorConfig&&)
     + ~Rotor()
     + transform(position: AlphabetIndex, reverse: bool) : AlphabetIndex
     + transformForward(position: AlphabetIndex) : AlphabetIndex
@@ -139,7 +143,8 @@ class Rotor {
 }
 
 class Reflector {
-    + Reflector(config: ReflectorConfig)
+    + Reflector(config: const ReflectorConfig&)
+    + Reflector(config: ReflectorConfig&&)
     + ~Reflector()
     + transform(position: AlphabetIndex, reverse: bool) : AlphabetIndex
     + transformForward(position: AlphabetIndex) : AlphabetIndex

@@ -38,17 +38,13 @@ void validateTransformerConfig(const toml::value& data, const std::string& expec
 
 RotorConfig EnigmaConfigLoader::loadRotor(const IAssetProvider& provider, const FileName& fileName) {
     std::istringstream stream(provider.loadAsset(fileName.string()));
-    // Parse from stream, pass filename for error reporting
     auto rotorData = toml::parse(stream, fileName.string());
     validateTransformerConfig(rotorData, "rotor", fileName.string());
 
     RotorConfig rotorConfig;
     rotorConfig.notchPosition = toml::find<AlphabetIndex>(rotorData, "rotor", "notchPosition");
-    rotorConfig.wiring = toml::find<std::vector<AlphabetIndex>>(rotorData, "rotor", "forward");
+    rotorConfig.wiring = toml::find<std::array<AlphabetIndex, TRANSFORMER_SIZE>>(rotorData, "rotor", "forward");
 
-    if (rotorConfig.wiring.size() != TRANSFORMER_SIZE) {
-        throw std::runtime_error("Error: Rotor wiring size mismatch in " + fileName.string());
-    }
     return rotorConfig;
 }
 
@@ -58,10 +54,7 @@ ReflectorConfig EnigmaConfigLoader::loadReflector(const IAssetProvider& provider
     validateTransformerConfig(reflectorData, "reflector", fileName.string());
 
     ReflectorConfig reflectorConfig;
-    reflectorConfig.wiring = toml::find<std::vector<AlphabetIndex>>(reflectorData, "reflector", "map");
-    if (reflectorConfig.wiring.size() != TRANSFORMER_SIZE) {
-        throw std::runtime_error("Error: Reflector wiring size mismatch in " + fileName.string());
-    }
+    reflectorConfig.wiring = toml::find<std::array<AlphabetIndex, TRANSFORMER_SIZE>>(reflectorData, "reflector", "map");
     return reflectorConfig;
 }
 
@@ -71,8 +64,7 @@ EnigmaMachineConfig EnigmaConfigLoader::load(const IAssetProvider& provider, con
     auto data = toml::parse(stream, fileName.string());
 
     int rotorCount = toml::find<int>(data, "rotors", "RotorCount");
-    std::vector<AlphabetIndex> rotorPositions =
-        toml::find<std::vector<AlphabetIndex>>(data, "rotors", "RotorPositions");
+    auto rotorPositions = toml::find<std::vector<AlphabetIndex>>(data, "rotors", "RotorPositions");
     auto rotorFilePaths = toml::find<std::vector<std::string>>(data, "rotors", "RotorFiles");
 
     if (static_cast<size_t>(rotorCount) != rotorPositions.size() ||
@@ -106,8 +98,8 @@ EnigmaMachineConfig EnigmaConfigLoader::load(const IAssetProvider& provider, con
 
     EnigmaMachineConfig newConfig;
     newConfig.rotorCount = rotorCount;
-    newConfig.rotorPositions = rotorPositions;
-    newConfig.rotors = rotors;
+    newConfig.rotorPositions = std::move(rotorPositions);
+    newConfig.rotors = std::move(rotors);
     newConfig.reflector = reflector;
     newConfig.plugBoardPairs = plugBoardPairs;
 

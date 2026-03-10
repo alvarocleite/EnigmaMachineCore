@@ -40,22 +40,38 @@ RotorBox::RotorBox(const std::vector<AlphabetIndex>& rotorPositions, const std::
     }
 
     rotorCount = (int)rotorPositions.size();
-    this->rotorPositions.reserve(rotorCount);
-    for (const auto& position : rotorPositions) {
-        this->rotorPositions.push_back(position);
-    }
+    this->rotorPositions = rotorPositions;
 
     initTransformers(rotors, reflector);
 
     for (int i = 0; i < rotorCount; i++) {
-        transformers.at(i)->setPosition(rotorPositions.at(i));
+        transformers.at(i)->setPosition(this->rotorPositions.at(i));
+    }
+}
+
+RotorBox::RotorBox(std::vector<AlphabetIndex>&& rotorPositions, std::vector<RotorConfig>&& rotors,
+                   ReflectorConfig&& reflector, ILogger* logger)
+    : rotorCount((int)rotorPositions.size()), rotorPositions(std::move(rotorPositions)), logger(logger) {
+    if (std::cmp_not_equal(this->rotorPositions.size(), rotors.size())) {
+        throw std::invalid_argument("Error: Number of rotors and number of rotor positions do not match.");
+    }
+
+    // Optimization: avoid copying configs by moving them into the transformers
+    transformers.reserve(rotorCount + 1);
+    for (auto& rotorConfig : rotors) {
+        transformers.push_back(std::make_unique<Rotor>(std::move(rotorConfig)));
+    }
+    transformers.push_back(std::make_unique<Reflector>(std::move(reflector)));
+
+    for (int i = 0; i < rotorCount; i++) {
+        transformers.at(i)->setPosition(this->rotorPositions.at(i));
     }
 }
 
 void RotorBox::registerObserver(IEnigmaObserver* observer) { observers.push_back(observer); }
 
 void RotorBox::removeObserver(IEnigmaObserver* observer) {
-    auto iterator = std::remove(observers.begin(), observers.end(), observer);
+    auto iterator = std::ranges::remove(observers, observer).begin();
     observers.erase(iterator, observers.end());
 }
 
@@ -70,8 +86,9 @@ void RotorBox::initTransformers(const std::vector<RotorConfig>& rotors, const Re
     transformers.clear();
     transformers.reserve(rotorCount + 1);
 
-    std::ranges::transform(rotors, std::back_inserter(transformers),
-                           [](const auto& rotorConfig) { return std::make_unique<Rotor>(rotorConfig); });
+    for (const auto& rotorConfig : rotors) {
+        transformers.push_back(std::make_unique<Rotor>(rotorConfig));
+    }
     transformers.emplace_back(std::make_unique<Reflector>(reflector));
 }
 

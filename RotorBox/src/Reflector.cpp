@@ -11,18 +11,20 @@
 Reflector::Reflector(const ReflectorConfig& config) {
     type = TransformerType::Reflector;
 
-    if (config.wiring.size() != TRANSFORMER_SIZE) {
-        throw std::runtime_error("Reflector wiring size mismatch");
-    }
-
-    for (size_t i = 0; i < config.wiring.size(); ++i) {
-        setTransformValue(0, static_cast<int>(i), config.wiring[i]);
-    }
+    copyTransformRow(0, config.wiring);
 
     // Initialize reverse transformation vector to -1.
     // Reflectors are typically symmetric, but the Transformer base class supports separate reverse path.
     // For a reflector, the return path is usually implicit in the map itself if symmetric.
     // However, keeping consistent with the old code:
+    fillTransformRow(1, -1);
+}
+
+Reflector::Reflector(ReflectorConfig&& config) {
+    type = TransformerType::Reflector;
+
+    copyTransformRow(0, config.wiring);
+
     fillTransformRow(1, -1);
 }
 

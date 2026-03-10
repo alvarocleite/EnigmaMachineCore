@@ -63,6 +63,16 @@ public:
     RotorBox(const std::vector<AlphabetIndex>& rotorPositions, const std::vector<RotorConfig>& rotors,
              const ReflectorConfig& reflector, ILogger* logger = nullptr);
 
+    /**
+     * @brief Constructor for the RotorBox class (move version).
+     * @param rotorPositions A vector containing the initial positions of each rotor.
+     * @param rotors A vector containing the configuration for each rotor.
+     * @param reflector Configuration for the reflector.
+     * @param logger Optional logger for event reporting.
+     */
+    RotorBox(std::vector<AlphabetIndex>&& rotorPositions, std::vector<RotorConfig>&& rotors,
+             ReflectorConfig&& reflector, ILogger* logger = nullptr);
+
     // Disable Copy
     RotorBox(const RotorBox&) = delete;
     RotorBox& operator=(const RotorBox&) = delete;
