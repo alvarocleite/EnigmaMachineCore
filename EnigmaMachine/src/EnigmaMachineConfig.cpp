@@ -7,9 +7,7 @@
 
 #include <numeric>
 
-RotorConfig::RotorConfig() {
-    std::iota(wiring.begin(), wiring.end(), 0);
-}
+RotorConfig::RotorConfig() { std::iota(wiring.begin(), wiring.end(), 0); }
 
 ReflectorConfig::ReflectorConfig() {
     for (int i = 0; i < TRANSFORMER_SIZE; ++i) {
