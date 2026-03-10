@@ -136,13 +136,13 @@ static void BM_EnigmaMachine_Throughput_Scaling(benchmark::State& state) {
     config.rotors.resize(nRotors);
     
     // Shared wiring for all rotors for simplicity
-    std::vector<int> wiring = {1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25, 0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24};
+    std::array<int, TRANSFORMER_SIZE> wiring = {{1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25, 0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24}};
     for(int i = 0; i < nRotors; ++i) {
         config.rotors[i].wiring = wiring;
         config.rotors[i].notchPosition = 16;
     }
     
-    config.reflector.wiring = {25, 24, 23, 22, 21, 20, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0};
+    config.reflector.wiring = {{25, 24, 23, 22, 21, 20, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0}};
     
     BenchmarkingEnigmaMachine machine(config);
     
@@ -172,12 +172,12 @@ static void BM_EnigmaMachine_PlugBoard_Scaling(benchmark::State& state) {
     config.rotorPositions = {0, 0, 0};
     config.rotors.resize(3);
     
-    std::vector<int> wiring = {1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25, 0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24};
+    std::array<int, TRANSFORMER_SIZE> wiring = {{1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25, 0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24}};
     for(int i = 0; i < 3; ++i) {
         config.rotors[i].wiring = wiring;
         config.rotors[i].notchPosition = 16;
     }
-    config.reflector.wiring = {25, 24, 23, 22, 21, 20, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0};
+    config.reflector.wiring = {{25, 24, 23, 22, 21, 20, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0}};
     
     // Fill with nSwaps
     for(int i = 0; i < nSwaps; ++i) {
@@ -228,7 +228,7 @@ BENCHMARK(BM_EnigmaMachine_KeyTransform)->Range(KB, 128 * KB);
 static void BM_Rotor_Transform(benchmark::State& state) {
     // Manually create a rotor config for benchmarking
     RotorConfig config;
-    config.wiring = {1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25, 0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24};
+    config.wiring = {{1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25, 0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24}};
     config.notchPosition = 16;
     
     Rotor rotor(config);
@@ -245,7 +245,7 @@ BENCHMARK(BM_Rotor_Transform);
 
 static void BM_Rotor_Rotate(benchmark::State& state) {
     RotorConfig config;
-    config.wiring = {1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25, 0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24};
+    config.wiring = {{1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25, 0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24}};
     config.notchPosition = 16;
     Rotor rotor(config);
 
@@ -258,7 +258,7 @@ BENCHMARK(BM_Rotor_Rotate);
 
 static void BM_Reflector_Transform(benchmark::State& state) {
     ReflectorConfig config;
-    config.wiring = {25, 24, 23, 22, 21, 20, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0};
+    config.wiring = {{25, 24, 23, 22, 21, 20, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0}};
     Reflector reflector(config);
 
     int input = 0;

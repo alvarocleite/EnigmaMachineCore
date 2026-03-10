@@ -78,6 +78,14 @@ EnigmaMachine::EnigmaMachine(const EnigmaMachineConfig& config, ILogger* logger)
     rotorBox->registerObserver(this);
 }
 
+EnigmaMachine::EnigmaMachine(EnigmaMachineConfig&& config, ILogger* logger)
+    : rotorBox(std::make_unique<RotorBox>(std::move(config.rotorPositions), std::move(config.rotors),
+                                          std::move(config.reflector), logger)),
+      plugBoard(std::make_unique<PlugBoard>(config.plugBoardPairs)),
+      logger(logger) {
+    rotorBox->registerObserver(this);
+}
+
 EnigmaMachine::EnigmaMachine(std::string_view fileName, std::string_view assetPath, ILogger* logger)
     : EnigmaMachine(FileAssetProvider{}, fileName, assetPath, logger) {}
 
@@ -143,7 +151,7 @@ void EnigmaMachine::setLogger(ILogger* log) {
 void EnigmaMachine::registerObserver(IEnigmaObserver* observer) { observers.push_back(observer); }
 
 void EnigmaMachine::removeObserver(IEnigmaObserver* observer) {
-    auto iterator = std::remove(observers.begin(), observers.end(), observer);
+    auto iterator = std::ranges::remove(observers, observer).begin();
     if (iterator != observers.end()) {
         observers.erase(iterator, observers.end());
     }

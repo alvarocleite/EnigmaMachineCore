@@ -24,6 +24,7 @@ public:
      * @param config The ReflectorConfig structure containing the wiring map.
      */
     explicit Reflector(const ReflectorConfig& config);
+    explicit Reflector(ReflectorConfig&& config);
     ~Reflector() override = default;
 
     /**
