@@ -180,7 +180,7 @@ target_link_libraries(my_app PRIVATE EnigmaMachineCore::EnigmaCore)
 
 ## Code Formatting
 
-To ensure a consistent style, the project uses `clang-format` based on the Google C++ style guide.
+To ensure a consistent style, the project uses `clang-format` (version 21 or higher) based on the Google C++ style guide. Using different versions of `clang-format` may result in slight formatting discrepancies that could fail CI checks.
 
 ### To format the source code:
 ```bash
