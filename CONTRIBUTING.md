@@ -78,6 +78,35 @@ We use Git tags to mark significant milestones and stable releases of the projec
 *   **Stability Requirement**: A tag must only be created when the codebase is confirmed stable, passing all integration tests and qualification checks.
 *   **Milestones**: Each tag represents a specific version/milestone (e.g., `v1.0.0`) that users can rely on for production or industrial use.
 
+## Git Hooks & Quality Enforcement
+
+To maintain a high standard of code quality and security, this repository uses [pre-commit](https://pre-commit.com/) to automate checks before every commit and push.
+
+### 1. Installation
+
+You must install `pre-commit` and the hooks locally:
+
+```bash
+# Install pre-commit (e.g., via pip)
+pip install pre-commit
+
+# Install the hooks defined in .pre-commit-config.yaml
+pre-commit install --hook-type pre-commit --hook-type commit-msg --hook-type pre-push
+```
+
+### 2. Automated Checks
+
+The following checks are enforced:
+
+*   **Protected Branch Check**: Prevents direct commits to `main` and `development`.
+*   **Commit Message Validation**: Enforces that every commit message has a title and a body separated by a blank line.
+*   **Branch Naming Convention**: Ensures branch names follow the `feature/`, `fix/`, `docs/`, or `release/` pattern.
+*   **Clang-Format**: Automatically formats C++ code to match the project's `.clang-format`.
+*   **Secret Scanning**: Uses `gitleaks` to prevent accidental commits of secrets or credentials.
+*   **General Hygiene**: Checks for trailing whitespace, end-of-file newlines, and large files.
+
+If a check fails, the commit or push will be blocked. You must fix the issues and try again.
+
 ## Pull Request Guidelines
 
 *   **Template**: Please fill out the provided PR template.
