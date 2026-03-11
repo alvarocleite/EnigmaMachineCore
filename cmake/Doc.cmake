@@ -3,9 +3,9 @@ find_package(Doxygen)
 find_package(Java REQUIRED)
 
 # Look for the JAR file specifically because Doxygen expects to run it with 'java -jar'
-find_file(PLANTUML_PATH 
-    NAMES plantuml.jar 
-    PATHS 
+find_file(PLANTUML_PATH
+    NAMES plantuml.jar
+    PATHS
     /usr/share/java/plantuml
     /usr/share/plantuml
     /usr/local/share/plantuml
@@ -20,7 +20,7 @@ if (PLANTUML_PATH)
     # --- Automatic Diagram Generation ---
     # Find all .puml files in docs/diagrams
     file(GLOB PUML_FILES "${CMAKE_CURRENT_SOURCE_DIR}/docs/diagrams/*.puml")
-    
+
     # Define the output directory for generated diagrams
     set(DIAGRAM_GEN_DIR "${CMAKE_CURRENT_SOURCE_DIR}/docs/diagrams/output")
 
@@ -45,17 +45,17 @@ if (DOXYGEN_FOUND)
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
         COMMENT "Generating API documentation with Doxygen"
         VERBATIM)
-    
+
     # Make Doxygen depend on the diagrams being generated first
     if (PLANTUML_PATH)
         add_dependencies(Enigma_doxygen Enigma_generate_diagrams)
     endif()
-    
+
     # Target to run everything (Build + Docs)
     # Only add dependency on the executable if it is actually being built
     add_custom_target(Enigma_full_build)
     add_dependencies(Enigma_full_build Enigma_doxygen)
-    
+
     if(ENIGMA_BUILD_CLI)
          add_dependencies(Enigma_full_build ${PROJECT_NAME})
     else()

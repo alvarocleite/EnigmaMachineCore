@@ -11,11 +11,11 @@ MIB_FACTOR = 1024 * 1024
 
 class BenchmarkComparison:
     """Represents the comparison between a single baseline and current benchmark entry."""
-    
+
     def __init__(self, name: str, base_entry: Dict, curr_entry: Dict):
         self.name = name
         self.is_throughput = 'bytes_per_second' in curr_entry and 'bytes_per_second' in base_entry
-        
+
         if self.is_throughput:
             self.base_val = base_entry['bytes_per_second']
             self.curr_val = curr_entry['bytes_per_second']
@@ -52,7 +52,7 @@ def load_benchmark_map(file_path: str) -> Dict[str, Dict]:
     """Loads a Google Benchmark JSON file and returns a mapping of name to entry."""
     if not os.path.exists(file_path):
         raise FileNotFoundError(f"Benchmark file not found: {file_path}")
-        
+
     with open(file_path, 'r') as f:
         data = json.load(f)
         return {entry['name']: entry for entry in data.get('benchmarks', [])}
@@ -64,7 +64,7 @@ def generate_comparisons(baseline_map: Dict, current_map: Dict) -> List[Benchmar
         if name not in baseline_map:
             print(f"Skipping {name} (not in baseline).")
             continue
-            
+
         comparisons.append(BenchmarkComparison(name, baseline_map[name], curr_entry))
     return comparisons
 
@@ -73,7 +73,7 @@ def print_console_report(comparisons: List[BenchmarkComparison]):
     header = f"{'Benchmark':50} | {'Baseline':>15} | {'Current':>15} | {'Change':>10}"
     print(header)
     print("-" * len(header))
-    
+
     for comp in comparisons:
         base_str = comp.format_value(comp.base_val)
         curr_str = comp.format_value(comp.curr_val)
@@ -85,12 +85,12 @@ def write_github_summary(comparisons: List[BenchmarkComparison], summary_path: s
         f.write("### 🚀 Benchmark Comparison (PR vs CI Baseline)\n\n")
         f.write("| Benchmark | Baseline | Current | Change |\n")
         f.write("| :--- | :--- | :--- | :--- |\n")
-        
+
         for comp in comparisons:
             base_str = comp.format_value(comp.base_val)
             curr_str = comp.format_value(comp.curr_val)
             f.write(f"| {comp.name} | {base_str} | {curr_str} | {comp.diff_percent:+.2f}% {comp.status_icon} |\n")
-        
+
         regressions = [c for c in comparisons if c.is_regression]
         if regressions:
             f.write("\n#### ❌ Regressions Detected\n")
@@ -104,33 +104,33 @@ def main():
     parser.add_argument("baseline", help="Baseline JSON file path")
     parser.add_argument("current", help="Current results JSON file path")
     parser.add_argument("--github-summary", help="Optional: Path to GitHub Actions summary file")
-    
+
     args = parser.parse_args()
-    
+
     try:
         baseline_map = load_benchmark_map(args.baseline)
         current_map = load_benchmark_map(args.current)
     except Exception as e:
         print(f"FATAL: {e}")
         sys.exit(1)
-        
+
     comparisons = generate_comparisons(baseline_map, current_map)
-    
+
     print("\nBenchmark Comparison Report")
     print("=" * 100)
     print_console_report(comparisons)
     print("=" * 100)
-    
+
     if args.github_summary:
         write_github_summary(comparisons, args.github_summary)
-        
+
     regressions = [c for c in comparisons if c.is_regression]
     if regressions:
         print("\n❌ FAILED: Performance regressions detected.")
         for reg in regressions:
             print(f"  - {reg.get_regression_message()}")
         sys.exit(1)
-    
+
     print("\n✅ SUCCESS: Performance is stable.")
     sys.exit(0)
 

@@ -32,7 +32,7 @@
 
 ### Test Case: `SteppingMechanism`
 *   **Goal:** Verify that Rotor 2 moves when Rotor 1 hits its notch.
-*   **Logic:** 
+*   **Logic:**
     1.  Set positions to {25, 0, 0}.
     2.  `keyTransform` is called.
     3.  Internally, Rotor 1 rotates to 0. Since 0 is the notch, Rotor 2 rotates to 1.

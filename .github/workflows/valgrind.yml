@@ -7,7 +7,7 @@ jobs:
   valgrind:
     name: Valgrind Memory Check
     runs-on: ubuntu-latest
-    
+
     steps:
     - uses: actions/checkout@v4
       with:
@@ -27,7 +27,7 @@ jobs:
     - name: Run Valgrind
       shell: bash
       run: |
-        # Run valgrind and capture output. 
+        # Run valgrind and capture output.
         # We use the custom target but redirect output to a file for summary generation.
         # We don't fail immediately here so we can generate the summary.
         cmake --build build --target Enigma_valgrind 2>&1 | tee valgrind.log || true
@@ -37,30 +37,30 @@ jobs:
       shell: bash
       run: |
         echo "## Valgrind Memory Analysis Summary" >> $GITHUB_STEP_SUMMARY
-        
+
         # Extract key metrics from valgrind output
         LEAK_SUMMARY=$(grep "LEAK SUMMARY:" valgrind.log -A 5 || true)
         ERROR_SUMMARY=$(grep "ERROR SUMMARY:" valgrind.log || true)
-        
+
         # Count total errors
         ERRORS=$(echo "$ERROR_SUMMARY" | awk '{print $4}' || echo 0)
-        
+
         echo "### Quick Stats" >> $GITHUB_STEP_SUMMARY
         echo "| Metric | Value |" >> $GITHUB_STEP_SUMMARY
         echo "| :--- | :--- |" >> $GITHUB_STEP_SUMMARY
         echo "| **Total Errors** | **$ERRORS** |" >> $GITHUB_STEP_SUMMARY
-        
+
         if [ "$ERRORS" -gt 0 ]; then
           echo "### Leak Details" >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
           echo "$LEAK_SUMMARY" >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
-          
+
           echo "### Error Summary" >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
           echo "$ERROR_SUMMARY" >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
-          
+
           echo "⚠️ **Valgrind detected $ERRORS issues.** Please review the full log artifact for details." >> $GITHUB_STEP_SUMMARY
           # Fail the job if errors were found
           exit 1

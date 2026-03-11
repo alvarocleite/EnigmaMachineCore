@@ -7,7 +7,7 @@ jobs:
   clang-tidy:
     name: Clang-Tidy Analysis
     runs-on: ubuntu-latest
-    
+
     steps:
     - uses: actions/checkout@v4
       with:
@@ -29,16 +29,16 @@ jobs:
       if: always()
       run: |
         echo "## Clang-Tidy Analysis Summary" >> $GITHUB_STEP_SUMMARY
-        
+
         # Count total warnings (lines containing ": warning:")
         TOTAL_WARNINGS=$(grep -c ": warning:" static-analysis.log || echo 0)
         echo "**Total Warnings:** $TOTAL_WARNINGS" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
-        
+
         if [ "$TOTAL_WARNINGS" -gt 0 ]; then
           echo "| Warning Type | Count |" >> $GITHUB_STEP_SUMMARY
           echo "| :--- | :---: |" >> $GITHUB_STEP_SUMMARY
-          
+
           # Extract warning types (text in [brackets] at end of warning lines)
           # Sort and count unique occurrences
           grep ": warning:" static-analysis.log | sed -n 's/.*\[\(.*\)\].*/\1/p' | sort | uniq -c | sort -nr | while read count type; do
@@ -81,11 +81,11 @@ jobs:
       if: always()
       run: |
         echo "## CppCheck Analysis Summary" >> $GITHUB_STEP_SUMMARY
-        
+
         # CppCheck output format: filepath:line:col: severity: message [id]
         # We filter for lines that look like actual findings (starting with / or alphanumeric path)
         grep -E "^[^[:space:]]+:[0-9]+:[0-9]+: " cppcheck.log > findings.log || true
-        
+
         TOTAL_ISSUES=$(wc -l < findings.log)
         echo "**Total Issues Found:** $TOTAL_ISSUES" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
@@ -94,23 +94,23 @@ jobs:
           echo "### 📊 Severity Breakdown" >> $GITHUB_STEP_SUMMARY
           echo "| Severity | Count |" >> $GITHUB_STEP_SUMMARY
           echo "| :--- | :---: |" >> $GITHUB_STEP_SUMMARY
-          
+
           # Extract severity and count
           sed -n 's/^[^:]*:[0-9]*:[0-9]*: \([^:]*\):.*/\1/p' findings.log | sort | uniq -c | sort -nr | while read count type; do
             echo "| \`$type\` | $count |" >> $GITHUB_STEP_SUMMARY
           done
-          
+
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### 🔍 Detailed Findings" >> $GITHUB_STEP_SUMMARY
           echo "<details><summary>Click to expand all $TOTAL_ISSUES findings</summary>" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "| File | Line | Severity | Message |" >> $GITHUB_STEP_SUMMARY
           echo "| :--- | :--- | :--- | :--- |" >> $GITHUB_STEP_SUMMARY
-          
+
           # Format issues into table rows
           # We escape | characters in messages to avoid breaking the markdown table
           sed -n 's/^\([^:]*\):\([0-9]*\):[0-9]*: \([^:]*\): \(.*\)/\1 | \2 | \3 | \4/p' findings.log | sed 's/|/\\|/g' | sed 's/ \\| / | /g' >> $GITHUB_STEP_SUMMARY
-          
+
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "</details>" >> $GITHUB_STEP_SUMMARY
         else

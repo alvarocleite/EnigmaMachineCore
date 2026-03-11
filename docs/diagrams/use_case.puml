@@ -13,34 +13,34 @@ CLI --|> User
 CLI --|> Tech
 
 package "Enigma Machine System" {
-    
+
     ' Core Operations
     usecase "Encrypt/Decrypt Message" as UC1
     usecase "Perform Round-Trip Verification" as UC1a
     usecase "View Debug Trace" as UC2
     usecase "Process Character" as UC3
-    
+
     ' Configuration
     usecase "Configure Machine" as UC4
     usecase "Load TOML Configuration" as UC5
     usecase "Specify Custom Asset Path" as UC5a
     usecase "Validate Wiring & Plugs" as UC5b
     usecase "Set Rotor Positions" as UC6
-    
+
     ' Relationships
     User --> UC1
-    
+
     UC1 ..> UC3 : <<include>>
     UC1 <|-- UC1a : <<extends>>
-    
+
     UC1 ..> UC2 : <<extends>> (if --debug)
-    
+
     Tech --> UC4
     UC4 ..> UC5 : <<include>>
     UC5 ..> UC5a : <<extends>> (if --assets)
     UC5 ..> UC5b : <<include>>
     UC4 <|-- UC6
-    
+
     ' Note: In this system, encryption and decryption are symmetric operations
     note "Symmetric Cipher:\nEncryption logic == Decryption logic" as N1
     (UC1) .. N1

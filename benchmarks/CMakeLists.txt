@@ -3,8 +3,8 @@ add_executable(EnigmaBenchmark EnigmaBenchmark.cpp)
 
 # Link benchmark library and EnigmaCore Logic
 # Linking against the OBJ library allows access to hidden internal symbols for micro-benchmarking
-target_link_libraries(EnigmaBenchmark PRIVATE 
-    benchmark::benchmark 
+target_link_libraries(EnigmaBenchmark PRIVATE
+    benchmark::benchmark
     EnigmaCore_OBJ
 )
 

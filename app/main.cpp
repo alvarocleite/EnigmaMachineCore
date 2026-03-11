@@ -171,9 +171,11 @@ void runApplication(const AppConfig& config) {
                 if (std::isalpha(c)) cleanOriginal += std::toupper(c);
 
             if (decoded == cleanOriginal) {
-                std::cout << "Success: Decoded message matches original!" << "\n";
+                std::cout << "Success: Decoded message matches original!"
+                          << "\n";
             } else {
-                std::cout << "Failure: Decoded message mismatch." << "\n";
+                std::cout << "Failure: Decoded message mismatch."
+                          << "\n";
             }
         }
     }
@@ -191,6 +193,7 @@ int main(int argc, char** argv) {
         return 1;
     }
 
-    std::cout << "End of program." << "\n";
+    std::cout << "End of program."
+              << "\n";
     return 0;
 }

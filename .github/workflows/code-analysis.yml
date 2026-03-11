@@ -10,7 +10,7 @@ on:
 jobs:
   static-analysis:
     uses: ./.github/workflows/static-analysis.yml
-    
+
   runtime-sanitizers:
     uses: ./.github/workflows/sanitizers.yml
 

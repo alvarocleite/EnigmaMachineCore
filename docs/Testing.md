@@ -1,6 +1,6 @@
 # Testing Guide
 
-This project uses **GoogleTest (gTest)** for unit testing and **CTest** as the test runner. 
+This project uses **GoogleTest (gTest)** for unit testing and **CTest** as the test runner.
 
 ## Testing Strategy
 

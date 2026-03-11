@@ -36,7 +36,7 @@ activate EM
                     RB -> R2: rotate()
                 end
             end
-            
+
             loop for each observer
                 RB -> EM: onRotorStepped(rotorIndex, pos: AlphabetIndex)
                 activate EM
@@ -44,7 +44,7 @@ activate EM
                 deactivate EM
             end
         deactivate RB
-        
+
         note right of RB: 2.2 Forward Pass (0 -> 1 -> 2)
         RB -> R0: transformForward(char)
         R0 --> RB: c1: AlphabetIndex

@@ -1,0 +1,51 @@
+name: pre-commit
+
+on:
+  pull_request:
+  push:
+    branches: [main, development]
+
+jobs:
+  pre-commit:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.x'
+    - name: Install clang-format
+      run: sudo apt-get update && sudo apt-get install -y clang-format
+    - name: Install pre-commit
+      run: python -m pip install pre-commit
+    - name: Run pre-commit
+      id: run-pre-commit
+      shell: bash
+      run: |
+        set -o pipefail
+        pre-commit run --all-files --show-diff-on-failure --color=always 2>&1 | tee pre-commit.log
+    - name: Upload pre-commit logs
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: pre-commit-logs
+        path: pre-commit.log
+        retention-days: 5
+    - name: Generate Action Summary
+      if: always()
+      run: |
+        echo "### 🛡️ Pre-commit Quality Gate" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        if [[ "${{ steps.run-pre-commit.outcome }}" == "success" ]]; then
+          echo "✅ **Status: Passed**" >> $GITHUB_STEP_SUMMARY
+          echo "All quality and security hooks executed successfully." >> $GITHUB_STEP_SUMMARY
+        else
+          echo "❌ **Status: Failed**" >> $GITHUB_STEP_SUMMARY
+          echo "One or more hooks failed. Please review the **'Run pre-commit'** logs above or download the **pre-commit-logs** artifact." >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "> **Note:** You can run \`pre-commit run --all-files\` locally to reproduce and fix these errors." >> $GITHUB_STEP_SUMMARY
+        fi
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "#### 📋 Environment Info" >> $GITHUB_STEP_SUMMARY
+        echo "- **Runner OS:** ${{ runner.os }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Python Version:** 3.x" >> $GITHUB_STEP_SUMMARY
+        echo "- **Artifact:** \`pre-commit-logs\` uploaded" >> $GITHUB_STEP_SUMMARY

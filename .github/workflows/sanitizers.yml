@@ -46,17 +46,17 @@ jobs:
       run: |
         # Ensure assets are available in the current directory if needed
         # (CMake already copies them to build/assets/ but app/main.cpp looks for "assets" locally first)
-        
+
         # Scenario 1: Help
         ./build/EnigmaMachineCore --help > /dev/null 2> sanitizer_help.log || true
-        
+
         # Scenario 2: Simple encoding/decoding
         # Note: app/main.cpp expects assetPath to contain Rotor1.toml etc.
         ./build/EnigmaMachineCore -c build/assets/EnigmaMachineConfig1.toml -a build/assets/ -m "THEQUICKBROWNFOXJUMPSOVERTHELAZYDOG" --encode --decode > /dev/null 2> sanitizer_run.log || true
-        
+
         # Scenario 3: Debug mode enabled
         ./build/EnigmaMachineCore -c build/assets/EnigmaMachineConfig1.toml -a build/assets/ -m "ENIGMA" --debug > /dev/null 2> sanitizer_debug.log || true
-        
+
         cat sanitizer_help.log sanitizer_run.log sanitizer_debug.log > sanitizer_all.log
         echo "--- Sanitizer Output Log ---"
         cat sanitizer_all.log
@@ -70,7 +70,7 @@ jobs:
         UBSAN_COUNT=$(grep -c "runtime error:" sanitizer_all.log || echo 0)
         MSAN_COUNT=$(grep -c "MemorySanitizer" sanitizer_all.log || echo 0)
         TOTAL=$((ASAN_COUNT + UBSAN_COUNT + MSAN_COUNT))
-        
+
         echo "## Sanitizer Report: ${{ matrix.sanitizer }}" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
         echo "| Issue Type | Count |" >> $GITHUB_STEP_SUMMARY
@@ -80,7 +80,7 @@ jobs:
         echo "| MemorySanitizer (MSan) | $MSAN_COUNT |" >> $GITHUB_STEP_SUMMARY
         echo "| **Total Issues** | **$TOTAL** |" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
-        
+
         if [ $TOTAL -gt 0 ]; then
           echo "⚠️ **Sanitizer detected $TOTAL issues.** Please review the build logs for details." >> $GITHUB_STEP_SUMMARY
           echo "### Log Preview" >> $GITHUB_STEP_SUMMARY
