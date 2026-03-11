@@ -96,8 +96,8 @@ public:
 #include <iostream>
 
 class MyLogger : public IEnigmaObserver {
-    void onRotorStepped(int idx, AlphabetIndex pos) override { 
-        std::cout << "Rotor " << idx << " moved to " << pos << "\n"; 
+    void onRotorStepped(int idx, AlphabetIndex pos) override {
+        std::cout << "Rotor " << idx << " moved to " << pos << "\n";
     }
     void onCharEncrypted(char in, char out) override {}
 };
@@ -105,18 +105,18 @@ class MyLogger : public IEnigmaObserver {
 int main() {
     // 1. Initialize (standard machine auto-resolves assets if installed)
     EnigmaMachine machine;
-    
+
     // 2. Observe
     MyLogger logger;
     machine.registerObserver(&logger);
-    
+
     // 3. Execute (Single character)
     AlphabetIndex result = machine.keyTransform(7); // 'H'
-    
+
     // 4. Execute (Batch processing)
     std::vector<AlphabetIndex> buffer = {0, 1, 2}; // "ABC"
     machine.processBuffer(buffer);
-    
+
     return 0;
 }
 ```

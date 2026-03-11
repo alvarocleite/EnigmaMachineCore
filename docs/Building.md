@@ -19,8 +19,8 @@ To build and run this project, you will need the following tools and libraries:
 
 ### Libraries
 *   **[toml11](https://github.com/ToruNiina/toml11):** A powerful C++11 header-only library for TOML.
-*   **[CLI11](https://github.com/CLIUtils/CLI11):** Command line parser for C++11. 
-  
+*   **[CLI11](https://github.com/CLIUtils/CLI11):** Command line parser for C++11.
+
 *Note: These are included as git submodules in the `external/` directory.*
 
 ### Testing & Benchmarking Tools
@@ -180,7 +180,7 @@ target_link_libraries(my_app PRIVATE EnigmaMachineCore::EnigmaCore)
 
 ## Code Formatting
 
-To ensure a consistent style, the project uses `clang-format` based on the Google C++ style guide. 
+To ensure a consistent style, the project uses `clang-format` based on the Google C++ style guide.
 
 ### To format the source code:
 ```bash

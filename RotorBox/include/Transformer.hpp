@@ -102,7 +102,7 @@ public:
     virtual AlphabetIndex transformReverse(AlphabetIndex position) const = 0;
 
     virtual int rotate() = 0;
-    virtual void setPosition(int /*position*/) {};
+    virtual void setPosition(int /*position*/){};
     virtual int getPosition() const { return 0; };
 
     /**

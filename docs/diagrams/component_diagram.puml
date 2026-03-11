@@ -12,7 +12,7 @@ package "EnigmaCore (Library)" {
     component [RotorBox] as RB
     component [PlugBoard] as PB
     component [Configuration] as Config
-    
+
     interface "IAssetProvider" as IAP
     interface "ILogger" as ILOG
 }

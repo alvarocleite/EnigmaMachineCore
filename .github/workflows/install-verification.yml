@@ -70,13 +70,13 @@ jobs:
             EnigmaMachine machine;
             AlphabetIndex input = 7; // 'H'
             AlphabetIndex output = machine.keyTransform(input);
-            
+
             std::cout << "Input: " << input << " -> Output: " << output << std::endl;
-            
+
             // Basic sanity check: Encryption should produce a valid index
             assert(output >= 0 && output < TRANSFORMER_SIZE);
             assert(output != input); // Enigma never maps a letter to itself
-            
+
             std::cout << "Consumer Linkage Success!" << std::endl;
             return 0;
         }
@@ -86,10 +86,10 @@ jobs:
         cmake_minimum_required(VERSION 3.15)
         project(EnigmaConsumer CXX)
         set(CMAKE_CXX_STANDARD 20)
-        
+
         # Find the installed package
         find_package(EnigmaMachineCore REQUIRED)
-        
+
         add_executable(consumer_app main.cpp)
         target_link_libraries(consumer_app PRIVATE EnigmaMachineCore::EnigmaCore)
         EOF
@@ -108,7 +108,7 @@ jobs:
         # Run from a different directory to ensure it doesn't find local 'assets/'
         mkdir -p "$GITHUB_WORKSPACE/run_test"
         cd "$GITHUB_WORKSPACE/run_test"
-        
+
         if [ "${{ matrix.os }}" == "windows-latest" ]; then
           # On Windows, the DLL must be in the same folder as the EXE or in PATH
           cp "$GITHUB_WORKSPACE/install_dir/bin/EnigmaCore.dll" "$GITHUB_WORKSPACE/consumer_build/Release/"

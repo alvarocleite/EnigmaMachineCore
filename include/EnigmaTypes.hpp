@@ -15,12 +15,7 @@ using AlphabetIndex = int;
 /**
  * @brief Severity levels for logging.
  */
-enum class LogLevel {
-    Debug,
-    Info,
-    Warning,
-    Error
-};
+enum class LogLevel { Debug, Info, Warning, Error };
 
 /**
  * @brief Interface for platform-specific logging.

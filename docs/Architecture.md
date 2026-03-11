@@ -103,19 +103,19 @@ The mechanical stepping mechanism is the most complex state transition in the sy
 
 On each key press, the stepping logic operates as follows:
 
-1.  **Pre-step notch evaluation**  
+1.  **Pre-step notch evaluation**
     Before any rotor is rotated, each rotor’s current position is checked to determine whether it is at its notch. These notch states are captured **prior to rotation** and drive all subsequent stepping decisions.
 
-2.  **Rightmost rotor rotation**  
+2.  **Rightmost rotor rotation**
     The rightmost (fast) rotor always rotates on every key press, regardless of notch positions.
 
-3.  **Carry-over rotation**  
+3.  **Carry-over rotation**
     A rotor rotates if the rotor immediately to its right was at its notch position before the step. This models the mechanical carry behavior of the Enigma.
 
-4.  **Double stepping**  
+4.  **Double stepping**
     If a rotor is at its own notch position and is not the leftmost rotor, it also rotates.
 
-5.  **Post-step notification**  
+5.  **Post-step notification**
     After all rotations are applied, observers are notified with the updated position of each rotor.
 
 This approach ensures historically accurate rotor motion by:

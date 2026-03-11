@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-# Helper script to run EnigmaMachineCore through common scenarios 
+# Helper script to run EnigmaMachineCore through common scenarios
 # for sanitizer verification (ASan, UBSan, MSan).
 
 BUILD_DIR=${1:-build}
