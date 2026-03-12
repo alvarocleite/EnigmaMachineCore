@@ -32,6 +32,7 @@ WARN_NO_PARAMDOC       = YES
 # Input files configuration
 INPUT                  = README.md \
                          CONTRIBUTING.md \
+                         roadmap.md \
                          ./docs \
                          ./EnigmaMachine \
                          ./RotorBox \
