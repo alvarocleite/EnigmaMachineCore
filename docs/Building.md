@@ -13,11 +13,14 @@ To build and run this project, you will need the following tools and libraries:
 *   **Git:** Required for version control and to manage the project's submodules.
 *   **[clang-format](https://clang.llvm.org/docs/ClangFormat.html):** Recommended for maintaining consistent code style.
 *   **[clang-tidy](https://clang.llvm.org/extra/clang-tidy/):** Used for static analysis during the build process.
+*   **[cppcheck](http://cppcheck.sourceforge.net/):** Used for deeper static analysis, specifically performance, style, and portability.
+*   **[Valgrind](https://valgrind.org/):** Essential for memory leak detection and profiling on Linux.
+*   **[LLVM/Clang Sanitizers](https://clang.llvm.org/docs/index.html):** Used for runtime analysis (ASan, UBSan, MSan). Requires `clang` and `llvm` (for `llvm-symbolizer`).
 
 ### Libraries
 *   **[toml11](https://github.com/ToruNiina/toml11):** A powerful C++11 header-only library for TOML.
-*   **[CLI11](https://github.com/CLIUtils/CLI11):** Command line parser for C++11. 
-  
+*   **[CLI11](https://github.com/CLIUtils/CLI11):** Command line parser for C++11.
+
 *Note: These are included as git submodules in the `external/` directory.*
 
 ### Testing & Benchmarking Tools
@@ -177,7 +180,7 @@ target_link_libraries(my_app PRIVATE EnigmaMachineCore::EnigmaCore)
 
 ## Code Formatting
 
-To ensure a consistent style, the project uses `clang-format` based on the Google C++ style guide. 
+To ensure a consistent style, the project uses `clang-format` (version 21 or higher) based on the Google C++ style guide. Using different versions of `clang-format` may result in slight formatting discrepancies that could fail CI checks.
 
 ### To format the source code:
 ```bash
@@ -190,8 +193,9 @@ This will automatically format all source and header files in the project.
 
 ## Static Analysis
 
-Static analysis is performed using **clang-tidy** and is integrated into the CMake build system.
+Static analysis is performed using **clang-tidy** and **cppcheck**, both of which are integrated into the CMake build system.
 
+### Clang-Tidy
 *   **How to Enable:** By default, static analysis is disabled to ensure fast build times. To enable it, use the `ENIGMA_ENABLE_CLANG_TIDY` flag during configuration:
     ```bash
     cmake -DENIGMA_ENABLE_CLANG_TIDY=ON -S . -B build
@@ -199,6 +203,48 @@ Static analysis is performed using **clang-tidy** and is integrated into the CMa
 *   **Execution:** Once enabled, clang-tidy will run on every source file during compilation (`make`).
 *   **Identifying Issues:** Clang-tidy output is interleaved with compiler output. You can distinguish them by the bracketed check name at the end of the line (e.g., `[modernize-use-auto]`). Standard compiler warnings typically start with `-W`.
 *   **Configuration:** The list of active checks is defined in `CMakeLists.txt`.
+
+### CppCheck
+*   **How to Enable:** Use the `ENIGMA_ENABLE_CPPCHECK` flag during configuration:
+    ```bash
+    cmake -DENIGMA_ENABLE_CPPCHECK=ON -S . -B build
+    ```
+*   **Execution:** Unlike clang-tidy, cppcheck is run via a dedicated custom target:
+    ```bash
+    cmake --build build --target enigma_cppcheck
+    ```
+*   **Purpose:** It focuses on performance, portability, style, and unused functions.
+*   **CI Enforcement:** In the GitHub Actions pipeline, `enigma_cppcheck` is run on every push/PR within the `Code Analysis` workflow.
+
+---
+
+## Sanitizers (Runtime Analysis)
+
+The project supports LLVM/Clang Sanitizers to detect memory errors, uninitialized reads, and undefined behavior at runtime.
+
+### Requirements
+*   **Compiler:** Requires `clang` / `clang++`.
+*   **Tools:** `llvm` (specifically `llvm-symbolizer`) is recommended for descriptive backtraces.
+
+### Available Options
+| Option | Sanitizer |
+| :--- | :--- |
+| `ENIGMA_USE_ASAN` | AddressSanitizer (ASan) |
+| `ENIGMA_USE_UBSAN` | UndefinedBehaviorSanitizer (UBSan) |
+| `ENIGMA_USE_MSAN` | MemorySanitizer (MSan) |
+
+### Usage
+1.  **Configure with Clang and Sanitizers:**
+    ```bash
+    cmake -DCMAKE_CXX_COMPILER=clang++ -DENIGMA_USE_ASAN=ON -S . -B build
+    ```
+2.  **Build and Run:**
+    ```bash
+    cmake --build build
+    ./scripts/run_sanitizers.sh build
+    ```
+
+*Note: Sanitizers are automatically excluded from the Unit Test suite to maintain performance. They are applied to the core engine and CLI application. In CI, these checks are centralized in the `code-analysis.yml` workflow.*
 
 ---
 

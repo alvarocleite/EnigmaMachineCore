@@ -52,7 +52,7 @@ PlugBoard::PlugBoard(const std::array<PlugBoardPair, PLUGBOARD_MAX_PAIRS>& pairs
  * @details Performs a character swap using the pre-calculated mapping table.
  * @internal This operation is O(1) and is performed twice for every key press in the EnigmaMachine.
  */
-int PlugBoard::swap(int key) const {
+AlphabetIndex PlugBoard::swap(AlphabetIndex key) const {
     if (key < 0 || key >= TRANSFORMER_SIZE) {
         return key;
     }

@@ -23,34 +23,36 @@ public:
      *
      * @param config The ReflectorConfig structure containing the wiring map.
      */
-    Reflector(const ReflectorConfig& config);
-    ~Reflector() = default;
+    explicit Reflector(const ReflectorConfig& config);
+    explicit Reflector(ReflectorConfig&& config);
+    ~Reflector() override = default;
 
     /**
      * @brief Transforms the given position using the reflector's transformation lookup table (LUT).
      *
      * @param position The input position to be transformed.
      * @param reverse It should not be set to true.
-     * @return int The transformed position. Returns "-1" if the position is not found in the LUT when reverse is true.
+     * @return AlphabetIndex The transformed position. Returns "-1" if the position is not found in the LUT when reverse
+     * is true.
      * @details This method is const-qualified, ensuring that the signal transformation does not modify the internal
      * state of the reflector.
      */
-    int transform(int position, bool reverse = false) const override;
+    AlphabetIndex transform(AlphabetIndex position, bool reverse = false) const override;
 
     /**
      * @brief Transforms the given position forward.
      * @param position The current position (0 to TRANSFORMER_SIZE - 1).
-     * @return int The transformed position (0 to TRANSFORMER_SIZE - 1).
+     * @return AlphabetIndex The transformed position (0 to TRANSFORMER_SIZE - 1).
      * @details Implements the signal reflection at the end of the rotor sequence.
      */
-    int transformForward(int position) const override;
+    AlphabetIndex transformForward(AlphabetIndex position) const override;
 
     /**
      * @brief Transforms the given position in reverse.
      * @param position The current position (0 to TRANSFORMER_SIZE - 1).
-     * @return int Returns -1 since reflectors are symmetric and do not have separate reverse paths.
+     * @return AlphabetIndex Returns -1 since reflectors are symmetric and do not have separate reverse paths.
      */
-    int transformReverse(int position) const override;
+    AlphabetIndex transformReverse(AlphabetIndex position) const override;
 
     /**
      * @brief Reflector does not rotate.

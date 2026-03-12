@@ -8,7 +8,7 @@ class MockObserver : public IEnigmaObserver {
 public:
     struct StepEvent {
         int rotorIndex;
-        int position;
+        AlphabetIndex position;
     };
     struct EncryptEvent {
         char input;
@@ -18,7 +18,9 @@ public:
     std::vector<StepEvent> stepEvents;
     std::vector<EncryptEvent> encryptEvents;
 
-    void onRotorStepped(int rotorIndex, int position) override { stepEvents.push_back({rotorIndex, position}); }
+    void onRotorStepped(int rotorIndex, AlphabetIndex position) override {
+        stepEvents.push_back({rotorIndex, position});
+    }
 
     void onCharEncrypted(char input, char output) override { encryptEvents.push_back({input, output}); }
 };

@@ -11,13 +11,7 @@
 Reflector::Reflector(const ReflectorConfig& config) {
     type = TransformerType::Reflector;
 
-    if (config.wiring.size() != TRANSFORMER_SIZE) {
-        throw std::runtime_error("Reflector wiring size mismatch");
-    }
-
-    for (size_t i = 0; i < config.wiring.size(); ++i) {
-        setTransformValue(0, static_cast<int>(i), config.wiring[i]);
-    }
+    copyTransformRow(0, config.wiring);
 
     // Initialize reverse transformation vector to -1.
     // Reflectors are typically symmetric, but the Transformer base class supports separate reverse path.
@@ -26,12 +20,20 @@ Reflector::Reflector(const ReflectorConfig& config) {
     fillTransformRow(1, -1);
 }
 
+Reflector::Reflector(ReflectorConfig&& config) {
+    type = TransformerType::Reflector;
+
+    copyTransformRow(0, config.wiring);
+
+    fillTransformRow(1, -1);
+}
+
 /**
  * @details Performs the signal reflection.
  * @internal The 'reverse' parameter is ignored for reflectors as they
  * occupy the 'turn-around' point in the signal path.
  */
-int Reflector::transform(int position, bool reverse) const {
+AlphabetIndex Reflector::transform(AlphabetIndex position, bool reverse) const {
     return reverse ? transformReverse(position) : transformForward(position);
 }
 
@@ -39,10 +41,10 @@ int Reflector::transform(int position, bool reverse) const {
  * @details Reflects the input signal back towards the rotors.
  * @internal This operation uses the primary transformation mapping (row 0).
  */
-int Reflector::transformForward(int position) const { return getTransformValue(0, position); }
+AlphabetIndex Reflector::transformForward(AlphabetIndex position) const { return getTransformValue(0, position); }
 
 /**
  * @details Returns -1 for Reflector reverse transformations.
  * @internal Reflectors are unidirectional; the signal only enters from the forward side.
  */
-int Reflector::transformReverse(int position) const { return getTransformValue(1, position); }
+AlphabetIndex Reflector::transformReverse(AlphabetIndex position) const { return getTransformValue(1, position); }

@@ -119,6 +119,6 @@ Instead, follow this "A/B" workflow on your local machine:
     ```
 
 ### Performance Regression Threshold
-The CI environment enforces a **5% regression threshold** against the **CI Baseline**. 
+The CI environment enforces a **5% regression threshold** against the **CI Baseline**.
 *   **Why 5%?** Benchmarking on shared CI runners (like GitHub Actions) is subject to "system noise" (CPU scaling, OS interrupts). A 5% buffer ensures that we only fail for genuine algorithmic regressions, not minor hardware fluctuations.
 *   **Baseline Management:** If a PR significantly alters the engine's architecture in a way that intentionally changes the performance profile, the official CI baseline may need to be updated.

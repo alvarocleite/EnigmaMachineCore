@@ -1,0 +1,2 @@
+# Exclude external libraries from sanitizer instrumentation
+src:*/external/*

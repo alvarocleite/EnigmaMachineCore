@@ -1,6 +1,6 @@
 # Testing Guide
 
-This project uses **GoogleTest (gTest)** for unit testing and **CTest** as the test runner. 
+This project uses **GoogleTest (gTest)** for unit testing and **CTest** as the test runner.
 
 ## Testing Strategy
 
@@ -20,6 +20,7 @@ tests/
 ├── EnigmaMachine/
 │   ├── TestEnigmaConfigLoader.cpp
 │   ├── TestEnigmaMachine.cpp
+│   ├── TestHistoricalVectors.cpp
 │   ├── TestSpec.md
 │   └── TestSpecLoader.md
 ├── PlugBoard/
@@ -87,6 +88,79 @@ add_executable(EnigmaTests
 
 ### 3. Build and Run
 Re-run your build command. CMake will automatically detect the new tests.
+
+## Historical Test Vectors
+
+To ensure cryptographic accuracy, the project includes a suite of tests based on historical Enigma I (Wehrmacht/Luftwaffe) configurations. These tests use verified wiring and notch data found in `assets/historical/`.
+
+| Test Name | Description | Source |
+| :--- | :--- | :--- |
+| `StandardAAAAA_BDZGO` | Validates the classic "AAAAA" vector for Rotors I-II-III. | Historical Baseline |
+| `OCAMLVector` | Complex setup with plugboard and custom starting positions. | Cornell CS 3110 |
+| `LongStringVerification` | Verifies stepping logic over a 35-character string. | EnigmaCore Baseline |
+| `HistoricalReciprocity` | Ensures encryption/decryption symmetry with historical settings. | - |
+
+These tests are located in `tests/EnigmaMachine/TestHistoricalVectors.cpp`.
+
+## Sanitizers (Clang)
+
+To improve code reliability and detect memory errors or undefined behavior, the project integrates LLVM/Clang Sanitizers.
+
+### Requirements
+*   **Compiler:** `clang` / `clang++` must be used for sanitizer builds.
+
+### Enabling Sanitizers
+You can enable sanitizers individually during the CMake configuration step:
+
+| Option | Sanitizer | Description |
+| :--- | :--- | :--- |
+| `ENIGMA_USE_ASAN` | AddressSanitizer (ASan) | Detects heap/stack buffer overflows, use-after-free, and memory leaks. |
+| `ENIGMA_USE_UBSAN` | UndefinedBehaviorSanitizer (UBSan) | Detects signed integer overflow, null pointer dereference, and other C++ undefined behaviors. |
+| `ENIGMA_USE_MSAN` | MemorySanitizer (MSan) | Detects uninitialized memory reads. |
+
+**Example Command:**
+```bash
+cmake -DCMAKE_CXX_COMPILER=clang++ -DENIGMA_USE_ASAN=ON -B build
+cmake --build build
+```
+
+### Local Verification
+To run the same scenarios as the CI locally, use the provided helper script:
+```bash
+# Ensure you have built the CLI with sanitizers enabled
+./scripts/run_sanitizers.sh build
+```
+
+## Valgrind (Memory Leak Detection)
+
+The project includes a custom CMake target to run the entire test suite through Valgrind.
+
+### Usage
+1.  **Configure with Tests Enabled:**
+    ```bash
+    cmake -DENIGMA_BUILD_TESTS=ON -S . -B build
+    ```
+2.  **Run Valgrind Target:**
+    ```bash
+    cmake --build build --target Enigma_valgrind
+    ```
+
+This will execute `EnigmaTests` with `--leak-check=full` and will return a non-zero exit code if any leaks or memory errors are detected, making it suitable for both local development and CI gates.
+
+### Constraints
+*   **Linux Only:** Valgrind is currently only supported on Linux environments.
+*   **Performance:** Running through Valgrind is significantly slower than native execution.
+
+### Constraints
+*   **Exclusion of Tests:** By design, sanitizers are applied to the core engine and the CLI application but are **excluded** from the Unit Test suite targets. This is achieved by using a separate non-instrumented object library for tests when sanitizers are active, reducing noise and execution time for the test suite.
+*   **Performance:** Sanitizers introduce runtime overhead (typically 2x-4x) and should be used during development or in specific CI pipelines rather than production builds.
+
+### CI Integration
+Code analysis is centralized in the **Code Analysis** workflow (`code-analysis.yml`), which runs on every push and pull request. It orchestrates parallel jobs for:
+*   **Static Analysis:** Running Clang-Tidy on the core logic.
+*   **Runtime Sanitizers:** Executing ASan, UBSan, and MSan checks via the reusable `sanitizers.yml` workflow.
+
+Results are aggregated into a single **GitHub Job Summary** without failing the build, allowing the team to monitor and fix issues asynchronously.
 
 ## GoogleTest Dependency
 The project uses CMake's `FetchContent` to download GoogleTest automatically.

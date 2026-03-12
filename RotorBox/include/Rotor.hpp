@@ -41,37 +41,38 @@ public:
      *
      * @param config The RotorConfig structure containing wiring and notch info.
      */
-    Rotor(const RotorConfig& config);
-    ~Rotor() = default;
+    explicit Rotor(const RotorConfig& config);
+    explicit Rotor(RotorConfig&& config);
+    ~Rotor() override = default;
 
     /**
      * @brief Transforms the given position based on the transformation lookup table (LUT).
      *
      * @param position The current position in the rotor.
      * @param reverse If true, transforms using the reverse LUT; otherwise, uses the forward LUT.
-     * @return int The transformed position.
+     * @return AlphabetIndex The transformed position.
      * @details This method is const-qualified, ensuring that the signal transformation does not modify the internal
      * state of the rotor.
      */
-    int transform(int position, bool reverse = false) const override;
+    AlphabetIndex transform(AlphabetIndex position, bool reverse = false) const override;
 
     /**
      * @brief Transforms the given position forward using the forward LUT.
      * @param position The current position in the rotor (0 to TRANSFORMER_SIZE - 1).
-     * @return int The transformed position (0 to TRANSFORMER_SIZE - 1).
+     * @return AlphabetIndex The transformed position (0 to TRANSFORMER_SIZE - 1).
      * @details Implements the forward signal path through the rotor's specific wiring,
      * accounting for current rotation offset.
      */
-    int transformForward(int position) const override;
+    AlphabetIndex transformForward(AlphabetIndex position) const override;
 
     /**
      * @brief Transforms the given position in reverse using the reverse LUT.
      * @param position The current position in the rotor (0 to TRANSFORMER_SIZE - 1).
-     * @return int The transformed position (0 to TRANSFORMER_SIZE - 1).
+     * @return AlphabetIndex The transformed position (0 to TRANSFORMER_SIZE - 1).
      * @details Implements the return signal path through the rotor's specific wiring,
      * accounting for current rotation offset.
      */
-    int transformReverse(int position) const override;
+    AlphabetIndex transformReverse(AlphabetIndex position) const override;
 
     /**
      * @brief Rotates the rotor by one position.

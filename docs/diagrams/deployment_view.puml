@@ -4,11 +4,11 @@ skinparam monochrome true
 skinparam componentStyle uml2
 
 node "Host System (Linux/Windows/macOS)" as Host {
-    
+
     folder "Installation Directory" {
-        
+
         artifact "EnigmaMachineCore (Executable)" as App
-        
+
         folder "assets/" as Assets {
             file "EnigmaMachineConfig.toml"
             file "Rotor1.toml"
@@ -20,7 +20,7 @@ node "Host System (Linux/Windows/macOS)" as Host {
 
 node "Embedded System (MCU)" as Embedded {
     artifact "Firmware" as FW
-    
+
     folder "Flash Memory" as Flash {
         file "Config Data (Serialized)"
     }

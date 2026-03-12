@@ -1,6 +1,6 @@
 # EnigmaMachineCore
 
-EnigmaMachineCore is a C++ project that simulates the behavior of the Enigma Machine. 
+EnigmaMachineCore is a C++ project that simulates the behavior of the Enigma Machine.
 
 The Enigma Machine was a cipher device used for secure communication in the first half of the 20th century. For more details, see [Enigma Machine](https://en.wikipedia.org/wiki/Enigma_machine).
 
@@ -8,6 +8,7 @@ This project provides a modular and extensive implementation of Enigma's core co
 
 **Features:**
 - **Faithful Simulation:** Accurately simulates the rotor stepping, wiring, and reflector logic of the Enigma machine.
+- **Historical Accuracy:** Includes a full set of verified historical Enigma I rotors (I-V) and reflectors (A-C). See [docs/Historical_Data.md](docs/Historical_Data.md).
 - **Configurable Transformers:** Load rotor and reflector configurations from TOML files for easy customization.
 - **Modular Design:** Clean separation of components (rotors, reflectors, RotorBox logic) for extensibility and testing.
 - **Advanced Architecture:** Uses Dependency Injection and DTOs to separate data, logic, and IO access.
@@ -16,7 +17,7 @@ This project provides a modular and extensive implementation of Enigma's core co
 ## Getting Started
 
 ### Prerequisites
-To build and run this project, you will need a **C++20 compatible compiler**, **CMake 3.15+**, and **Git**. 
+To build and run this project, you will need a **C++20 compatible compiler**, **CMake 3.15+**, and **Git**.
 
 For a complete list of dependencies and detailed environment setup, please refer to the [Building and Testing guide](docs/Building.md).
 
@@ -54,7 +55,7 @@ int main() {
 
     // 2. Transform a character (0-25 index)
     int encrypted = machine.keyTransform(7); // 'H' -> ?
-    
+
     return 0;
 }
 ```
@@ -121,6 +122,9 @@ For more details on performance metrics and benchmarking options, see [docs/Benc
 ## Documentation
 
 If you have Doxygen installed, you can generate the project documentation.
+
+*   **Internal Workings:** See [docs/EnigmaMachineWorkings.md](docs/EnigmaMachineWorkings.md) for a technical explanation of the Enigma simulation and signal flow diagrams.
+*   **API Reference:** Generate with Doxygen (see below).
 
 **Using the modern CMake CLI:**
 ```bash

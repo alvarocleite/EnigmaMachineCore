@@ -1,0 +1,15 @@
+Name = "EnigmaI_Stepping_Config"
+ReflectorFile = "ReflectorB.toml"
+
+[rotors]
+RotorCount = 3
+RotorFiles = [
+    "RotorI.toml",
+    "RotorII.toml",
+    "RotorIII.toml"
+]
+RotorPositions = [0, 0, 20]
+
+[plugboard]
+PlugCount = 0
+PlugBoardPairs = []

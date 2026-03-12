@@ -1,0 +1,61 @@
+@startuml Enigma_Signal_Flow_Diagram
+
+' Header Comment: This diagram shows the complete electrical path of a signal
+' from the key press to the lamp illumination, illustrating the Enigma's
+' reciprocal property.
+
+skinparam monochrome true
+skinparam shadowing false
+skinparam responseMessageBelowArrow true
+
+actor "Operator (Key Press)" as User
+participant "Keyboard" as KB
+participant "PlugBoard" as PB
+participant "Entry Wheel" as ETW
+participant "RotorBox\n(Rotors + Reflector)" as RB
+participant "Lampboard" as LP
+
+User -> KB : Press Key (e.g., 'A')
+activate KB
+
+    KB -> PB : Send Signal
+    activate PB
+    note over PB : 1. First Swap
+    PB -> ETW : Swapped Signal
+    deactivate PB
+
+    activate ETW
+    ETW -> RB : Entrance to Rotors
+    deactivate ETW
+
+    activate RB
+    note over RB : 2. Mechanical Step\n(Middle rotor anomaly applies)
+    note over RB : 3. Forward Pass\n(Fast -> Middle -> Slow)
+    note over RB : 4. Reflection\n(Mathematical Inverse)
+    note over RB : 5. Reverse Pass\n(Slow -> Middle -> Fast)
+    RB -> ETW : Exit to Entry Wheel
+    deactivate RB
+
+    activate ETW
+    ETW -> PB : Return Signal
+    deactivate ETW
+
+    activate PB
+    note over PB : 6. Second Swap\n(Same wiring)
+    PB -> LP : Final Signal
+    deactivate PB
+
+    activate LP
+    LP --> User : Light Lamp (e.g., 'G')
+    deactivate LP
+
+deactivate KB
+
+legend center
+  **Reciprocal Property**
+  Due to the Reflector and Plugboard symmetry,
+  if 'A' results in 'G', then 'G' results in 'A'
+  with the same machine settings.
+endlegend
+
+@enduml

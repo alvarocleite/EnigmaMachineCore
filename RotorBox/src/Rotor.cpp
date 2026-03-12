@@ -24,14 +24,18 @@ Rotor::Rotor(const RotorConfig& config) {
     rotationCount = 0;
     type = TransformerType::Rotor;
 
-    // Set forward wiring from config
-    if (config.wiring.size() != TRANSFORMER_SIZE) {
-        throw std::runtime_error("Rotor wiring size mismatch");
-    }
+    copyTransformRow(0, config.wiring);
 
-    for (size_t i = 0; i < config.wiring.size(); ++i) {
-        setTransformValue(0, static_cast<int>(i), config.wiring[i]);
-    }
+    initReverseLookupTable();
+    initRotorPosition();
+}
+
+Rotor::Rotor(RotorConfig&& config) {
+    notchPosition = config.notchPosition;
+    rotationCount = 0;
+    type = TransformerType::Rotor;
+
+    copyTransformRow(0, config.wiring);
 
     initReverseLookupTable();
     initRotorPosition();
@@ -86,7 +90,7 @@ bool Rotor::isNotchPosition(int position) const { return (position == notchPosit
  * @internal This logic ensures that the physical rotation of the rotor
  * effectively changes the entry and exit pins of the signal.
  */
-int Rotor::transform(int position, bool reverse) const {
+AlphabetIndex Rotor::transform(AlphabetIndex position, bool reverse) const {
     return reverse ? transformReverse(position) : transformForward(position);
 }
 
@@ -96,7 +100,7 @@ int Rotor::transform(int position, bool reverse) const {
  * 2. Look up the internal wiring map (row 0).
  * 3. Adjust output back to the machine's absolute reference frame.
  */
-int Rotor::transformForward(int position) const {
+AlphabetIndex Rotor::transformForward(AlphabetIndex position) const {
     position = (position + rotationCount);
     if (position >= TRANSFORMER_SIZE) {
         position -= TRANSFORMER_SIZE;
@@ -116,7 +120,7 @@ int Rotor::transformForward(int position) const {
  * 2. Look up the internal wiring map (row 1 - inverse).
  * 3. Adjust output back to the machine's absolute reference frame.
  */
-int Rotor::transformReverse(int position) const {
+AlphabetIndex Rotor::transformReverse(AlphabetIndex position) const {
     position = (rotationCount + position);
     if (position >= TRANSFORMER_SIZE) {
         position -= TRANSFORMER_SIZE;

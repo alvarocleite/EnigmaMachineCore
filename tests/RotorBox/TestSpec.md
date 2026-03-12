@@ -13,10 +13,28 @@
 | **ParameterizedConstructor** | Verifies custom configuration. | Checks if providing specific files and positions correctly initializes the box. |
 | **SingleStepTransformation** | Verifies basic signal flow after one step. | Sets positions to 0,0,0. `keyTransform` steps to 1,0,0 and transforms. |
 | **SteppingMechanism** | Verifies the notch-based stepping (odometer). | Sets Rotor 1 to position 25. `keyTransform` should move Rotor 1 to 0 and Rotor 2 to 1. |
-| **DoubleStepping** | Verifies carry-over stepping. | Sets Rotor 1 and Rotor 2 to positions that will trigger multiple carries. |
+| **MultiStepCarry** | Verifies carry-over stepping. | Sets Rotor 1 and Rotor 2 to positions that will trigger multiple carries. |
+| **DoubleStepping_1/2/3** | Verifies the "Double Stepping Anomaly". | Tests specific notch combinations that trigger the middle rotor to step twice. |
 | **RoundTrip** | Verifies the reciprocal nature of Enigma. | Encrypting a character, resetting positions, and encrypting the result should yield the original character. |
 
 ## Detailed Logic Breakdown
+...
+### Test Case: `MultiStepCarry`
+*   **Goal:** Verify a "waterfall" step where R1 steps R2, and R2 steps R3.
+*   **Logic:**
+    1. Set positions where both R1 and R2 are at their notches (e.g., {25, 25, 0} if notches are at 0).
+    2. Call `keyTransform`.
+    3. Verify that all three rotors advanced.
+
+### Test Case: `DoubleSteppingMechanism (1, 2, 3)`
+*   **Goal:** Verify the historical "double stepping" behavior of the middle rotor.
+*   **Mechanism:** When the middle rotor is at its notch, it steps itself AND the rotor to its left on the next character, regardless of whether the right rotor just hit a notch.
+*   **Logic:**
+    1. Initialize `RotorBox` with specific "pre-anomaly" positions.
+    2. Register an `IEnigmaObserver` to capture the `onRotorStepped` events.
+    3. Call `keyTransform`.
+    4. Assert the final positions captured by the observer match the expected historical stepping sequence.
+
 
 ### Test Fixture: `RotorBoxTests`
 *   **Purpose:** Shared context for `RotorBox` tests.
@@ -32,7 +50,7 @@
 
 ### Test Case: `SteppingMechanism`
 *   **Goal:** Verify that Rotor 2 moves when Rotor 1 hits its notch.
-*   **Logic:** 
+*   **Logic:**
     1.  Set positions to {25, 0, 0}.
     2.  `keyTransform` is called.
     3.  Internally, Rotor 1 rotates to 0. Since 0 is the notch, Rotor 2 rotates to 1.

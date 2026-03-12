@@ -14,8 +14,26 @@
 | **StringEncryption** | Verifies multi-character encryption. | Encrypts "AAAAA" to observe rotor stepping effect (output should change even if input is constant). |
 | **Reciprocity (Decryption)** | Verifies that Encrypt(Encrypt(Msg)) == Msg. | Encrypts "HELLO" -> Cypher. Re-initializes machine. Encrypts Cypher -> Plain. Plain should match "HELLO". |
 | **PlugBoardEffect** | Verifies Plugboard influence. | Compares output of a machine with Plugboard vs without Plugboard for same rotor settings. |
+| **ProcessBufferSpan** | Verifies block processing. | Compares `processBuffer` result against sequential `keyTransform` calls. |
+| **LoggerInjection** | Verifies logger propagation. | Ensures a custom `ILogger` receives stepping events from the engine. |
 
 ## Detailed Logic Breakdown
+...
+### Test Case: `ProcessBufferSpan`
+*   **Goal:** Ensure the batch processing API yields identical results to sequential processing.
+*   **Procedure:**
+    1. Initialize two identical machines.
+    2. Process a vector of indexes using `keyTransform` in a loop.
+    3. Process the same vector using `processBuffer`.
+    4. Assert results are identical.
+
+### Test Case: `LoggerInjectionAndPropagation`
+*   **Goal:** Validate the Observer pattern for logging.
+*   **Procedure:**
+    1. Create a mock `ILogger` that stores logs in a list.
+    2. Inject logger into `EnigmaMachine`.
+    3. Trigger an action (encryption) that causes a rotor step.
+    4. Assert that the mock logger captured a message containing "Rotor" and "stepped".
 
 ### Test Fixture: `EnigmaMachineTests`
 *   **Purpose:** Setup/Teardown not strictly needed if we initialize new machines per test, but useful for defining common config paths.

@@ -13,13 +13,13 @@ participant "Rotor (2)" as R2
 participant "Reflector" as REF
 participant "IEnigmaObserver" as OBS
 
-User -> EM: keyTransform(inputChar)
+User -> EM: keyTransform(inputChar: AlphabetIndex)
 activate EM
 
     note right of EM: 1. Electrical Signal Path (Plugboard Entry)
     EM -> PB: swap(inputChar)
     activate PB
-    PB --> EM: swappedChar
+    PB --> EM: swappedChar: AlphabetIndex
     deactivate PB
 
     note right of EM: 2. RotorBox Processing
@@ -36,42 +36,42 @@ activate EM
                     RB -> R2: rotate()
                 end
             end
-            
+
             loop for each observer
-                RB -> EM: onRotorStepped(rotorIndex, pos)
+                RB -> EM: onRotorStepped(rotorIndex, pos: AlphabetIndex)
                 activate EM
                     EM -> OBS: onRotorStepped(rotorIndex, pos)
                 deactivate EM
             end
         deactivate RB
-        
+
         note right of RB: 2.2 Forward Pass (0 -> 1 -> 2)
         RB -> R0: transformForward(char)
-        R0 --> RB: c1
+        R0 --> RB: c1: AlphabetIndex
         RB -> R1: transformForward(c1)
-        R1 --> RB: c2
+        R1 --> RB: c2: AlphabetIndex
         RB -> R2: transformForward(c2)
-        R2 --> RB: c3
+        R2 --> RB: c3: AlphabetIndex
 
         note right of RB: 2.3 Reflection
         RB -> REF: transformForward(c3)
-        REF --> RB: c4
+        REF --> RB: c4: AlphabetIndex
 
         note right of RB: 2.4 Reverse Pass (2 -> 1 -> 0)
         RB -> R2: transformReverse(c4)
-        R2 --> RB: c5
+        R2 --> RB: c5: AlphabetIndex
         RB -> R1: transformReverse(c5)
-        R1 --> RB: c6
+        R1 --> RB: c6: AlphabetIndex
         RB -> R0: transformReverse(c6)
-        R0 --> RB: c7
+        R0 --> RB: c7: AlphabetIndex
 
-    RB --> EM: outputChar
+    RB --> EM: outputChar: AlphabetIndex
     deactivate RB
 
     note right of EM: 3. Electrical Signal Path (Plugboard Exit)
     EM -> PB: swap(outputChar)
     activate PB
-    PB --> EM: finalChar
+    PB --> EM: finalChar: AlphabetIndex
     deactivate PB
 
     note right of EM: 4. Notification
@@ -79,7 +79,7 @@ activate EM
         EM -> OBS: onCharEncrypted(inputChar, finalChar)
     end
 
-EM --> User: finalChar
+EM --> User: finalChar: AlphabetIndex
 deactivate EM
 
 

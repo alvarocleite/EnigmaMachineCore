@@ -12,8 +12,9 @@ package "EnigmaCore (Library)" {
     component [RotorBox] as RB
     component [PlugBoard] as PB
     component [Configuration] as Config
-    
+
     interface "IAssetProvider" as IAP
+    interface "ILogger" as ILOG
 }
 
 package "External Dependencies" {
@@ -24,13 +25,16 @@ package "External Dependencies" {
 ' Application Dependencies
 App ..> EM : uses
 App ..> CLI11 : uses
+App ..|> ILOG : implements
 
 ' Core Internal Dependencies
 EM ..> RB : owns
 EM ..> PB : owns
 EM ..> IAP : uses
+EM ..> ILOG : uses
 Config ..> IAP : uses
 RB ..> Config : uses (RotorConfig)
+RB ..> ILOG : uses
 
 ' External Lib Usage
 Config ..> toml11 : uses

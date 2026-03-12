@@ -6,10 +6,10 @@ Accepted
 ## Context
 The internal signal path of the Enigma Machine involves passing a character through multiple rotors and a reflector. There are two primary ways to represent this signal:
 1.  **Raw Characters:** Passing `char` values (e.g., 'A', 'B') and performing character arithmetic.
-2.  **Alphabet Indices:** Passing `int` values representing the index in the alphabet (e.g., 0-25 for a 26-letter alphabet).
+2.  **Alphabet Indices:** Passing `AlphabetIndex` values representing the index in the alphabet (e.g., 0 to `TRANSFORMER_SIZE - 1`).
 
 ## Decision
-We will use **Alphabet Indices** (`int` values, 0-25) for all internal signal transformations within the `Transformer`, `RotorBox`, and `PlugBoard` classes.
+We will use **Alphabet Indices** (`AlphabetIndex` values, 0 to `TRANSFORMER_SIZE - 1`) for all internal signal transformations within the `Transformer`, `RotorBox`, and `PlugBoard` classes.
 
 1.  **Semantic Consistency:** Transformations are mathematical mappings within a set. Using indices makes this mapping explicit.
 2.  **Performance:** Avoids repeated conversions between ASCII/UTF-8 and numeric indices during the hot path of encryption.

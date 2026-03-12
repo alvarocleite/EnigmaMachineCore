@@ -66,6 +66,10 @@ set(INCLUDE_DIRS
 # Initialize toml11 library (header-only submodule)
 add_subdirectory(external/toml11)
 
+# Ensure toml11 headers are treated as SYSTEM to suppress warnings and sanitizer noise
+get_target_property(TOML11_INCLUDE_DIRS toml11 INTERFACE_INCLUDE_DIRECTORIES)
+set_target_properties(toml11 PROPERTIES INTERFACE_SYSTEM_INCLUDE_DIRECTORIES "${TOML11_INCLUDE_DIRS}")
+
 # --- Core Targets ---
 
 # 1. Create Object Library for all core logic
@@ -79,11 +83,11 @@ target_link_libraries(EnigmaCore_OBJ PUBLIC toml11::toml11)
 set_target_properties(EnigmaCore_OBJ PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
 # Define the installed assets path for the library fallback
-target_compile_definitions(EnigmaCore_OBJ PRIVATE 
+target_compile_definitions(EnigmaCore_OBJ PRIVATE
     ENIGMA_INSTALL_ASSETS_PATH="${CMAKE_INSTALL_FULL_DATADIR}/EnigmaMachineCore/assets/"
 )
 
-# On Windows, when building a shared library, the object files must also 
+# On Windows, when building a shared library, the object files must also
 # have the EXPORTS definition so they know to export symbols rather than import them.
 if(BUILD_SHARED_LIBS)
     target_compile_definitions(EnigmaCore_OBJ PRIVATE EnigmaCore_EXPORTS)
@@ -95,8 +99,8 @@ add_library(EnigmaCore
     $<TARGET_OBJECTS:EnigmaCore_OBJ>
 )
 target_link_libraries(EnigmaCore PRIVATE $<BUILD_INTERFACE:toml11::toml11>)
-target_include_directories(EnigmaCore 
-    PUBLIC 
+target_include_directories(EnigmaCore
+    PUBLIC
         $<BUILD_INTERFACE:${INCLUDE_DIRS}>
         $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
 )
@@ -112,10 +116,10 @@ generate_export_header(EnigmaCore
 )
 
 # Add the generated directory to include paths
-target_include_directories(EnigmaCore_OBJ PUBLIC 
+target_include_directories(EnigmaCore_OBJ PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/generated>
 )
-target_include_directories(EnigmaCore PUBLIC 
+target_include_directories(EnigmaCore PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/generated>
 )
 
@@ -138,12 +142,84 @@ if(ENIGMA_ENABLE_CLANG_TIDY)
             "-modernize-use-trailing-return-type"
         )
         string(REPLACE ";" "," CLANG_TIDY_CHECKS_STR "${CLANG_TIDY_CHECKS}")
-        
+
         set_target_properties(EnigmaCore_OBJ PROPERTIES
             CXX_CLANG_TIDY "${CLANG_TIDY_EXE};-checks=${CLANG_TIDY_CHECKS_STR}"
         )
     else()
         message(WARNING "clang-tidy not found. Static analysis will not be run.")
+    endif()
+endif()
+
+# --- Static Analysis (cppcheck) ---
+option(ENIGMA_ENABLE_CPPCHECK "Enable static analysis with cppcheck" OFF)
+
+if(ENIGMA_ENABLE_CPPCHECK)
+    find_program(CPPCHECK_EXE cppcheck)
+    if(CPPCHECK_EXE)
+        message(STATUS "cppcheck found: ${CPPCHECK_EXE}")
+
+        # Define include directories for cppcheck to use
+        set(CPPCHECK_INCLUDES "")
+        foreach(inc ${INCLUDE_DIRS})
+            list(APPEND CPPCHECK_INCLUDES "-I${inc}")
+        endforeach()
+
+        # Add custom target to run cppcheck
+        # Using --project=compile_commands.json is usually better but requires CMAKE_EXPORT_COMPILE_COMMANDS=ON
+        add_custom_target(enigma_cppcheck
+            COMMAND ${CPPCHECK_EXE}
+                --enable=performance,portability,style,unusedFunction
+                --std=c++20
+                --inline-suppr
+                --suppress=missingIncludeSystem
+                --force
+                --quiet
+                --error-exitcode=1
+                ${CPPCHECK_INCLUDES}
+                ${CORE_SOURCES}
+                app/main.cpp
+            WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+            COMMENT "Running cppcheck on core sources and application"
+        )
+    else()
+        message(WARNING "cppcheck not found. The 'enigma_cppcheck' target will not be available.")
+    endif()
+endif()
+
+# --- Sanitizers ---
+option(ENIGMA_USE_ASAN "Enable AddressSanitizer" OFF)
+option(ENIGMA_USE_UBSAN "Enable UndefinedBehaviorSanitizer" OFF)
+option(ENIGMA_USE_MSAN "Enable MemorySanitizer (Clang only)" OFF)
+
+set(SANITIZER_FLAGS "")
+if(ENIGMA_USE_ASAN OR ENIGMA_USE_UBSAN OR ENIGMA_USE_MSAN)
+    if(NOT CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+        message(WARNING "Sanitizers are intended for use with Clang as per project requirements.")
+    endif()
+
+    # Sanitizer Ignore List (excludes external libraries from instrumentation)
+    set(IGNORE_LIST_FILE "${CMAKE_CURRENT_SOURCE_DIR}/.sanitizer_ignorelist.txt")
+    set(IGNORE_LIST_FLAG "-fsanitize-ignorelist=${IGNORE_LIST_FILE}")
+
+    if(ENIGMA_USE_ASAN)
+        list(APPEND SANITIZER_FLAGS "-fsanitize=address" "${IGNORE_LIST_FLAG}")
+    endif()
+    if(ENIGMA_USE_UBSAN)
+        list(APPEND SANITIZER_FLAGS "-fsanitize=undefined" "-fno-sanitize-recover=all" "${IGNORE_LIST_FLAG}")
+    endif()
+    if(ENIGMA_USE_MSAN)
+        list(APPEND SANITIZER_FLAGS "-fsanitize=memory" "-fsanitize-memory-track-origins" "-fno-omit-frame-pointer" "${IGNORE_LIST_FLAG}")
+    endif()
+
+    if(SANITIZER_FLAGS)
+        message(STATUS "Enabling Sanitizers: ${SANITIZER_FLAGS}")
+
+        # Apply to core object library
+        target_compile_options(EnigmaCore_OBJ PRIVATE ${SANITIZER_FLAGS})
+
+        # Apply to core library (linkage)
+        target_link_options(EnigmaCore PRIVATE ${SANITIZER_FLAGS})
     endif()
 endif()
 
@@ -157,6 +233,10 @@ if(ENIGMA_BUILD_CLI)
     # Initialize and link CLI11 library (Only needed for the CLI app)
     add_subdirectory(external/CLI11)
 
+    # Ensure CLI11 headers are treated as SYSTEM
+    get_target_property(CLI11_INCLUDE_DIRS CLI11 INTERFACE_INCLUDE_DIRECTORIES)
+    set_target_properties(CLI11 PROPERTIES INTERFACE_SYSTEM_INCLUDE_DIRECTORIES "${CLI11_INCLUDE_DIRS}")
+
     # The EnigmaMachineCore application executable, which is just a wrapper around the EnigmaCore
     add_executable(${PROJECT_NAME}
         ${APP_SOURCES}
@@ -168,8 +248,14 @@ if(ENIGMA_BUILD_CLI)
     # Link the core library logic to the executable
     target_link_libraries(${PROJECT_NAME} PRIVATE EnigmaMachineCore::EnigmaCore CLI11::CLI11)
 
+    # Apply sanitizers to CLI if enabled
+    if(SANITIZER_FLAGS)
+        target_compile_options(${PROJECT_NAME} PRIVATE ${SANITIZER_FLAGS})
+        target_link_options(${PROJECT_NAME} PRIVATE ${SANITIZER_FLAGS})
+    endif()
+
     # Define the installed assets path for the CLI fallback
-    target_compile_definitions(${PROJECT_NAME} PRIVATE 
+    target_compile_definitions(${PROJECT_NAME} PRIVATE
         ENIGMA_INSTALL_ASSETS_PATH="${CMAKE_INSTALL_FULL_DATADIR}/EnigmaMachineCore/assets/"
     )
 
@@ -201,6 +287,24 @@ if(ENIGMA_BUILD_TESTS)
     FetchContent_MakeAvailable(googletest)
 
     enable_testing()
+
+    # Create a separate non-instrumented object library for tests if sanitizers are active
+    # to satisfy the requirement: "ensure these sanitizers do not run on the Unit Test suite targets"
+    if(SANITIZER_FLAGS)
+        add_library(EnigmaCore_NoSan_OBJ OBJECT ${CORE_SOURCES})
+        target_include_directories(EnigmaCore_NoSan_OBJ PUBLIC ${INCLUDE_DIRS})
+        target_link_libraries(EnigmaCore_NoSan_OBJ PUBLIC toml11::toml11)
+        set_target_properties(EnigmaCore_NoSan_OBJ PROPERTIES POSITION_INDEPENDENT_CODE ON)
+        target_compile_definitions(EnigmaCore_NoSan_OBJ PRIVATE
+            ENIGMA_INSTALL_ASSETS_PATH="${CMAKE_INSTALL_FULL_DATADIR}/EnigmaMachineCore/assets/"
+        )
+        if(MSVC)
+            target_compile_options(EnigmaCore_NoSan_OBJ PRIVATE /W4)
+        else()
+            target_compile_options(EnigmaCore_NoSan_OBJ PRIVATE -Wall -Wextra -Wpedantic)
+        endif()
+    endif()
+
     add_subdirectory(tests)
 endif()
 
@@ -230,7 +334,7 @@ if(CLANG_FORMAT_EXE)
         "tests/*.cpp"
     )
     list(APPEND ALL_SOURCES "app/main.cpp" "config/config.hpp")
-    
+
     add_custom_target(enigma_format
         COMMAND ${CLANG_FORMAT_EXE} -i -style=file ${ALL_SOURCES}
         COMMENT "Formatting source code with clang-format"
@@ -254,6 +358,7 @@ install(TARGETS EnigmaCore
 # 2. Install public headers
 set(PUBLIC_HEADERS
     include/EnigmaCore.hpp
+    include/EnigmaTypes.hpp
     EnigmaMachine/include/EnigmaMachine.hpp
     EnigmaMachine/include/IEnigmaObserver.hpp
     EnigmaMachine/include/IAssetProvider.hpp
@@ -308,5 +413,3 @@ install(FILES
     "${CMAKE_CURRENT_BINARY_DIR}/EnigmaMachineCoreConfigVersion.cmake"
     DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/EnigmaMachineCore
 )
-
-

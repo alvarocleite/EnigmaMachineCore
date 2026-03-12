@@ -10,6 +10,7 @@
 
 // Core Engine
 #include "EnigmaMachine.hpp"
+#include "EnigmaTypes.hpp"
 #include "IEnigmaObserver.hpp"
 
 // Asset Management

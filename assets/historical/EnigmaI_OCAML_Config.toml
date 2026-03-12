@@ -1,0 +1,17 @@
+Name = "EnigmaI_OCAML_Config"
+ReflectorFile = "ReflectorB.toml"
+
+[rotors]
+RotorCount = 3
+RotorFiles = [
+    "RotorIII.toml",
+    "RotorII.toml",
+    "RotorI.toml"
+]
+RotorPositions = [13, 20, 5]
+
+[plugboard]
+PlugCount = 1
+PlugBoardPairs = [
+    { from = 0, to = 25 }
+]

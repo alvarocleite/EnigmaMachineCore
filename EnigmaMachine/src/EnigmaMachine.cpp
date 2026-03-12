@@ -46,7 +46,7 @@ static std::string resolveDefaultAssetPath() {
  */
 using FileName = EnigmaConfigLoader::FileName;
 using AssetPath = EnigmaConfigLoader::AssetPath;
-EnigmaMachine::EnigmaMachine() {
+EnigmaMachine::EnigmaMachine(ILogger* logger) : logger(logger) {
     FileAssetProvider provider;
     fs::path assetsDirectory(resolveDefaultAssetPath());
     try {
@@ -56,36 +56,46 @@ EnigmaMachine::EnigmaMachine() {
         rotors.push_back(EnigmaConfigLoader::loadRotor(provider, FileName(assetsDirectory / defaultRotor3File)));
         auto reflector = EnigmaConfigLoader::loadReflector(provider, FileName(assetsDirectory / defaultReflectorFile));
 
-        rotorBox = std::make_unique<RotorBox>(std::vector<int>{0, 0, 0}, rotors, reflector);
+        rotorBox = std::make_unique<RotorBox>(std::vector<AlphabetIndex>{0, 0, 0}, rotors, reflector, logger);
         plugBoard = std::make_unique<PlugBoard>();
         rotorBox->registerObserver(this);
     } catch (const std::exception& e) {
-        std::cerr << "Failed to initialize default EnigmaMachine: " << e.what() << "\n";
+        if (this->logger) {
+            this->logger->log(LogLevel::Error, "Failed to initialize default EnigmaMachine: " + std::string(e.what()));
+        }
         throw;
     }
 }
 
-EnigmaMachine::EnigmaMachine(const IAssetProvider& provider, std::string_view fileName, std::string_view assetPath)
-    : EnigmaMachine(EnigmaConfigLoader::load(provider, FileName(fileName), AssetPath(assetPath))) {}
+EnigmaMachine::EnigmaMachine(const IAssetProvider& provider, std::string_view fileName, std::string_view assetPath,
+                             ILogger* logger)
+    : EnigmaMachine(EnigmaConfigLoader::load(provider, FileName(fileName), AssetPath(assetPath)), logger) {}
 
-EnigmaMachine::EnigmaMachine(const EnigmaMachineConfig& config)
-    : rotorBox(std::make_unique<RotorBox>(config.rotorPositions, config.rotors, config.reflector)),
-      plugBoard(std::make_unique<PlugBoard>(config.plugBoardPairs)) {
+EnigmaMachine::EnigmaMachine(const EnigmaMachineConfig& config, ILogger* logger)
+    : rotorBox(std::make_unique<RotorBox>(config.rotorPositions, config.rotors, config.reflector, logger)),
+      plugBoard(std::make_unique<PlugBoard>(config.plugBoardPairs)),
+      logger(logger) {
     rotorBox->registerObserver(this);
 }
 
-EnigmaMachine::EnigmaMachine(std::string_view fileName, std::string_view assetPath)
-    : EnigmaMachine([&]() {
-          FileAssetProvider provider;
-          return EnigmaConfigLoader::load(provider, FileName(fileName), AssetPath(assetPath));
-      }()) {}
+EnigmaMachine::EnigmaMachine(EnigmaMachineConfig&& config, ILogger* logger)
+    : rotorBox(std::make_unique<RotorBox>(std::move(config.rotorPositions), std::move(config.rotors),
+                                          std::move(config.reflector), logger)),
+      plugBoard(std::make_unique<PlugBoard>(config.plugBoardPairs)),
+      logger(logger) {
+    rotorBox->registerObserver(this);
+}
+
+EnigmaMachine::EnigmaMachine(std::string_view fileName, std::string_view assetPath, ILogger* logger)
+    : EnigmaMachine(FileAssetProvider{}, fileName, assetPath, logger) {}
 
 EnigmaMachine::~EnigmaMachine() = default;
 
 EnigmaMachine::EnigmaMachine(EnigmaMachine&& other) noexcept
     : rotorBox(std::move(other.rotorBox)),
       plugBoard(std::move(other.plugBoard)),
-      observers(std::move(other.observers)) {
+      observers(std::move(other.observers)),
+      logger(other.logger) {
     if (rotorBox) {
         rotorBox->removeObserver(&other);
         rotorBox->registerObserver(this);
@@ -97,6 +107,7 @@ EnigmaMachine& EnigmaMachine::operator=(EnigmaMachine&& other) noexcept {
         rotorBox = std::move(other.rotorBox);
         plugBoard = std::move(other.plugBoard);
         observers = std::move(other.observers);
+        logger = other.logger;
 
         if (rotorBox) {
             rotorBox->removeObserver(&other);
@@ -115,27 +126,38 @@ EnigmaMachine& EnigmaMachine::operator=(EnigmaMachine&& other) noexcept {
  * @internal The plugboard is its own inverse, so the same swap() method is used for both entry and exit.
  * The mechanical stepping happens inside rotorBox->keyTransform() before the signal starts.
  */
-int EnigmaMachine::keyTransform(int input) {
-    int originalInput = input;
+AlphabetIndex EnigmaMachine::keyTransform(AlphabetIndex input) {
+    AlphabetIndex originalInput = input;
     input = plugBoard->swap(input);
     input = rotorBox->keyTransform(input);
-    int output = plugBoard->swap(input);
+    AlphabetIndex output = plugBoard->swap(input);
 
     this->onCharEncrypted(static_cast<char>('A' + originalInput), static_cast<char>('A' + output));
 
     return output;
 }
 
+void EnigmaMachine::processBuffer(std::span<AlphabetIndex> buffer) {
+    std::ranges::for_each(buffer, [this](auto& item) { item = keyTransform(item); });
+}
+
+void EnigmaMachine::setLogger(ILogger* log) {
+    this->logger = log;
+    if (rotorBox) {
+        rotorBox->setLogger(log);
+    }
+}
+
 void EnigmaMachine::registerObserver(IEnigmaObserver* observer) { observers.push_back(observer); }
 
 void EnigmaMachine::removeObserver(IEnigmaObserver* observer) {
-    auto iterator = std::remove(observers.begin(), observers.end(), observer);
+    auto iterator = std::ranges::remove(observers, observer).begin();
     if (iterator != observers.end()) {
         observers.erase(iterator, observers.end());
     }
 }
 
-void EnigmaMachine::onRotorStepped(int rotorIndex, int position) {
+void EnigmaMachine::onRotorStepped(int rotorIndex, AlphabetIndex position) {
     for (auto* obs : observers) {
         obs->onRotorStepped(rotorIndex, position);
     }

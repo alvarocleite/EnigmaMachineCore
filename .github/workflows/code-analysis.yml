@@ -1,0 +1,18 @@
+name: Code Analysis
+
+on:
+  push:
+    branches: [ "main", "development" ]
+  pull_request:
+    branches: [ "main", "development" ]
+  workflow_dispatch:
+
+jobs:
+  static-analysis:
+    uses: ./.github/workflows/static-analysis.yml
+
+  runtime-sanitizers:
+    uses: ./.github/workflows/sanitizers.yml
+
+  valgrind-analysis:
+    uses: ./.github/workflows/valgrind.yml

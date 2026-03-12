@@ -13,14 +13,16 @@ jobs:
 
     - name: Install clang-format
       run: |
+        wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
+        sudo apt-add-repository "deb http://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs)-21 main"
         sudo apt-get update
-        sudo apt-get install -y clang-format
+        sudo apt-get install -y clang-format-21
 
     - name: Run clang-format
       run: |
         # Find all source files excluding external/ and build/
         # Matches the patterns in CMakeLists.txt
-        find EnigmaMachine PlugBoard RotorBox config tests app -name '*.cpp' -o -name '*.hpp' | xargs clang-format -i -style=file
+        find EnigmaMachine PlugBoard RotorBox config tests app -name '*.cpp' -o -name '*.hpp' | xargs clang-format-21 -i -style=file
 
     - name: Check for changes
       run: |

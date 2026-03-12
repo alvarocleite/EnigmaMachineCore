@@ -1,0 +1,41 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-added-large-files
+      - id: check-yaml
+      - id: check-toml
+
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.18.2
+    hooks:
+      - id: gitleaks
+
+  - repo: https://github.com/pre-commit/mirrors-clang-format
+    rev: v21.1.8
+    hooks:
+      - id: clang-format
+        types_or: [c++, c]
+
+  - repo: local
+    hooks:
+      - id: check-protected-branch
+        name: Protected branch check
+        entry: ./scripts/check-protected-branch.sh
+        language: script
+        stages: [pre-commit]
+        always_run: true
+
+      - id: check-commit-message
+        name: Commit message validation
+        entry: ./scripts/check-commit-message.sh
+        language: script
+        stages: [commit-msg]
+
+      - id: check-branch-name
+        name: Branch naming convention
+        entry: ./scripts/check-branch-name.sh
+        language: script
+        stages: [pre-push]
