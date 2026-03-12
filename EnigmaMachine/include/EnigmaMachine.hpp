@@ -22,6 +22,9 @@ class IAssetProvider;
 
 /**
  * @brief Class representing the Enigma machine.
+ *
+ * @image html signal-flow.svg "Complete Signal Flow" width=1000px
+ *
  * This class encapsulates the functionality of the Enigma machine, providing a simple
  * interface for encryption while hiding the complexity of the rotors and plugboard.
  */

@@ -1,0 +1,45 @@
+@startuml RotorBox_Organization_Diagram
+
+' Header Comment: This diagram illustrates the physical and logical arrangement of the RotorBox components,
+' showing the assembly of rotors, the entry wheel conceptual position, and the reflector.
+
+skinparam monochrome true
+skinparam shadowing false
+skinparam componentStyle uml2
+
+package "RotorBox Assembly" {
+    [Entry Wheel\n(Conceptual)] as ETW
+
+    component "Rotor 0\n(Fast/Rightmost)" as R0
+    component "Rotor 1\n(Middle)" as R1
+    component "Rotor 2\n(Slow/Leftmost)" as R2
+
+    component "Reflector\n(Umkehrwalze)" as REF
+}
+
+note bottom of R0: Steps every key press
+note bottom of R1: Steps if R0 at notch\n(Middle rotor anomaly)
+note bottom of R2: Steps if R1 at notch
+
+' Signal Flow
+ETW -right-> R0 : Forward Pass
+R0 -right-> R1
+R1 -right-> R2
+R2 -right-> REF
+
+REF -left-> R2 : Reverse Pass
+R2 -left-> R1
+R1 -left-> R0
+R0 -left-> ETW
+
+' Stepping logic indication
+R0 .up.> R1 : triggers
+R1 .up.> R2 : triggers
+
+legend right
+  **Signal Path**
+  Forward: ETW -> R0 -> R1 -> R2 -> REF
+  Reverse: REF -> R2 -> R1 -> R0 -> ETW
+endlegend
+
+@enduml

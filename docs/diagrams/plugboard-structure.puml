@@ -1,0 +1,41 @@
+@startuml PlugBoard_Structure_Diagram
+
+' Header Comment: This diagram illustrates the Plugboard (Steckerbrett) functionality,
+' showing how letter pairs are swapped bidirectionally and how unplugged letters
+' pass through unchanged.
+
+skinparam monochrome true
+skinparam shadowing false
+
+rectangle "PlugBoard" {
+    together {
+        (A)
+        (B)
+        (C)
+        (D)
+        (...)
+        (Z)
+    }
+
+    ' Example swaps
+    (A) <-> (Z) : Cable 1
+    (B) <-> (E) : Cable 2
+
+    ' Pass through
+    (C) -[hidden]> (C) : Unplugged (Identity)
+}
+
+note right
+  **Swap Logic**
+  Input: X -> Y
+  Output: Y -> X
+  (Bidirectional/Reciprocal)
+endnote
+
+legend bottom
+  - Connected letters (e.g., A-Z) are swapped.
+  - Unconnected letters (e.g., C) remain unchanged.
+  - A socket can only have one plug (conflict prevention).
+endlegend
+
+@enduml

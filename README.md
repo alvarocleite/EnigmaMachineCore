@@ -123,6 +123,9 @@ For more details on performance metrics and benchmarking options, see [docs/Benc
 
 If you have Doxygen installed, you can generate the project documentation.
 
+*   **Internal Workings:** See [docs/EnigmaMachineWorkings.md](docs/EnigmaMachineWorkings.md) for a technical explanation of the Enigma simulation and signal flow diagrams.
+*   **API Reference:** Generate with Doxygen (see below).
+
 **Using the modern CMake CLI:**
 ```bash
 cmake --build build --target Enigma_doxygen

@@ -11,6 +11,14 @@
 #include "PlugBoardPair.hpp"
 #include "config.hpp"
 
+/**
+ * @brief Class representing the PlugBoard (Steckerbrett) of the Enigma machine.
+ *
+ * @image html plugboard-structure.svg "PlugBoard Structure" width=600px
+ *
+ * The plugboard allows for manual swapping of letter pairs before they enter
+ * the rotor assembly and after they exit.
+ */
 class PlugBoard {
 private:
     std::array<AlphabetIndex, TRANSFORMER_SIZE> mapping;  // Direct mapping: mapping[Input] = Output
