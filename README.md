@@ -8,6 +8,7 @@ This project provides a modular and extensive implementation of Enigma's core co
 
 **Features:**
 - **Faithful Simulation:** Accurately simulates the rotor stepping, wiring, and reflector logic of the Enigma machine.
+- **Historical Accuracy:** Includes a full set of verified historical Enigma I rotors (I-V) and reflectors (A-C). See [docs/Historical_Data.md](docs/Historical_Data.md).
 - **Configurable Transformers:** Load rotor and reflector configurations from TOML files for easy customization.
 - **Modular Design:** Clean separation of components (rotors, reflectors, RotorBox logic) for extensibility and testing.
 - **Advanced Architecture:** Uses Dependency Injection and DTOs to separate data, logic, and IO access.

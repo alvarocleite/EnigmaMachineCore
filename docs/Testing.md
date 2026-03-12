@@ -20,6 +20,7 @@ tests/
 ├── EnigmaMachine/
 │   ├── TestEnigmaConfigLoader.cpp
 │   ├── TestEnigmaMachine.cpp
+│   ├── TestHistoricalVectors.cpp
 │   ├── TestSpec.md
 │   └── TestSpecLoader.md
 ├── PlugBoard/
@@ -87,6 +88,19 @@ add_executable(EnigmaTests
 
 ### 3. Build and Run
 Re-run your build command. CMake will automatically detect the new tests.
+
+## Historical Test Vectors
+
+To ensure cryptographic accuracy, the project includes a suite of tests based on historical Enigma I (Wehrmacht/Luftwaffe) configurations. These tests use verified wiring and notch data found in `assets/historical/`.
+
+| Test Name | Description | Source |
+| :--- | :--- | :--- |
+| `StandardAAAAA_BDZGO` | Validates the classic "AAAAA" vector for Rotors I-II-III. | Historical Baseline |
+| `OCAMLVector` | Complex setup with plugboard and custom starting positions. | Cornell CS 3110 |
+| `LongStringVerification` | Verifies stepping logic over a 35-character string. | EnigmaCore Baseline |
+| `HistoricalReciprocity` | Ensures encryption/decryption symmetry with historical settings. | - |
+
+These tests are located in `tests/EnigmaMachine/TestHistoricalVectors.cpp`.
 
 ## Sanitizers (Clang)
 

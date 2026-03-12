@@ -3,6 +3,7 @@ add_executable(EnigmaTests
     EnigmaMachine/TestEnigmaMachine.cpp
     EnigmaMachine/TestEnigmaConfigLoader.cpp
     EnigmaMachine/TestEnigmaObserver.cpp
+    EnigmaMachine/TestHistoricalVectors.cpp
     PlugBoard/TestPlugBoard.cpp
     RotorBox/TestRotorBox.cpp
     RotorBox/TestTransformer.cpp
