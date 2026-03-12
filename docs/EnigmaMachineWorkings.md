@@ -17,7 +17,7 @@ The Enigma machine operates on a reciprocal electrical signal path. This means t
 8.  **Plugboard (Exit):** The signal passes through the plugboard a second time (using the same cable connections).
 9.  **Lampboard:** The resulting signal illuminates a lamp on the panel.
 
-![Signal Flow Diagram](diagrams/signal-flow.svg)
+![Signal Flow Diagram](Enigma_Signal_Flow_Diagram.svg)
 
 ---
 
@@ -30,7 +30,7 @@ The `RotorBox` manages the assembly of rotors and the reflector. In our simulati
 *   **Notches:** Physical notches on the rotors trigger the turnover of the adjacent rotor to the left.
 *   **The Reflector:** A static component at the end of the chain that ensures the signal returns through the rotors, providing the machine's reciprocal property.
 
-![RotorBox Organization](diagrams/rotorbox-organization.svg)
+![RotorBox Organization](RotorBox_Organization_Diagram.svg)
 
 ---
 
@@ -42,7 +42,7 @@ The plugboard provides an additional layer of security by allowing the operator 
 *   **Identity:** If a letter has no cable connected, it passes through unchanged (Identity mapping).
 *   **Constraints:** Each socket can only accommodate one cable end (no letter can be part of two pairs).
 
-![Plugboard Structure](diagrams/plugboard-structure.svg)
+![Plugboard Structure](PlugBoard_Structure_Diagram.svg)
 
 ---
 

@@ -22,12 +22,11 @@ if (PLANTUML_PATH)
     file(GLOB PUML_FILES "${CMAKE_CURRENT_SOURCE_DIR}/docs/diagrams/*.puml")
 
     # Define the output directory for generated diagrams
-    set(DIAGRAM_GEN_DIR "${CMAKE_CURRENT_SOURCE_DIR}/docs/diagrams/output")
+    set(DIAGRAM_GEN_DIR "${CMAKE_CURRENT_SOURCE_DIR}/docs/diagrams")
 
     # Create a custom target to generate SVGs
     # We use batch mode which automatically respects the filename defined in @startuml <name>
     add_custom_target(Enigma_generate_diagrams
-        COMMAND ${CMAKE_COMMAND} -E make_directory "${DIAGRAM_GEN_DIR}"
         COMMAND ${Java_JAVA_EXECUTABLE} -jar ${PLANTUML_PATH} -tsvg "${CMAKE_CURRENT_SOURCE_DIR}/docs/diagrams/*.puml" -o "${DIAGRAM_GEN_DIR}"
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
         COMMENT "Generating SVG diagrams with PlantUML..."
