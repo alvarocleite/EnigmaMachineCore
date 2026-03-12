@@ -13,7 +13,7 @@ To provide a high-performance, zero-overhead, and platform-agnostic Enigma ciphe
 
 ---
 
-## Phase 1: Foundation & Performance Baseline (v1.0)
+## Phase 1: Foundation & Performance Baseline (v0.1.0)
 **Goal:** Stabilize the API and establish performance/memory metrics.
 
 - [x] **Performance Benchmarking:**
@@ -26,6 +26,9 @@ To provide a high-performance, zero-overhead, and platform-agnostic Enigma ciphe
     - Use `Valgrind`/`Sanitizers` to ensure zero leaks in the core library.
 - [x] **Architecture Decision Records (ADRs):**
     - Document core design choices (e.g., Signal path, DI strategy) in [docs/adr/ADRs.md](docs/adr/ADRs.md).
+- [x] **Historical Assets & Documentation:**
+    - Integrated full set of historical Enigma I rotors (I-V) and reflectors (A-C).
+    - Documented wiring sources and technical specifications in [docs/Historical_Data.md](docs/Historical_Data.md).
 
 ## Phase 2: Universal Portability & PAL (Platform Abstraction Layer)
 **Goal:** Decouple from the OS and C++ Runtime (Exceptions/Filesystem).

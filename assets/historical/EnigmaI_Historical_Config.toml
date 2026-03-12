@@ -1,0 +1,15 @@
+Name = "EnigmaI_Historical_Config"
+ReflectorFile = "ReflectorB.toml"
+
+[rotors]
+RotorCount = 3
+RotorFiles = [
+    "RotorIII.toml",
+    "RotorII.toml",
+    "RotorI.toml"
+]
+RotorPositions = [0, 0, 0]
+
+[plugboard]
+PlugCount = 0
+PlugBoardPairs = []
