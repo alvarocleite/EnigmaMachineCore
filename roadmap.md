@@ -29,6 +29,9 @@ To provide a high-performance, zero-overhead, and platform-agnostic Enigma ciphe
 - [x] **Historical Assets & Documentation:**
     - Integrated full set of historical Enigma I rotors (I-V) and reflectors (A-C).
     - Documented wiring sources and technical specifications in [docs/Historical_Data.md](docs/Historical_Data.md).
+- [x] **Technical Documentation & Visualization:**
+    - Created PlantUML diagrams for RotorBox assembly, Plugboard structure, and Signal Flow.
+    - Integrated visualizations into the source code documentation (Doxygen).
 
 ## Phase 2: Universal Portability & PAL (Platform Abstraction Layer)
 **Goal:** Decouple from the OS and C++ Runtime (Exceptions/Filesystem).

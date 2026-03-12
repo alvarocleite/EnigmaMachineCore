@@ -130,3 +130,5 @@ As a result, the rotor movement and resulting cipher output match authentic Enig
 ### 4.2. Signal Path Sequence
 
 ![Encryption Sequence](diagrams/output/Enigma_Encryption_Sequence_Diagram.svg)
+
+For a detailed visual and technical breakdown of the electrical path and component roles, see [Technical Workings of the Enigma Machine](EnigmaMachineWorkings.md).

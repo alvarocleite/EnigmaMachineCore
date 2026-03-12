@@ -15,6 +15,9 @@
 
 /**
  * @brief Class representing a box of rotors in the Enigma machine.
+ *
+ * @image html rotorbox-organization.svg "RotorBox Organization" width=800px
+ *
  * This class manages multiple rotors and a reflector, allowing for the transformation of input keys.
  * It handles the initialization of rotors, their positions, and the transformation process.
  */
