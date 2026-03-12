@@ -41,4 +41,4 @@ build_release/*
 
 # Documentation
 docs/doxygen-gen-files/
-docs/diagrams/output/
+docs/diagrams/*.svg
