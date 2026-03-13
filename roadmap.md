@@ -5,11 +5,16 @@ This roadmap outlines the evolution of `EnigmaMachineCore` from a C++ library in
 ## Vision
 To provide a high-performance, zero-overhead, and platform-agnostic Enigma cipher core that serves as a reference implementation for modern C++20 cryptographic engineering.
 
-## Current State (v0.x)
+## Current State (v0.0.1 -> v0.1.0)
+**Status:** Phase 1 implementation complete; awaiting final v0.1.0 release milestone.
+
 - [x] Core cryptographic logic (Rotors, Plugboard, Reflector).
 - [x] Modern C++20 architecture with Dependency Injection (DI).
 - [x] Basic TOML configuration support via `toml11`.
-- [x] Automated CI/CD for Linux, Windows, and macOS.
+- [x] Automated CI/CD for Linux, Windows, and macOS (11 comprehensive workflows).
+- [x] Comprehensive benchmarking suite with baseline established.
+- [x] Full memory profiling (Valgrind + 4 sanitizers) in CI.
+- [x] Historical Enigma I reference models (Rotors I-V, Reflectors A-C).
 
 ---
 
@@ -33,59 +38,109 @@ To provide a high-performance, zero-overhead, and platform-agnostic Enigma ciphe
     - Created PlantUML diagrams for RotorBox assembly, Plugboard structure, and Signal Flow.
     - Integrated visualizations into the source code documentation (Doxygen).
 - [ ] **Verified Code Coverage:**
-    - Integrate `gcov/lcov` and a service like **Codecov** to ensure the core signal path has 100% branch coverage.
+    - Integrate `gcov/lcov` into CMake build for coverage reporting.
+    - Set up **Codecov** or similar service for automated branch coverage tracking.
+    - Enforce minimum coverage thresholds in CI (goal: 95% for signal path, 75% overall).
+- [ ] **Property-Based Testing Foundation:**
+    - Integrate `RapidCheck` for reciprocity verification (`Encrypt(Encrypt(x)) == x`).
+    - Add 10+ randomized configuration tests.
 
 ## Phase 2: Universal Portability & "No-Filesystem" Mode (v0.2.0)
 **Goal:** Decouple from the OS and enable initialization without disk I/O.
 
-- [ ] **Static Configuration Support (Critical for Zephyr):**
+**Sequencing Note:** Phase 2 is split into 3 sub-phases
+- **Phase 2a:** Exception-Free Core (Constructors -> Static Factories)
+- **Phase 2b:** Platform Abstraction Layer (PAL) & Logging
+- **Phase 2c:** Zero-Overhead Static DI (Templates & Concepts)
+
+### Phase 2a: Exception-Free Core & Factory Methods
+
+- [ ] **Constructor Refactoring to Static Factories:**
+    - Move all fallible initialization logic from constructors to static factory methods.
+    - Create `EnigmaMachine::create()` -> `Result<EnigmaMachine>` (using `std::expected`).
+    - Keep default constructor for simple in-memory initialization.
+- [ ] **Result Type Integration:**
+    - Adopt `std::expected<T, Error>` for all public APIs that can fail.
+    - Define a minimal `EnigmaError` enum with clear error categories.
+- [ ] **POD Configuration DTOs:**
+    - Create `EnigmaMachineData`, `RotorData`, `ReflectorData` structs (Plain Old Data).
+    - Ensure all core components can initialize from these POD structures.
     - Expose `EnigmaMachine` constructors that accept `EnigmaMachineConfig` (DTO) directly.
-    - Ensure all core components can be initialized from Plain Old Data (POD) structures.
-- [ ] **State Serialization (Save/Restore):**
-    - Implement a standardized way to export and restore the current mutable state (rotor positions, etc.) into a minimal binary buffer.
-- [ ] **Dynamic Alphabet & Size Support:**
-    - Transition `TRANSFORMER_SIZE` from a constant to a template parameter for compile-time optimization of arbitrary alphabet sizes (e.g., 26, 29, 36, 256).
-- [ ] **Correctness Verification (Property-Based Testing):**
-    - Integrate `RapidCheck` to verify mathematical reciprocity (`Encrypt(Encrypt(x)) == x`) and state transitions across thousands of random configurations.
-- [ ] **Historical Model Factory Methods:**
-    - Provide static factory methods (e.g., `createEnigmaI()`, `createM3()`) to instantiate standard historical models with a single call.
-- [ ] **Exception-Free Core & Modern Error Handling:**
-    - Transition from `throw` to `std::expected` (or `tl::expected`) for all public APIs.
-    - Enable `-fno-exceptions` support for embedded and WASM targets.
+- [ ] **Verify Exception-Free Compilation:**
+    - Add CI job: compile core with `-fno-exceptions` and `-fno-rtti`.
+
+### Phase 2b: Platform Abstraction Layer (PAL) & Logging
+
 - [x] **Logging & IO Abstraction (`ILogger` / `PAL`):**
     - Remove `std::cout`/`std::cerr`.
     - Implement a `PAL` (Platform Abstraction Layer) for Logging (Logcat, UART, Console).
-- [ ] **Zero-Overhead Refactor (Static DI):**
-    - Move from virtual interfaces to **C++20 Concepts and Templates** in the hot signal path to eliminate vtable overhead.
+- [ ] **Logging Abstraction (ILogger):**
+    - Ensure `ILogger` is the only runtime logging abstraction.
+    - Provide `StandardOutputLogger` for CLI and `NullLogger` as default.
+- [ ] **Configuration Decoupling:**
+    - Decouple TOML parsing from `EnigmaMachine` (move to CLI only).
+    - Ensure core accepts pre-parsed config DTOs or binary buffers.
+
+### Phase 2c: Zero-Overhead Refactor (Static DI) & Additional Features
+
+- [ ] **Static Polymorphism (C++20 Concepts):**
+- [ ] **State Serialization (Save/Restore):**
+    - **Format Specification (CRITICAL):** Define immutable binary serialization format for state snapshots (see Phase 2 planning notes).
+    - Implement methods to export/restore rotor positions and plugboard mappings.
+    - Ensure format supports version evolution (backward compatibility).
+- [ ] **Dynamic Alphabet & Size Support:**
+    - Transition `TRANSFORMER_SIZE` from constant to template parameter.
+    - Enable compile-time optimization for arbitrary alphabets (26, 29, 36, 256 chars).
+- [ ] **Correctness Verification (Property-Based Testing):**
+    - Integrate `RapidCheck` to verify reciprocity across thousands of random configs.
+- [ ] **Historical Model Factory Methods:**
+    - Provide static factory methods: `createEnigmaI()`, `createM3()`, `createM4()`, etc.
+    - Load from built-in wiring tables (no file I/O required).
 
 ## Phase 3: Interoperability & Stable C-ABI (v0.3.0)
 **Goal:** Expose the core to all major application environments via a universal translator.
+
+### Phase 3a: Cross-Compilation Foundation & WASM
+
+- [ ] **Cross-Compilation CI:**
+    - Add GitHub Actions for `wasm32-unknown-unknown` (Emscripten).
+    - Add GitHub Actions for `arm-none-eabi` (Cortex-M / Zephyr).
+    - Validate core compiles and tests pass on both targets.
+- [ ] **WASM Build Pipeline:**
+    - Create Emscripten build configuration.
+    - Generate `enigma_core.wasm` with Embind or raw C-exports.
+    - Provide simple JavaScript wrapper example.
+
+### Phase 3b: C-Interface & Android
 
 - [ ] **Stable C-Interface (`enigma_core_c.h`):**
     - Create an `extern "C"` wrapper for the `EnigmaMachine` public API.
     - Support opaque pointers for instance management (FFI-friendly).
 - [ ] **ABI Stability Tracking:**
     - Integrate tools like `libabigail` into CI to ensure updates don't unintentionally break the binary interface for library consumers.
+- [ ] **Android (JNI/NDK Bridge):**
+    - Implement JNI wrapper for Kotlin/Java interop.
+    - Create example Android app demonstrating library usage.
 - [ ] **High-Level Convenience API:**
     - Add `encrypt(std::string_view)` and `decrypt(std::string_view)` wrappers that handle character-to-index mapping and filtering automatically.
 - [ ] **Package Manager Integration:**
     - Develop and maintain official recipes for **Conan** and **vcpkg** to simplify library distribution and consumption.
+
+### Phase 3c: Python & Additional Platforms
+
+- [ ] **High-Level Bindings (Python):**
+    - **Decision Point:** Implement `pybind11` vs `ctypes` .
+    - Provide PyPI package (`enigma-core`).
+    - Include example Python encryption/decryption scripts.
 - [ ] **Platform-Specific "Starter Kits":**
-    - Provide minimal `samples/` for Zephyr, Android (JNI), and WASM to reduce integration friction.
-- [ ] **Android & WASM Track:**
-    - **Android:** JNI/NDK bridge using the C-API.
-    - **WASM:** `Emscripten` build pipeline with `Embind` or direct C-exports.
-- [ ] **High-Level Bindings:**
-    - Implement `pybind11` for Python support (or use `ctypes` over the C-API).
-- [ ] **Cross-Compilation CI:**
-    - Add GitHub Actions for `wasm32-unknown-unknown` and `arm-none-eabi` (Cortex-M).
+    - Provide minimal `samples/` for Zephyr, Android (JNI), WASM, and Python to reduce integration friction.
 
 ## Phase 4: Constrained Embedded & Heap-Agnostic Core (v0.4.0)
-**Goal:** Eliminate dynamic memory dependency and harden the engine.
+**Goal:** Eliminate dynamic memory dependency and harden the engine for resource-constrained targets (Zephyr RTOS, microcontrollers).
 
 - [ ] **Heap-Agnostic Core Refactor:**
-    - Replace `std::vector` and `std::unique_ptr` with `std::array` and static/inline storage where `MAX_ROTORS` is known.
-    - Ensure the engine can run entirely on the stack or in pre-allocated static memory.
+    - Minimize or eliminate all dynamic memory usage in the core library.
+    - Use fixed-size buffers and `std::array` where possible.
 - [ ] **Zero-Allocation Mode:**
     - Guarantee zero `new`/`malloc` calls after the initialization phase.
 - [ ] **Binary Size Profiling & Budgeting:**
@@ -98,7 +153,7 @@ To provide a high-performance, zero-overhead, and platform-agnostic Enigma ciphe
     - Integrate `LLVM libFuzzer` for the signal path and config loaders.
     - Investigate constant-time operations for sensitive logic.
 
-## Phase 5: Industrial Linux & System Integration (Yocto)
+## Phase 5: Industrial Linux & System Integration - Yocto (v0.5.0)
 **Goal:** Provide first-class support for Embedded Linux distributions.
 
 - [ ] **BitBake Recipe Development:**
@@ -107,8 +162,6 @@ To provide a high-performance, zero-overhead, and platform-agnostic Enigma ciphe
     - Generate `.pc` files via CMake to support standard Linux linking conventions.
 - [ ] **SIMD/Vectorization for Block Processing:**
     - Implement SIMD-accelerated variants of `processBuffer` for x86_64 (AVX2) and AArch64 (NEON).
-- [ ] **Runtime Optimization:**
-    - Validate performance and thermal impact on low-power ARM SoCs (e.g., i.MX6/8, Raspberry Pi).
 - [ ] **System-Wide Installation:**
     - Ensure robust support for `/usr/lib` and `/usr/include` standard paths.
 - [ ] **Professional Narrative Documentation:**
@@ -118,22 +171,23 @@ To provide a high-performance, zero-overhead, and platform-agnostic Enigma ciphe
 
 ## Target Matrix & Status
 
-| Target | Build System | Config Strategy | Status |
-| :--- | :--- | :--- | :--- |
-| **CLI (Linux/Win/Mac)** | CMake | TOML (Runtime) | ✅ Basic |
-| **Web (WASM)** | Emscripten | Memory/Embedded | 🏗️ Planned |
-| **Android (Kotlin/JNI)**| Gradle/CMake | AAssetManager | 🏗️ Planned |
-| **Embedded (Zephyr)** | West/CMake | Static (Flash) | 🏗️ Planned |
-| **Industrial Linux (Yocto)** | BitBake/CMake | TOML (Runtime) | 🏗️ Planned |
-| **Python** | pybind11 | Memory/String | 🏗️ Planned |
+| Target | Build System | Config Strategy | Priority | Phase | Status |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **CLI (Linux/Win/Mac)** | CMake | TOML (Runtime) | High | ✅ Phase 1 | ✅ Complete |
+| **Web (WASM)** | Emscripten + CMake | Memory Buffer | High | Phase 3a | 🏗️ Planned |
+| **Android (Kotlin/JNI)**| Gradle/CMake | AAssetManager | High | Phase 3b | 🏗️ Planned |
+| **Python** | pybind11/ctypes | Memory/String | Medium | Phase 3c | 🏗️ Planned |
+| **Embedded (Zephyr RTOS)** | West/CMake | Static Config (POD) | High | Phase 4 | 🏗️ Planned |
+| **Industrial Linux - Yocto** | BitBake/CMake | TOML (Runtime) | Low | Phase 5 | 📋 Future |
 
-## Success Metrics
-- **Portability:** Core logic compiles with `-fno-exceptions` and `-fno-rtti`.
-- **Performance:** Zero performance regression between vtable-based DI and Template-based DI.
-- **Size:** Embedded binary footprint (Core only) < 50KB.
-- **Memory:** Zero heap allocations in the hot encryption path.
-- **Correctness:** 100% pass rate on property-based reciprocity tests.
+## Success Metrics & Verification
+
+- **Portability:** Core logic compiles with `-fno-exceptions` and `-fno-rtti`
+- **Performance:** Zero performance regression between vtable-based DI and Template-based DI
+- **Size:** Embedded binary footprint (Core only) < 50KB
+- **Correctness:** 100% pass rate on property-based reciprocity tests
 
 ## Non-Goals
+
 - We will NOT implement UI components (GUI/Mobile Screens) in this repository.
 - We will NOT support legacy C++ standards (< C++20).
