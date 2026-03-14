@@ -2,6 +2,7 @@
 #include <string>
 #include <vector>
 #include "EnigmaMachine.hpp"
+#include "FileAssetProvider.hpp"
 #include "config.hpp"
 
 class EnigmaMachineTests : public ::testing::Test {
@@ -21,10 +22,12 @@ protected:
 };
 
 TEST_F(EnigmaMachineTests, Initialization) {
+    /** @brief Verifies EnigmaMachine can be initialized from a valid configuration file. */
     EXPECT_NO_THROW({ EnigmaMachine machine(configPath, assetsDir); });
 }
 
 TEST_F(EnigmaMachineTests, BasicEncryption) {
+    /** @brief Verifies basic encryption produces consistent, valid output within alphabet bounds. */
     EnigmaMachine machine(configPath, assetsDir);
     int res = machine.keyTransform(0);  // 'A'
     EXPECT_GE(res, 0);
@@ -37,6 +40,7 @@ TEST_F(EnigmaMachineTests, BasicEncryption) {
 }
 
 TEST_F(EnigmaMachineTests, StringEncryption) {
+    /** @brief Verifies multi-character encryption with rotor stepping produces varying output. */
     EnigmaMachine machine(configPath, assetsDir);
     std::string input = "AAAAA";
     std::string output = encryptString(machine, input);
@@ -53,6 +57,7 @@ TEST_F(EnigmaMachineTests, StringEncryption) {
 }
 
 TEST_F(EnigmaMachineTests, Reciprocity) {
+    /** @brief Verifies encryption and decryption are reciprocal operations. */
     std::string plain = "HELLOWORLD";
 
     // 1. Encrypt
@@ -67,6 +72,7 @@ TEST_F(EnigmaMachineTests, Reciprocity) {
 }
 
 TEST_F(EnigmaMachineTests, PlugBoardEffect) {
+    /** @brief Verifies plugboard configuration affects encryption output. */
     // 1. Machine WITH Plugboard (from file)
     EnigmaMachine mWithPlugs(configPath, assetsDir);
 
@@ -102,6 +108,7 @@ public:
 };
 
 TEST_F(EnigmaMachineTests, ProcessBufferSpan) {
+    /** @brief Verifies processBuffer correctly transforms a span of indices. */
     EnigmaMachine m1;
     EnigmaMachine m2;
 
@@ -122,6 +129,7 @@ TEST_F(EnigmaMachineTests, ProcessBufferSpan) {
 }
 
 TEST_F(EnigmaMachineTests, LoggerInjectionAndPropagation) {
+    /** @brief Verifies logger receives rotor stepping events from the engine. */
     TestLogger logger;
     // Inject logger via constructor
     EnigmaMachine machine(&logger);
@@ -140,4 +148,148 @@ TEST_F(EnigmaMachineTests, LoggerInjectionAndPropagation) {
         }
     }
     EXPECT_TRUE(foundSteppingLog) << "Should find a log entry related to rotor stepping.";
+}
+
+TEST_F(EnigmaMachineTests, MoveConstructor) {
+    /** @brief Verifies move constructor transfers machine state correctly. */
+    EnigmaMachine machineOriginal(configPath, assetsDir);
+    int outputOriginal = machineOriginal.keyTransform(0);
+
+    EnigmaMachine machineMoved(std::move(machineOriginal));
+    int outputMoved = machineMoved.keyTransform(0);
+
+    EXPECT_GE(outputMoved, 0);
+    EXPECT_LT(outputMoved, 26);
+}
+
+TEST_F(EnigmaMachineTests, MoveAssignment) {
+    /** @brief Verifies move assignment operator transfers machine state correctly. */
+    EnigmaMachine machine1(configPath, assetsDir);
+    machine1.keyTransform(0);
+
+    EnigmaMachine machine2;
+    machine2 = std::move(machine1);
+    int output2 = machine2.keyTransform(0);
+
+    EXPECT_GE(output2, 0);
+    EXPECT_LT(output2, 26);
+}
+
+TEST_F(EnigmaMachineTests, RegisterAndRemoveObserver) {
+    /** @brief Verifies observer registration and removal work correctly. */
+    class CountingObserver : public IEnigmaObserver {
+    public:
+        int rotorStepCount = 0;
+        int charEncryptCount = 0;
+        void onRotorStepped(int rotorIndex, AlphabetIndex position) override { rotorStepCount++; }
+        void onCharEncrypted(char input, char output) override { charEncryptCount++; }
+    };
+
+    CountingObserver observer1;
+    CountingObserver observer2;
+
+    EnigmaMachine machine;
+    machine.registerObserver(&observer1);
+    machine.registerObserver(&observer2);
+
+    machine.keyTransform(0);
+
+    EXPECT_EQ(observer1.rotorStepCount, 3);
+    EXPECT_EQ(observer2.rotorStepCount, 3);
+    EXPECT_EQ(observer1.charEncryptCount, 1);
+    EXPECT_EQ(observer2.charEncryptCount, 1);
+
+    machine.removeObserver(&observer1);
+    machine.keyTransform(0);
+
+    EXPECT_EQ(observer1.rotorStepCount, 3);
+    EXPECT_EQ(observer2.rotorStepCount, 6);
+}
+
+TEST_F(EnigmaMachineTests, SetLoggerPropagation) {
+    /** @brief Verifies setLogger propagates to rotorBox and captures events. */
+    TestLogger logger;
+    EnigmaMachine machine;
+
+    machine.setLogger(&logger);
+    machine.keyTransform(0);
+
+    EXPECT_FALSE(logger.logs.empty());
+}
+
+TEST_F(EnigmaMachineTests, ConstructorWithFilePath) {
+    /** @brief Verifies EnigmaMachine construction from file path. */
+    EnigmaMachine machine(configPath, assetsDir);
+    int res = machine.keyTransform(0);
+    EXPECT_GE(res, 0);
+    EXPECT_LT(res, 26);
+}
+
+TEST_F(EnigmaMachineTests, ConstructorWithFilePathAndLogger) {
+    /** @brief Verifies EnigmaMachine construction from file path with logger. */
+    TestLogger logger;
+    EnigmaMachine machine(configPath, assetsDir, &logger);
+    int res = machine.keyTransform(0);
+    EXPECT_GE(res, 0);
+    EXPECT_LT(res, 26);
+    EXPECT_FALSE(logger.logs.empty());
+}
+
+TEST_F(EnigmaMachineTests, DefaultConstructorWithLogger) {
+    /** @brief Verifies default constructor with logger injection. */
+    TestLogger logger;
+    EnigmaMachine machine(&logger);
+    int res = machine.keyTransform(0);
+    EXPECT_GE(res, 0);
+    EXPECT_LT(res, 26);
+    EXPECT_FALSE(logger.logs.empty());
+}
+
+TEST_F(EnigmaMachineTests, ConstructorWithIAssetProvider) {
+    /** @brief Verifies EnigmaMachine construction with custom asset provider. */
+    FileAssetProvider provider;
+    TestLogger logger;
+    EnigmaMachine machine(provider, "assets/EnigmaMachineConfig1.toml", "assets/", &logger);
+    int res = machine.keyTransform(0);
+    EXPECT_GE(res, 0);
+    EXPECT_LT(res, 26);
+}
+
+TEST_F(EnigmaMachineTests, MoveConstructorWithObserver) {
+    /** @brief Verifies move constructor correctly re-registers observer after move. */
+    class CountingObserver : public IEnigmaObserver {
+    public:
+        int rotorStepCount = 0;
+        void onRotorStepped(int rotorIndex, AlphabetIndex position) override { rotorStepCount++; }
+        void onCharEncrypted(char input, char output) override {}
+    };
+
+    CountingObserver observer;
+    EnigmaMachine machine1;
+    machine1.registerObserver(&observer);
+
+    EnigmaMachine machine2(std::move(machine1));
+
+    machine2.keyTransform(0);
+    EXPECT_GE(observer.rotorStepCount, 3);
+}
+
+TEST_F(EnigmaMachineTests, MoveAssignmentWithObserver) {
+    /** @brief Verifies move assignment correctly re-registers observer after move. */
+    class CountingObserver : public IEnigmaObserver {
+    public:
+        int rotorStepCount = 0;
+        void onRotorStepped(int rotorIndex, AlphabetIndex position) override { rotorStepCount++; }
+        void onCharEncrypted(char input, char output) override {}
+    };
+
+    CountingObserver observer;
+    EnigmaMachine machine1;
+    machine1.registerObserver(&observer);
+
+    EnigmaMachine machine2;
+    machine2 = std::move(machine1);
+
+    machine2.keyTransform(0);
+    EXPECT_GE(observer.rotorStepCount, 3);
 }

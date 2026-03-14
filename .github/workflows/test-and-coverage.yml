@@ -145,30 +145,58 @@ jobs:
         CORE_FUNCS=$(lcov --summary ${{github.workspace}}/build/coverage_core_only.info 2>&1 | grep "functions" | awk '{print $2}' | tr -d '%')
 
         FULL_INT=$(echo "${FULL_LINES}" | cut -d'.' -f1)
+        FULL_FUNC_INT=$(echo "${FULL_FUNCS}" | cut -d'.' -f1)
         CORE_INT=$(echo "${CORE_LINES}" | cut -d'.' -f1)
+        CORE_FUNC_INT=$(echo "${CORE_FUNCS}" | cut -d'.' -f1)
 
-        if [ "${FULL_INT}" -ge 75 ]; then FULL_STATUS="✅"; else FULL_STATUS="🔴"; fi
+        if [ "${FULL_INT}" -ge 90 ]; then FULL_STATUS="✅"; else FULL_STATUS="🔴"; fi
+        if [ "${FULL_FUNC_INT}" -ge 90 ]; then FULL_FUNC_STATUS="✅"; else FULL_FUNC_STATUS="🔴"; fi
         if [ "${CORE_INT}" -ge 95 ]; then CORE_STATUS="✅"; else CORE_STATUS="🔴"; fi
+        if [ "${CORE_FUNC_INT}" -ge 95 ]; then CORE_FUNC_STATUS="✅"; else CORE_FUNC_STATUS="🔴"; fi
 
         echo "## Code Coverage Summary" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
         echo "| Report | Lines | Functions | Targets | Pass/Fail |" >> $GITHUB_STEP_SUMMARY
         echo "|--------|-------|----------|---------|-----------|" >> $GITHUB_STEP_SUMMARY
-        echo "| Full Library | ${FULL_LINES}% | ${FULL_FUNCS}% | 75% | ${FULL_STATUS} |" >> $GITHUB_STEP_SUMMARY
+        echo "| Full Library | ${FULL_LINES}% | ${FULL_FUNCS}% | 90% | ${FULL_STATUS} |" >> $GITHUB_STEP_SUMMARY
+        echo "| Full Library Functions | - | ${FULL_FUNCS}% | 90% | ${FULL_FUNC_STATUS} |" >> $GITHUB_STEP_SUMMARY
         echo "| Core Crypto Only | ${CORE_LINES}% | ${CORE_FUNCS}% | 95% | ${CORE_STATUS} |" >> $GITHUB_STEP_SUMMARY
+        echo "| Core Crypto Functions | - | ${CORE_FUNCS}% | 95% | ${CORE_FUNC_STATUS} |" >> $GITHUB_STEP_SUMMARY
 
     - name: Check coverage thresholds
       run: |
         FULL_LINES=$(lcov --summary ${{github.workspace}}/build/coverage.info 2>&1 | grep "lines" | awk '{print $2}' | tr -d '%')
+        FULL_FUNCS=$(lcov --summary ${{github.workspace}}/build/coverage.info 2>&1 | grep "functions" | awk '{print $2}' | tr -d '%')
         CORE_LINES=$(lcov --summary ${{github.workspace}}/build/coverage_core_only.info 2>&1 | grep "lines" | awk '{print $2}' | tr -d '%')
+        CORE_FUNCS=$(lcov --summary ${{github.workspace}}/build/coverage_core_only.info 2>&1 | grep "functions" | awk '{print $2}' | tr -d '%')
 
         FULL_INT=$(echo "${FULL_LINES}" | cut -d'.' -f1)
+        FULL_FUNC_INT=$(echo "${FULL_FUNCS}" | cut -d'.' -f1)
         CORE_INT=$(echo "${CORE_LINES}" | cut -d'.' -f1)
+        CORE_FUNC_INT=$(echo "${CORE_FUNCS}" | cut -d'.' -f1)
 
-        if [ "${FULL_INT}" -lt 75 ]; then
-          echo "::warning::Full library line coverage (${FULL_LINES}%) is below threshold (75%)"
+        FAILED=0
+
+        if [ "${FULL_INT}" -lt 90 ]; then
+          echo "::error::Full library line coverage (${FULL_LINES}%) is below threshold (90%)"
+          FAILED=1
+        fi
+
+        if [ "${FULL_FUNC_INT}" -lt 90 ]; then
+          echo "::error::Full library function coverage (${FULL_FUNCS}%) is below threshold (90%)"
+          FAILED=1
         fi
 
         if [ "${CORE_INT}" -lt 95 ]; then
-          echo "::warning::Core crypto line coverage (${CORE_LINES}%) is below threshold (95%)"
+          echo "::error::Core crypto line coverage (${CORE_LINES}%) is below threshold (95%)"
+          FAILED=1
+        fi
+
+        if [ "${CORE_FUNC_INT}" -lt 95 ]; then
+          echo "::error::Core crypto function coverage (${CORE_FUNCS}%) is below threshold (95%)"
+          FAILED=1
+        fi
+
+        if [ "${FAILED}" -eq 1 ]; then
+          exit 1
         fi
