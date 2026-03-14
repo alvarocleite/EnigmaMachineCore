@@ -98,6 +98,11 @@ jobs:
       run: |
         cmake --build "$GITHUB_WORKSPACE/build" -j$(nproc)
 
+    - name: Run tests to generate coverage data
+      working-directory: ${{github.workspace}}/build
+      run: |
+        ctest -C Debug --output-on-failure
+
     - name: Generate coverage reports
       working-directory: ${{github.workspace}}/build
       run: |

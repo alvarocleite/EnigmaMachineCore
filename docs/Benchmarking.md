@@ -195,7 +195,7 @@ Code coverage is automatically run on Pull Requests via GitHub Actions. The work
 4. **Coverage** - Generate reports, upload artifacts, and upload to Codecov
 
 Coverage reports are:
-- Uploaded to **Codecov** for tracking over time
+- Uploaded to **[Codecov](https://app.codecov.io/github/alvarocleite/EnigmaMachineCore/tree/main)** for tracking over time
 - Posted as **GitHub Job Summary** with pass/fail indicators
 - Available as HTML artifacts for manual review
 
