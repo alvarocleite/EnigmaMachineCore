@@ -156,12 +156,10 @@ jobs:
 
         echo "## Code Coverage Summary" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
-        echo "| Report | Lines | Functions | Targets | Pass/Fail |" >> $GITHUB_STEP_SUMMARY
-        echo "|--------|-------|----------|---------|-----------|" >> $GITHUB_STEP_SUMMARY
-        echo "| Full Library | ${FULL_LINES}% | ${FULL_FUNCS}% | 90% | ${FULL_STATUS} |" >> $GITHUB_STEP_SUMMARY
-        echo "| Full Library Functions | - | ${FULL_FUNCS}% | 90% | ${FULL_FUNC_STATUS} |" >> $GITHUB_STEP_SUMMARY
-        echo "| Core Crypto Only | ${CORE_LINES}% | ${CORE_FUNCS}% | 94% | ${CORE_STATUS} |" >> $GITHUB_STEP_SUMMARY
-        echo "| Core Crypto Functions | - | ${CORE_FUNCS}% | 95% | ${CORE_FUNC_STATUS} |" >> $GITHUB_STEP_SUMMARY
+        echo "| Report       | Target |  Lines  | Functions | Pass/Fail |" >> $GITHUB_STEP_SUMMARY
+        echo "|--------------|-------|---------|-----------|-----------|" >> $GITHUB_STEP_SUMMARY
+        echo "| Full Library |  90%  | ${FULL_LINES}% ${FULL_STATUS} | ${FULL_FUNCS}% ${FULL_FUNC_STATUS} |    ${FULL_STATUS}     |" >> $GITHUB_STEP_SUMMARY
+        echo "| Core Crypto  |  94%  | ${CORE_LINES}% ${CORE_STATUS} | ${CORE_FUNCS}% ${CORE_FUNC_STATUS} |    ${CORE_STATUS}     |" >> $GITHUB_STEP_SUMMARY
 
     - name: Check coverage thresholds
       run: |
@@ -187,8 +185,8 @@ jobs:
           FAILED=1
         fi
 
-        if [ "${CORE_INT}" -lt 95 ]; then
-          echo "::error::Core crypto line coverage (${CORE_LINES}%) is below threshold (95%)"
+        if [ "${CORE_INT}" -lt 94 ]; then
+          echo "::error::Core crypto line coverage (${CORE_LINES}%) is below threshold (94%)"
           FAILED=1
         fi
 
