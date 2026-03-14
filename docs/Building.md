@@ -94,6 +94,7 @@ The project uses CMake options to control the build process. By default, **only 
 *   **`ENIGMA_BUILD_TESTS`**: Build the GoogleTest-based unit test suite. Default is `OFF`.
 *   **`ENIGMA_BUILD_BENCHMARKS`**: Build the Google Benchmark-based performance suite. Default is `OFF`.
 *   **`ENIGMA_BUILD_DOCS`**: Build the Doxygen documentation targets. Default is `OFF`.
+*   **`ENIGMA_BUILD_PROPERTY_TESTS`**: Build the RapidCheck-based property-based test suite. Default is `OFF`.
 
 ### Feature Options
 *   **`ENIGMA_ENABLE_CLANG_TIDY`**: Enable static analysis during the build process. Default is `OFF`.
