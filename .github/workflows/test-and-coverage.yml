@@ -198,3 +198,84 @@ jobs:
         if [ "${FAILED}" -eq 1 ]; then
           exit 1
         fi
+
+  property-tests:
+    name: Property Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        submodules: recursive
+
+    - name: Install build tools
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y cmake gcc g++
+
+    - name: Configure CMake with property tests
+      run: |
+        cmake -B ${{github.workspace}}/build \
+          -DCMAKE_BUILD_TYPE=Debug \
+          -DENIGMA_BUILD_TESTS=ON \
+          -DENIGMA_BUILD_PROPERTY_TESTS=ON
+
+    - name: Build property tests
+      run: |
+        cmake --build "$GITHUB_WORKSPACE/build" -j$(nproc)
+
+    - name: Run property tests
+      working-directory: ${{github.workspace}}/build
+      env:
+        RC_PARAMS: "max_success=50"
+      run: |
+        ctest -C Debug --output-on-failure -R Properties --output-junit property_test_results.xml
+
+    - name: Upload Property Test Results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: property-test-results
+        path: ${{github.workspace}}/build/property_test_results.xml
+
+    - name: Property Tests Summary
+      working-directory: ${{github.workspace}}/build
+      run: |
+        if [ -f property_test_results.xml ]; then
+          TOTAL=$(grep -o 'tests="[0-9]*"' property_test_results.xml | head -1 | grep -o '[0-9]*')
+          FAILED=$(grep -o 'failures="[0-9]*"' property_test_results.xml | head -1 | grep -o '[0-9]*' || echo "0")
+          ERRORS=$(grep -o 'errors="[0-9]*"' property_test_results.xml | head -1 | grep -o '[0-9]*' || echo "0")
+          PASSED=$((TOTAL - FAILED - ERRORS))
+        else
+          TOTAL=0
+          PASSED=0
+          FAILED=0
+          ERRORS=0
+        fi
+
+        if [ "${FAILED}" -eq 0 ] && [ "${ERRORS}" -eq 0 ]; then
+          STATUS="✅"
+        else
+          STATUS="🔴"
+        fi
+
+        echo "## Property-Based Test Summary" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "| Total | Passed | Failed | Errors | Status |" >> $GITHUB_STEP_SUMMARY
+        echo "|-------|--------|--------|--------|--------|" >> $GITHUB_STEP_SUMMARY
+        echo "| ${TOTAL} | ${PASSED} | ${FAILED} | ${ERRORS} | ${STATUS} |" >> $GITHUB_STEP_SUMMARY
+
+    - name: Check property test results
+      working-directory: ${{github.workspace}}/build
+      run: |
+        if [ -f property_test_results.xml ]; then
+          FAILED=$(grep -o 'failures="[0-9]*"' property_test_results.xml | head -1 | grep -o '[0-9]*' || echo "0")
+          ERRORS=$(grep -o 'errors="[0-9]*"' property_test_results.xml | head -1 | grep -o '[0-9]*' || echo "0")
+
+          if [ "${FAILED}" -gt 0 ] || [ "${ERRORS}" -gt 0 ]; then
+            echo "::error::Property-based tests failed (${FAILED} failures, ${ERRORS} errors)"
+            exit 1
+          fi
+        fi
