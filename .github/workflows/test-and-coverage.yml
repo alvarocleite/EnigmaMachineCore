@@ -231,7 +231,7 @@ jobs:
       env:
         RC_PARAMS: "max_success=50"
       run: |
-        ctest -C Debug --output-on-failure -R Property --output-junit property_test_results.xml
+        ctest -C Debug --output-on-failure -R Properties --output-junit property_test_results.xml
 
     - name: Upload Property Test Results
       uses: actions/upload-artifact@v4
