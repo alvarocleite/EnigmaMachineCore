@@ -44,6 +44,7 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
       with:
+        submodules: recursive
         persist-credentials: false
 
     - name: Install build tools and coverage tools
@@ -56,6 +57,18 @@ jobs:
       with:
         name: build-dir
         path: ${{github.workspace}}/build
+
+    - name: Clean CMake cache
+      run: |
+        rm -rf ${{github.workspace}}/build/CMakeCache.txt
+        rm -rf ${{github.workspace}}/build/CMakeFiles
+
+    - name: Configure CMake
+      run: |
+        cmake -B ${{github.workspace}}/build \
+          -DCMAKE_BUILD_TYPE=Debug \
+          -DENIGMA_BUILD_TESTS=ON \
+          -DENIGMA_ENABLE_COVERAGE=ON
 
     - name: Build
       run: |
@@ -76,6 +89,7 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
       with:
+        submodules: recursive
         persist-credentials: false
 
     - name: Install build tools and coverage tools
@@ -88,6 +102,18 @@ jobs:
       with:
         name: build-artifacts
         path: ${{github.workspace}}/build
+
+    - name: Clean CMake cache
+      run: |
+        rm -rf ${{github.workspace}}/build/CMakeCache.txt
+        rm -rf ${{github.workspace}}/build/CMakeFiles
+
+    - name: Configure CMake
+      run: |
+        cmake -B ${{github.workspace}}/build \
+          -DCMAKE_BUILD_TYPE=Debug \
+          -DENIGMA_BUILD_TESTS=ON \
+          -DENIGMA_ENABLE_COVERAGE=ON
 
     - name: Run tests
       working-directory: ${{github.workspace}}/build
@@ -146,6 +172,7 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
       with:
+        submodules: recursive
         persist-credentials: false
 
     - name: Install build tools and coverage tools
@@ -164,6 +191,18 @@ jobs:
       with:
         name: coverage-data
         path: ${{github.workspace}}/build
+
+    - name: Clean CMake cache
+      run: |
+        rm -rf ${{github.workspace}}/build/CMakeCache.txt
+        rm -rf ${{github.workspace}}/build/CMakeFiles
+
+    - name: Configure CMake
+      run: |
+        cmake -B ${{github.workspace}}/build \
+          -DCMAKE_BUILD_TYPE=Debug \
+          -DENIGMA_BUILD_TESTS=ON \
+          -DENIGMA_ENABLE_COVERAGE=ON
 
     - name: Generate coverage reports
       working-directory: ${{github.workspace}}/build
