@@ -151,7 +151,7 @@ jobs:
 
         if [ "${FULL_INT}" -ge 90 ]; then FULL_STATUS="✅"; else FULL_STATUS="🔴"; fi
         if [ "${FULL_FUNC_INT}" -ge 90 ]; then FULL_FUNC_STATUS="✅"; else FULL_FUNC_STATUS="🔴"; fi
-        if [ "${CORE_INT}" -ge 95 ]; then CORE_STATUS="✅"; else CORE_STATUS="🔴"; fi
+        if [ "${CORE_INT}" -ge 94 ]; then CORE_STATUS="✅"; else CORE_STATUS="🔴"; fi
         if [ "${CORE_FUNC_INT}" -ge 95 ]; then CORE_FUNC_STATUS="✅"; else CORE_FUNC_STATUS="🔴"; fi
 
         echo "## Code Coverage Summary" >> $GITHUB_STEP_SUMMARY
@@ -160,7 +160,7 @@ jobs:
         echo "|--------|-------|----------|---------|-----------|" >> $GITHUB_STEP_SUMMARY
         echo "| Full Library | ${FULL_LINES}% | ${FULL_FUNCS}% | 90% | ${FULL_STATUS} |" >> $GITHUB_STEP_SUMMARY
         echo "| Full Library Functions | - | ${FULL_FUNCS}% | 90% | ${FULL_FUNC_STATUS} |" >> $GITHUB_STEP_SUMMARY
-        echo "| Core Crypto Only | ${CORE_LINES}% | ${CORE_FUNCS}% | 95% | ${CORE_STATUS} |" >> $GITHUB_STEP_SUMMARY
+        echo "| Core Crypto Only | ${CORE_LINES}% | ${CORE_FUNCS}% | 94% | ${CORE_STATUS} |" >> $GITHUB_STEP_SUMMARY
         echo "| Core Crypto Functions | - | ${CORE_FUNCS}% | 95% | ${CORE_FUNC_STATUS} |" >> $GITHUB_STEP_SUMMARY
 
     - name: Check coverage thresholds

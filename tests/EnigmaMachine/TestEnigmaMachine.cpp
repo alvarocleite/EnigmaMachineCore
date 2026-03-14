@@ -293,3 +293,36 @@ TEST_F(EnigmaMachineTests, MoveAssignmentWithObserver) {
     machine2.keyTransform(0);
     EXPECT_GE(observer.rotorStepCount, 3);
 }
+
+TEST_F(EnigmaMachineTests, RemoveObserverNotFound) {
+    /** @brief Verifies removeObserver handles case when observer is not registered. */
+    class DummyObserver : public IEnigmaObserver {
+    public:
+        void onRotorStepped(int rotorIndex, AlphabetIndex position) override {}
+        void onCharEncrypted(char input, char output) override {}
+    };
+
+    EnigmaMachine machine;
+    DummyObserver observer1;
+    DummyObserver observer2;
+
+    machine.registerObserver(&observer1);
+    EXPECT_NO_THROW(machine.removeObserver(&observer2));
+    EXPECT_NO_THROW(machine.removeObserver(&observer1));
+    EXPECT_NO_THROW(machine.removeObserver(&observer1));
+}
+
+TEST_F(EnigmaMachineTests, ProcessBufferEmpty) {
+    /** @brief Verifies processBuffer handles empty span correctly. */
+    EnigmaMachine machine;
+    std::vector<AlphabetIndex> emptyBuffer;
+    EXPECT_NO_THROW(machine.processBuffer(emptyBuffer));
+    EXPECT_TRUE(emptyBuffer.empty());
+}
+
+TEST_F(EnigmaMachineTests, Destructor) {
+    /** @brief Verifies default destructor can be called without issues. */
+    EnigmaMachine* machine = new EnigmaMachine();
+    machine->keyTransform(0);
+    EXPECT_NO_THROW(delete machine);
+}

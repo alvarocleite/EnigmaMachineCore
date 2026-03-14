@@ -110,6 +110,26 @@ TEST_F(RotorTests, MoveConstructor) {
     EXPECT_EQ(rotor.transform(3, true), 0);
 }
 
+/** @brief Verifies reverse transform handles wrap-around at boundaries. */
+TEST_F(RotorTests, ReverseTransformWrapAround) {
+    Rotor rotor(config);
+
+    for (int rot = 0; rot < 26; rot++) {
+        rotor.setPosition(rot);
+        for (int i = 0; i < 26; i++) {
+            int result = rotor.transform(i, true);
+            EXPECT_GE(result, 0);
+            EXPECT_LT(result, 26);
+        }
+    }
+
+    rotor.setPosition(10);
+    int res1 = rotor.transform(0, true);
+    rotor.setPosition(0);
+    int res2 = rotor.transform(10, true);
+    EXPECT_NE(res1, res2) << "Different rotation positions should produce different results";
+}
+
 /** @brief Verifies move constructor produces same results as copy. */
 TEST_F(RotorTests, MoveConstructorResultsMatchCopy) {
     RotorConfig configCopy = config;
