@@ -336,7 +336,7 @@ if(ENIGMA_BUILD_TESTS)
 
     if(ENIGMA_ENABLE_COVERAGE)
         add_custom_target(enigma_coverage
-            COMMAND ${LCOV_EXE} --capture --directory . --output-file coverage_raw.info --include 'EnigmaMachineCore/*' --ignore-errors gcov,source,inconsistent || true
+            COMMAND ${LCOV_EXE} --capture --directory . --output-file coverage_raw.info --include 'EnigmaMachineCore/*' --ignore-errors gcov,source,inconsistent,mismatch || true
             COMMAND ${LCOV_EXE} --remove coverage_raw.info '*/tests/*' '*/_deps/*' '*/external/*' --output-file coverage.info --ignore-errors inconsistent || true
             COMMAND ${GENHTML_EXE} coverage.info --output-directory coverage_html --branch-coverage --legend
             WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
@@ -345,9 +345,9 @@ if(ENIGMA_BUILD_TESTS)
         )
 
         add_custom_target(enigma_core_coverage
-            COMMAND ${LCOV_EXE} --capture --directory . --output-file coverage_core_raw.info --include 'EnigmaMachineCore/*' --ignore-errors gcov,source,inconsistent || true
+            COMMAND ${LCOV_EXE} --capture --directory . --output-file coverage_core_raw.info --include 'EnigmaMachineCore/*' --ignore-errors gcov,source,inconsistent,mismatch || true
             COMMAND ${LCOV_EXE} --remove coverage_core_raw.info '*/tests/*' '*/_deps/*' '*/external/*' --output-file coverage_core.info --ignore-errors inconsistent || true
-            COMMAND ${LCOV_EXE} --extract coverage_core.info '*/RotorBox/src/*' '*/PlugBoard/src/*' '*/EnigmaMachine/src/*' --output-file coverage_core_only.info || true
+            COMMAND ${LCOV_EXE} --extract coverage_core.info '*/RotorBox/src/*' '*/PlugBoard/src/*' '*/EnigmaMachine/src/*' --output-file coverage_core_only.info --ignore-errors mismatch || true
             COMMAND ${GENHTML_EXE} coverage_core_only.info --output-directory coverage_core_html --branch-coverage --legend
             WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
             DEPENDS EnigmaTests
