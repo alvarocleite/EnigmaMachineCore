@@ -97,6 +97,7 @@ The project uses CMake options to control the build process. By default, **only 
 
 ### Feature Options
 *   **`ENIGMA_ENABLE_CLANG_TIDY`**: Enable static analysis during the build process. Default is `OFF`.
+*   **`ENIGMA_ENABLE_COVERAGE`**: Enable code coverage instrumentation (gcov/lcov). Default is `OFF`.
 
 ### Internal Variables
 *   **`${PROJECT_NAME}`**: The name of the main project (`EnigmaMachineCore`).
