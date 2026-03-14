@@ -103,6 +103,10 @@ jobs:
         name: build-artifacts
         path: ${{github.workspace}}/build
 
+    - name: Fix executable permissions
+      run: |
+        chmod +x ${{github.workspace}}/build/tests/EnigmaTests
+
     - name: Clean CMake cache
       run: |
         rm -rf ${{github.workspace}}/build/CMakeCache.txt
@@ -191,6 +195,10 @@ jobs:
       with:
         name: coverage-data
         path: ${{github.workspace}}/build
+
+    - name: Fix executable permissions
+      run: |
+        chmod +x ${{github.workspace}}/build/tests/EnigmaTests
 
     - name: Clean CMake cache
       run: |
