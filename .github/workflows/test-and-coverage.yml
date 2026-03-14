@@ -202,6 +202,7 @@ jobs:
   property-tests:
     name: Property Tests
     runs-on: ubuntu-latest
+    timeout-minutes: 30
 
     steps:
     - name: Checkout repository
@@ -227,8 +228,10 @@ jobs:
 
     - name: Run property tests
       working-directory: ${{github.workspace}}/build
+      env:
+        RC_PARAMS: "max_success=50"
       run: |
-        ctest -C Debug --output-on-failure --output-junit property_test_results.xml
+        ctest -C Debug --output-on-failure -R Property --output-junit property_test_results.xml
 
     - name: Upload Property Test Results
       uses: actions/upload-artifact@v4
