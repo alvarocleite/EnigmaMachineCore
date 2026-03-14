@@ -1,0 +1,200 @@
+name: Test and Coverage
+
+on:
+  push:
+    branches: [ "main", "development" ]
+  pull_request:
+    branches: [ "main", "development" ]
+
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        submodules: recursive
+
+    - name: Install build tools and coverage tools
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y cmake lcov gcc g++
+
+    - name: Configure CMake with coverage
+      run: |
+        cmake -B ${{github.workspace}}/build \
+          -DCMAKE_BUILD_TYPE=Debug \
+          -DENIGMA_BUILD_TESTS=ON \
+          -DENIGMA_ENABLE_COVERAGE=ON
+
+    - name: Build
+      run: |
+        cmake --build "$GITHUB_WORKSPACE/build" -j$(nproc)
+
+    - name: Run tests
+      working-directory: ${{github.workspace}}/build
+      run: |
+        ctest -C Debug --output-on-failure --output-junit test_results.xml
+
+    - name: Upload Test Results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: test-results
+        path: ${{github.workspace}}/build/test_results.xml
+
+    - name: Test Summary
+      working-directory: ${{github.workspace}}/build
+      run: |
+        if [ -f test_results.xml ]; then
+          TOTAL=$(grep -o 'tests="[0-9]*"' test_results.xml | head -1 | grep -o '[0-9]*')
+          FAILED=$(grep -o 'failures="[0-9]*"' test_results.xml | head -1 | grep -o '[0-9]*' || echo "0")
+          ERRORS=$(grep -o 'errors="[0-9]*"' test_results.xml | head -1 | grep -o '[0-9]*' || echo "0")
+          PASSED=$((TOTAL - FAILED - ERRORS))
+        else
+          TOTAL=0
+          PASSED=0
+          FAILED=0
+          ERRORS=0
+        fi
+
+        if [ "${FAILED}" -eq 0 ] && [ "${ERRORS}" -eq 0 ]; then
+          STATUS="✅"
+        else
+          STATUS="🔴"
+        fi
+
+        echo "## Test Summary" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "| Total | Passed | Failed | Errors | Status |" >> $GITHUB_STEP_SUMMARY
+        echo "|-------|--------|--------|--------|--------|" >> $GITHUB_STEP_SUMMARY
+        echo "| ${TOTAL} | ${PASSED} | ${FAILED} | ${ERRORS} | ${STATUS} |" >> $GITHUB_STEP_SUMMARY
+
+  coverage:
+    name: Coverage
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        submodules: recursive
+
+    - name: Install build tools and coverage tools
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y cmake lcov gcc g++
+
+    - name: Configure CMake with coverage
+      run: |
+        cmake -B ${{github.workspace}}/build \
+          -DCMAKE_BUILD_TYPE=Debug \
+          -DENIGMA_BUILD_TESTS=ON \
+          -DENIGMA_ENABLE_COVERAGE=ON
+
+    - name: Build
+      run: |
+        cmake --build "$GITHUB_WORKSPACE/build" -j$(nproc)
+
+    - name: Run tests to generate coverage data
+      working-directory: ${{github.workspace}}/build
+      run: |
+        ctest -C Debug --output-on-failure
+
+    - name: Generate coverage reports
+      working-directory: ${{github.workspace}}/build
+      run: |
+        cmake --build "$GITHUB_WORKSPACE/build" --target enigma_coverage
+        cmake --build "$GITHUB_WORKSPACE/build" --target enigma_core_coverage
+
+    - name: Upload to Codecov
+      uses: codecov/codecov-action@v4
+      with:
+        files: |
+          ${{github.workspace}}/build/coverage.info
+          ${{github.workspace}}/build/coverage_core_only.info
+        token: ${{ secrets.CODECOV_TOKEN }}
+
+    - name: Upload coverage HTML (Full)
+      uses: actions/upload-artifact@v4
+      with:
+        name: coverage-html-full
+        path: ${{github.workspace}}/build/coverage_html
+
+    - name: Upload coverage HTML (Core)
+      uses: actions/upload-artifact@v4
+      with:
+        name: coverage-html-core
+        path: ${{github.workspace}}/build/coverage_core_html
+
+    - name: Upload coverage info
+      uses: actions/upload-artifact@v4
+      with:
+        name: coverage-info
+        path: |
+          ${{github.workspace}}/build/coverage.info
+          ${{github.workspace}}/build/coverage_core_only.info
+
+    - name: Coverage Summary
+      run: |
+        FULL_LINES=$(lcov --summary ${{github.workspace}}/build/coverage.info 2>&1 | grep "lines" | awk '{print $2}' | tr -d '%')
+        FULL_FUNCS=$(lcov --summary ${{github.workspace}}/build/coverage.info 2>&1 | grep "functions" | awk '{print $2}' | tr -d '%')
+        CORE_LINES=$(lcov --summary ${{github.workspace}}/build/coverage_core_only.info 2>&1 | grep "lines" | awk '{print $2}' | tr -d '%')
+        CORE_FUNCS=$(lcov --summary ${{github.workspace}}/build/coverage_core_only.info 2>&1 | grep "functions" | awk '{print $2}' | tr -d '%')
+
+        FULL_INT=$(echo "${FULL_LINES}" | cut -d'.' -f1)
+        FULL_FUNC_INT=$(echo "${FULL_FUNCS}" | cut -d'.' -f1)
+        CORE_INT=$(echo "${CORE_LINES}" | cut -d'.' -f1)
+        CORE_FUNC_INT=$(echo "${CORE_FUNCS}" | cut -d'.' -f1)
+
+        if [ "${FULL_INT}" -ge 90 ]; then FULL_STATUS="✅"; else FULL_STATUS="🔴"; fi
+        if [ "${FULL_FUNC_INT}" -ge 90 ]; then FULL_FUNC_STATUS="✅"; else FULL_FUNC_STATUS="🔴"; fi
+        if [ "${CORE_INT}" -ge 94 ]; then CORE_STATUS="✅"; else CORE_STATUS="🔴"; fi
+        if [ "${CORE_FUNC_INT}" -ge 95 ]; then CORE_FUNC_STATUS="✅"; else CORE_FUNC_STATUS="🔴"; fi
+
+        echo "## Code Coverage Summary" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "| Report       | Target |  Lines  | Functions | Pass/Fail |" >> $GITHUB_STEP_SUMMARY
+        echo "|--------------|-------|---------|-----------|-----------|" >> $GITHUB_STEP_SUMMARY
+        echo "| Full Library |  90%  | ${FULL_LINES}% ${FULL_STATUS} | ${FULL_FUNCS}% ${FULL_FUNC_STATUS} |    ${FULL_STATUS}     |" >> $GITHUB_STEP_SUMMARY
+        echo "| Core Crypto  |  94%  | ${CORE_LINES}% ${CORE_STATUS} | ${CORE_FUNCS}% ${CORE_FUNC_STATUS} |    ${CORE_STATUS}     |" >> $GITHUB_STEP_SUMMARY
+
+    - name: Check coverage thresholds
+      run: |
+        FULL_LINES=$(lcov --summary ${{github.workspace}}/build/coverage.info 2>&1 | grep "lines" | awk '{print $2}' | tr -d '%')
+        FULL_FUNCS=$(lcov --summary ${{github.workspace}}/build/coverage.info 2>&1 | grep "functions" | awk '{print $2}' | tr -d '%')
+        CORE_LINES=$(lcov --summary ${{github.workspace}}/build/coverage_core_only.info 2>&1 | grep "lines" | awk '{print $2}' | tr -d '%')
+        CORE_FUNCS=$(lcov --summary ${{github.workspace}}/build/coverage_core_only.info 2>&1 | grep "functions" | awk '{print $2}' | tr -d '%')
+
+        FULL_INT=$(echo "${FULL_LINES}" | cut -d'.' -f1)
+        FULL_FUNC_INT=$(echo "${FULL_FUNCS}" | cut -d'.' -f1)
+        CORE_INT=$(echo "${CORE_LINES}" | cut -d'.' -f1)
+        CORE_FUNC_INT=$(echo "${CORE_FUNCS}" | cut -d'.' -f1)
+
+        FAILED=0
+
+        if [ "${FULL_INT}" -lt 90 ]; then
+          echo "::error::Full library line coverage (${FULL_LINES}%) is below threshold (90%)"
+          FAILED=1
+        fi
+
+        if [ "${FULL_FUNC_INT}" -lt 90 ]; then
+          echo "::error::Full library function coverage (${FULL_FUNCS}%) is below threshold (90%)"
+          FAILED=1
+        fi
+
+        if [ "${CORE_INT}" -lt 94 ]; then
+          echo "::error::Core crypto line coverage (${CORE_LINES}%) is below threshold (94%)"
+          FAILED=1
+        fi
+
+        if [ "${CORE_FUNC_INT}" -lt 95 ]; then
+          echo "::error::Core crypto function coverage (${CORE_FUNCS}%) is below threshold (95%)"
+          FAILED=1
+        fi
+
+        if [ "${FAILED}" -eq 1 ]; then
+          exit 1
+        fi

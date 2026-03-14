@@ -10,20 +10,21 @@ protected:
     const std::string nonExistentAsset = std::string(assetsDir) + "GhostRotor.toml";
 };
 
+/** @brief Verifies loading an existing asset file. */
 TEST_F(FileAssetProviderTests, LoadExistingFile) {
     std::string content;
     EXPECT_NO_THROW({ content = provider.loadAsset(existingAsset); });
     EXPECT_FALSE(content.empty());
 
-    // Check for known TOML content (Rotor1.toml should contain "[rotor]")
     EXPECT_NE(content.find("[rotor]"), std::string::npos);
 }
 
+/** @brief Verifies exception thrown for non-existent asset. */
 TEST_F(FileAssetProviderTests, LoadNonExistentFile) {
     EXPECT_THROW({ provider.loadAsset(nonExistentAsset); }, std::runtime_error);
 }
 
-// Mock implementation to verify Interface usage
+/** @brief Mock provider for verifying IAssetProvider interface. */
 class MockAssetProvider : public IAssetProvider {
 public:
     std::string loadAsset(std::string_view assetName) const override {
@@ -34,6 +35,7 @@ public:
     }
 };
 
+/** @brief Verifies IAssetProvider interface contract with mock implementation. */
 TEST(IAssetProviderTests, MockImplementation) {
     MockAssetProvider mock;
     std::string content = mock.loadAsset("mock_rotor");

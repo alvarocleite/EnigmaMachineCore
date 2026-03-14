@@ -166,3 +166,7 @@ Results are aggregated into a single **GitHub Job Summary** without failing the 
 The project uses CMake's `FetchContent` to download GoogleTest automatically.
 *   **Offline Mode:** You must run the initial CMake configuration while online. After that, the library is stored in `build/<build_type>/_deps` and can be used offline.
 *   **Installation:** No manual installation of GoogleTest is required on your system.
+
+## Code Coverage
+
+For code coverage analysis (gcov/lcov), thresholds, and CI integration, see [Benchmarking Guide](Benchmarking.md).

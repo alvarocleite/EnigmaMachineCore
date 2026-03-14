@@ -4,6 +4,7 @@
 #include "IEnigmaObserver.hpp"
 #include "config.hpp"
 
+/** @brief Mock observer for testing IEnigmaObserver interface. */
 class MockObserver : public IEnigmaObserver {
 public:
     struct StepEvent {
@@ -30,24 +31,23 @@ protected:
     const std::string configPath = "assets/EnigmaMachineConfig1.toml";
 };
 
+/** @brief Verifies observer receives rotor stepped and character encrypted notifications. */
 TEST_F(EnigmaObserverTests, ReceivesNotifications) {
     EnigmaMachine machine(configPath, assetsDir);
     MockObserver observer;
     machine.registerObserver(&observer);
 
-    int res = machine.keyTransform(0);  // 'A'
+    int res = machine.keyTransform(0);
 
-    // Verify encryption event
     ASSERT_EQ(observer.encryptEvents.size(), 1);
     EXPECT_EQ(observer.encryptEvents[0].input, 'A');
     EXPECT_EQ(observer.encryptEvents[0].output, (char)('A' + res));
 
-    // Verify step event
-    // At least one rotor (index 0) should step.
     ASSERT_GT(observer.stepEvents.size(), 0);
     EXPECT_EQ(observer.stepEvents[0].rotorIndex, 0);
 }
 
+/** @brief Verifies removed observer no longer receives notifications. */
 TEST_F(EnigmaObserverTests, RemoveObserver) {
     EnigmaMachine machine(configPath, assetsDir);
     MockObserver observer;

@@ -19,6 +19,12 @@ else()
     target_link_libraries(EnigmaTests PRIVATE EnigmaCore_OBJ GTest::gtest_main)
 endif()
 
+# Apply coverage flags if enabled
+if(ENIGMA_ENABLE_COVERAGE)
+    target_compile_options(EnigmaTests PRIVATE ${COVERAGE_FLAGS})
+    target_link_options(EnigmaTests PRIVATE ${COVERAGE_FLAGS})
+endif()
+
 # Register tests so CTest can find them
 include(GoogleTest)
 gtest_discover_tests(EnigmaTests)

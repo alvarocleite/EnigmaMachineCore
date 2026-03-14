@@ -122,3 +122,83 @@ Instead, follow this "A/B" workflow on your local machine:
 The CI environment enforces a **5% regression threshold** against the **CI Baseline**.
 *   **Why 5%?** Benchmarking on shared CI runners (like GitHub Actions) is subject to "system noise" (CPU scaling, OS interrupts). A 5% buffer ensures that we only fail for genuine algorithmic regressions, not minor hardware fluctuations.
 *   **Baseline Management:** If a PR significantly alters the engine's architecture in a way that intentionally changes the performance profile, the official CI baseline may need to be updated.
+
+---
+
+## Code Coverage
+
+EnigmaMachineCore uses **gcov** and **lcov** to provide code coverage metrics. This helps identify untested code paths and ensures high quality for the cryptographic engine.
+
+### Coverage Targets
+
+| Metric | Target | Description |
+| :--- | :--- | :--- |
+| **Overall Coverage** | 75% | All library code (core + utilities) |
+| **Core Crypto Coverage** | 95% | Rotor, Reflector, Transformer, PlugBoard, EnigmaMachine |
+
+### Core Crypto Components
+
+The following files are considered "core crypto" for coverage analysis:
+- `RotorBox/src/Rotor.cpp`
+- `RotorBox/src/Reflector.cpp`
+- `RotorBox/src/Transformer.cpp`
+- `RotorBox/src/RotorBox.cpp`
+- `PlugBoard/src/PlugBoard.cpp`
+- `EnigmaMachine/src/EnigmaMachine.cpp`
+
+### How to Build and Run
+
+```bash
+# Create a dedicated build directory
+mkdir -p build_coverage && cd build_coverage
+
+# Configure with tests and coverage enabled
+cmake .. -DCMAKE_BUILD_TYPE=Debug -DENIGMA_BUILD_TESTS=ON -DENIGMA_ENABLE_COVERAGE=ON
+
+# Build
+cmake --build . -j$(nproc)
+
+# Run tests
+ctest -C Debug --output-on-failure
+
+# Generate coverage reports
+cmake --build . --target enigma_coverage         # Full coverage (all library code)
+cmake --build . --target enigma_core_coverage   # Core crypto only
+```
+
+### Viewing Coverage Reports
+
+After generating the reports:
+
+```bash
+# Full coverage report
+firefox coverage_html/index.html
+
+# Core crypto only report
+firefox coverage_core_html/index.html
+```
+
+### Understanding the Output
+
+The coverage reports show:
+- **Line Coverage:** Percentage of source lines executed during tests
+- **Function Coverage:** Percentage of functions called
+- **Branch Coverage:** Percentage of code branches exercised
+
+### CI Integration
+
+Code coverage is automatically run on Pull Requests via GitHub Actions. The workflow uses a 4-job pipeline:
+
+1. **Setup** - Install tools and configure CMake with coverage flags
+2. **Build** - Compile with coverage instrumentation
+3. **Test** - Run tests and generate coverage data
+4. **Coverage** - Generate reports, upload artifacts, and upload to Codecov
+
+Coverage reports are:
+- Uploaded to **[Codecov](https://app.codecov.io/github/alvarocleite/EnigmaMachineCore/tree/main)** for tracking over time
+- Posted as **GitHub Job Summary** with pass/fail indicators
+- Available as HTML artifacts for manual review
+
+Thresholds: 75% (full library), 95% (core crypto). Below thresholds trigger warnings but don't fail the build.
+
+See `.github/workflows/test-and-coverage.yml` for details.
