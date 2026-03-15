@@ -16,6 +16,7 @@ To build and run this project, you will need the following tools and libraries:
 *   **[cppcheck](http://cppcheck.sourceforge.net/):** Used for deeper static analysis, specifically performance, style, and portability.
 *   **[Valgrind](https://valgrind.org/):** Essential for memory leak detection and profiling on Linux.
 *   **[LLVM/Clang Sanitizers](https://clang.llvm.org/docs/index.html):** Used for runtime analysis (ASan, UBSan, MSan). Requires `clang` and `llvm` (for `llvm-symbolizer`).
+*   **[lcov](https://ltp.sourceforge.net/coverage/lcov.php):** Code coverage reporting tool. Used with gcov for coverage analysis.
 
 ### Libraries
 *   **[toml11](https://github.com/ToruNiina/toml11):** A powerful C++11 header-only library for TOML.
@@ -26,6 +27,7 @@ To build and run this project, you will need the following tools and libraries:
 ### Testing & Benchmarking Tools
 *   **[GoogleTest (gTest)](https://github.com/google/googletest):** Used for unit testing the core logic.
 *   **[Google Benchmark](https://github.com/google/benchmark):** Used for performance profiling and throughput measurement.
+*   **[RapidCheck](https://github.com/emil-e/rapidcheck):** Property-based testing for verifying cryptographic properties (reciprocity). Automatically downloaded via CMake FetchContent when `ENIGMA_BUILD_PROPERTY_TESTS=ON`.
 
 *Note: You do NOT need to install these libraries on your machine. The build system (CMake) automatically downloads and configures them during the first build (requires internet connection for the initial configuration).*
 
@@ -99,6 +101,7 @@ The project uses CMake options to control the build process. By default, **only 
 ### Feature Options
 *   **`ENIGMA_ENABLE_CLANG_TIDY`**: Enable static analysis during the build process. Default is `OFF`.
 *   **`ENIGMA_ENABLE_COVERAGE`**: Enable code coverage instrumentation (gcov/lcov). Default is `OFF`.
+*   **`ENIGMA_ENABLE_CPPCHECK`**: Run cppcheck static analysis. Default is `OFF`.
 
 ### Internal Variables
 *   **`${PROJECT_NAME}`**: The name of the main project (`EnigmaMachineCore`).

@@ -188,7 +188,7 @@ cmake --build build
 
 ```bash
 # Run all property tests
-cd build && ctest -C Debug --output-on-failure -R Property
+cd build && ctest -C Debug --output-on-failure -R Properties
 
 # Or run directly
 ./build/tests/EnigmaPropertyTests
@@ -202,7 +202,7 @@ The property-based test suite includes **60+ tests** across 5 test modules:
 |--------|-------|------------------------|
 | `EnigmaMachineProperties` | 10 | Reciprocity, Decryption symmetry, Output range |
 | `RotorProperties` | 14 | Forward/reverse transform inverse, Rotation cycles |
-| `PlugBoardProperties` | 17 | Swapping symmetry, No fixed points, Determinism |
+| `PlugBoardProperties` | 15 | Swapping symmetry, No fixed points, Determinism |
 | `ReflectorProperties` | 5 | Bidirectional mapping, No self-mapping |
 | `RotorBoxProperties` | 14 | Multi-rotor stepping, Full encryption cycle |
 
