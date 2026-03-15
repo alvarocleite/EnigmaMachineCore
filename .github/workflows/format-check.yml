@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
 
     - name: Install clang-format
       run: |
@@ -33,7 +33,7 @@ jobs:
 
     - name: Upload Format Patch
       if: failure()
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: format-fixes
         path: format_fixes.patch
