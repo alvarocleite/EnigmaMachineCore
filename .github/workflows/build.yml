@@ -31,7 +31,7 @@ jobs:
             build_type: Release
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
       if: matrix.os == 'ubuntu-latest' || (github.ref != 'refs/heads/development' && github.base_ref != 'development')
       with:
         submodules: recursive
@@ -63,21 +63,21 @@ jobs:
 
     - name: Upload build log
       if: matrix.os == 'ubuntu-latest' || (github.ref != 'refs/heads/development' && github.base_ref != 'development')
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: build-log-${{ matrix.os }}-${{ matrix.build_type }}
         path: build.log
 
     - name: Upload compiler warnings
       if: (matrix.os == 'ubuntu-latest' || (github.ref != 'refs/heads/development' && github.base_ref != 'development')) && env.warning_count > 0
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: compiler-warnings-${{ matrix.os }}-${{ matrix.build_type }}
         path: warnings_list.txt
 
     - name: Upload Build Artifacts
       if: (matrix.os == 'ubuntu-latest' || (github.ref != 'refs/heads/development' && github.base_ref != 'development')) && success()
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: build-artifacts-${{ matrix.os }}-${{ matrix.build_type }}
         path: |

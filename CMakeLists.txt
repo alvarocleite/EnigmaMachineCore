@@ -7,7 +7,7 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 
 # Define project name, version, and language
-project(EnigmaMachineCore VERSION 0.0.1 LANGUAGES CXX)
+project(EnigmaMachineCore VERSION 0.1.0 LANGUAGES CXX)
 
 # --- GNU Install Directories ---
 include(GNUInstallDirs)

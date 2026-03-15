@@ -13,7 +13,7 @@ jobs:
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
       with:
         submodules: recursive
 
@@ -39,7 +39,7 @@ jobs:
         ctest -C Debug --output-on-failure --output-junit test_results.xml
 
     - name: Upload Test Results
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       if: always()
       with:
         name: test-results
@@ -78,7 +78,7 @@ jobs:
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
       with:
         submodules: recursive
 
@@ -118,19 +118,19 @@ jobs:
         token: ${{ secrets.CODECOV_TOKEN }}
 
     - name: Upload coverage HTML (Full)
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: coverage-html-full
         path: ${{github.workspace}}/build/coverage_html
 
     - name: Upload coverage HTML (Core)
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: coverage-html-core
         path: ${{github.workspace}}/build/coverage_core_html
 
     - name: Upload coverage info
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: coverage-info
         path: |
@@ -206,7 +206,7 @@ jobs:
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
       with:
         submodules: recursive
 
@@ -234,7 +234,7 @@ jobs:
         ctest -C Debug --output-on-failure -R Properties --output-junit property_test_results.xml
 
     - name: Upload Property Test Results
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       if: always()
       with:
         name: property-test-results

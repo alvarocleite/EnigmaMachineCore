@@ -5,8 +5,8 @@ This roadmap outlines the evolution of `EnigmaMachineCore` from a C++ library in
 ## Vision
 To provide a high-performance, zero-overhead, and platform-agnostic Enigma cipher core that serves as a reference implementation for modern C++20 cryptographic engineering.
 
-## Current State (v0.0.1 -> v0.1.0)
-**Status:** Phase 1 implementation complete; awaiting final v0.1.0 release milestone.
+## Current State (v0.1.0)
+**Status:** Phase 1 implementation complete; v0.1.0 release ready.
 
 - [x] Core cryptographic logic (Rotors, Plugboard, Reflector).
 - [x] Modern C++20 architecture with Dependency Injection (DI).
@@ -37,11 +37,11 @@ To provide a high-performance, zero-overhead, and platform-agnostic Enigma ciphe
 - [x] **Technical Documentation & Visualization:**
     - Created PlantUML diagrams for RotorBox assembly, Plugboard structure, and Signal Flow.
     - Integrated visualizations into the source code documentation (Doxygen).
-- [ ] **Verified Code Coverage:**
+- [x] **Verified Code Coverage:**
     - Integrate `gcov/lcov` into CMake build for coverage reporting.
     - Set up **Codecov** or similar service for automated branch coverage tracking.
     - Enforce minimum coverage thresholds in CI (goal: 95% for signal path, 75% overall).
-- [ ] **Property-Based Testing Foundation:**
+- [x] **Property-Based Testing Foundation:**
     - Integrate `RapidCheck` for reciprocity verification (`Encrypt(Encrypt(x)) == x`).
     - Add 10+ randomized configuration tests.
 

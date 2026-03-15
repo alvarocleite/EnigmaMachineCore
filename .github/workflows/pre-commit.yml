@@ -9,7 +9,7 @@ jobs:
   pre-commit:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
     - uses: actions/setup-python@v5
       with:
         python-version: '3.x'
@@ -25,7 +25,7 @@ jobs:
         pre-commit run --all-files --show-diff-on-failure --color=always 2>&1 | tee pre-commit.log
     - name: Upload pre-commit logs
       if: always()
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: pre-commit-logs
         path: pre-commit.log
