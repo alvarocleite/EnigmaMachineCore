@@ -166,3 +166,60 @@ Results are aggregated into a single **GitHub Job Summary** without failing the 
 The project uses CMake's `FetchContent` to download GoogleTest automatically.
 *   **Offline Mode:** You must run the initial CMake configuration while online. After that, the library is stored in `build/<build_type>/_deps` and can be used offline.
 *   **Installation:** No manual installation of GoogleTest is required on your system.
+
+## Property-Based Testing
+
+The project uses **RapidCheck** for property-based testing, which generates random test cases to verify fundamental cryptographic properties across thousands of configurations.
+
+### What is Property-Based Testing?
+
+Unlike traditional unit testing with fixed inputs, property-based testing randomly generates inputs and verifies that certain mathematical properties hold. For the Enigma machine, the most important property is **reciprocity**: encrypting then decrypting with the same settings must return the original value.
+
+### Enabling Property Tests
+
+Property tests are disabled by default. To enable them:
+
+```bash
+cmake -DENIGMA_BUILD_TESTS=ON -DENIGMA_BUILD_PROPERTY_TESTS=ON -S . -B build
+cmake --build build
+```
+
+### Running Property Tests
+
+```bash
+# Run all property tests
+cd build && ctest -C Debug --output-on-failure -R Property
+
+# Or run directly
+./build/tests/EnigmaPropertyTests
+```
+
+### Test Coverage
+
+The property-based test suite includes **60+ tests** across 5 test modules:
+
+| Module | Tests | Key Properties Verified |
+|--------|-------|------------------------|
+| `EnigmaMachineProperties` | 10 | Reciprocity, Decryption symmetry, Output range |
+| `RotorProperties` | 14 | Forward/reverse transform inverse, Rotation cycles |
+| `PlugBoardProperties` | 17 | Swapping symmetry, No fixed points, Determinism |
+| `ReflectorProperties` | 5 | Bidirectional mapping, No self-mapping |
+| `RotorBoxProperties` | 14 | Multi-rotor stepping, Full encryption cycle |
+
+### Key Properties Tested
+
+*   **Reciprocity:** `Encrypt(Encrypt(x)) == x` - The fundamental Enigma property
+*   **Determinism:** Same input always produces same output
+*   **Output Range:** All transforms stay within [0, 25]
+*   **Inverse Transform:** Forward transform followed by reverse returns original input
+*   **Edge Cases:** Empty configurations, boundary values, self-loops
+
+### CI Integration
+
+Property tests run automatically on every push and pull request via the `test-and-coverage.yml` workflow. The job includes:
+*   Test result XML generation
+*   Pass/fail summary in GitHub PR checks
+
+## Code Coverage
+
+For code coverage analysis (gcov/lcov), thresholds, and CI integration, see [Benchmarking Guide](Benchmarking.md).

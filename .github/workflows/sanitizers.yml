@@ -19,7 +19,7 @@ jobs:
             cmake_flag: -DENIGMA_USE_MSAN=ON
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
       with:
         submodules: recursive
 
@@ -93,7 +93,7 @@ jobs:
 
     - name: Upload Sanitizer Logs
       if: always()
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: sanitizer-logs-${{ matrix.sanitizer }}
         path: sanitizer_all.log

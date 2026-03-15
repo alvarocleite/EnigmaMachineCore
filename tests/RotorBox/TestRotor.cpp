@@ -1,4 +1,5 @@
 #include <gtest/gtest.h>
+#include <array>
 #include "EnigmaConfigLoader.hpp"
 #include "EnigmaMachineConfig.hpp"
 #include "FileAssetProvider.hpp"
@@ -15,29 +16,26 @@ protected:
     }
 };
 
+/** @brief Verifies rotor initialization and type identification. */
 TEST_F(RotorTests, InitializationAndType) {
     Rotor rotor(config);
     EXPECT_EQ(rotor.getType(), TransformerType::Rotor);
 }
 
+/** @brief Verifies basic forward and reverse transformation. */
 TEST_F(RotorTests, BasicTransformation) {
     Rotor rotor(config);
-    // Ensure initial position is 0
     rotor.setPosition(0);
 
-    // Based on Rotor1.toml: 0 maps to 3
     EXPECT_EQ(rotor.transform(0, false), 3);
-
-    // Reverse: 3 maps to 0
     EXPECT_EQ(rotor.transform(3, true), 0);
 }
 
+/** @brief Verifies rotor is reciprocal: transform(reverse(transform(x))) == x. */
 TEST_F(RotorTests, Reciprocity) {
     Rotor rotor(config);
     rotor.setPosition(0);
 
-    // Verify that the Reverse LUT is the exact inverse of the Forward LUT
-    // This explicitly tests the logic in initReverseLookupTable()
     for (int i = 0; i < 26; i++) {
         int forward = rotor.transform(i, false);
         int reverse = rotor.transform(forward, true);
@@ -45,31 +43,27 @@ TEST_F(RotorTests, Reciprocity) {
     }
 }
 
+/** @brief Verifies rotation changes the transformation mapping. */
 TEST_F(RotorTests, RotationEffect) {
     Rotor rotor(config);
     rotor.setPosition(0);
 
-    // Initial: 0 -> 3
     int initialOutput = rotor.transform(0, false);
     EXPECT_EQ(initialOutput, 3);
 
-    // Rotate 1 step
     rotor.rotate();
 
-    // After rotation, the mapping changes.
-    // The exact new value depends on the internal math (Ring setting vs Position),
-    // but it MUST be different from the initial for a standard rotor.
     int rotatedOutput = rotor.transform(0, false);
     EXPECT_NE(rotatedOutput, initialOutput);
 }
 
+/** @brief Verifies 26 rotations return to starting position. */
 TEST_F(RotorTests, FullRotationCycle) {
     Rotor rotor(config);
     rotor.setPosition(0);
 
     int startVal = rotor.transform(0, false);
 
-    // Rotate 26 times to return to start
     for (int i = 0; i < 26; i++) {
         rotor.rotate();
     }
@@ -77,6 +71,7 @@ TEST_F(RotorTests, FullRotationCycle) {
     EXPECT_EQ(rotor.transform(0, false), startVal);
 }
 
+/** @brief Verifies setPosition manually sets rotor position. */
 TEST_F(RotorTests, SetPosition) {
     Rotor rotor(config);
 
@@ -89,23 +84,84 @@ TEST_F(RotorTests, SetPosition) {
     rotor.rotate();
     rotor.rotate();
     rotor.rotate();
-    // Now effectively at 5
 
     EXPECT_EQ(rotor.transform(0, false), valAt5);
 }
 
+/** @brief Verifies notch signaling when rotor steps into notch position. */
 TEST_F(RotorTests, NotchSignaling) {
     Rotor rotor(config);
 
-    // Rotor1 notch is at 0 (from config)
-    // We want to step INTO the notch.
-    // If we are at 25, next step is 0 (Notch).
-
     rotor.setPosition(25);
-    int signal = rotor.rotate();  // Becomes 0
+    int signal = rotor.rotate();
     EXPECT_EQ(signal, 1) << "Rotor should signal notch when stepping into position 0";
 
-    // Step again (to 1)
     signal = rotor.rotate();
     EXPECT_EQ(signal, 0) << "Rotor should not signal notch when stepping out of 0";
+}
+
+/** @brief Verifies move constructor transfers state correctly. */
+TEST_F(RotorTests, MoveConstructor) {
+    RotorConfig configCopy = config;
+    Rotor rotor(std::move(configCopy));
+
+    EXPECT_EQ(rotor.getType(), TransformerType::Rotor);
+    EXPECT_EQ(rotor.transform(0, false), 3);
+    EXPECT_EQ(rotor.transform(3, true), 0);
+}
+
+/** @brief Verifies reverse transform handles wrap-around at boundaries. */
+TEST_F(RotorTests, ReverseTransformWrapAround) {
+    Rotor rotor(config);
+
+    for (int rot = 0; rot < 26; rot++) {
+        rotor.setPosition(rot);
+        for (int i = 0; i < 26; i++) {
+            int result = rotor.transform(i, true);
+            EXPECT_GE(result, 0);
+            EXPECT_LT(result, 26);
+        }
+    }
+
+    rotor.setPosition(10);
+    int res1 = rotor.transform(0, true);
+    rotor.setPosition(0);
+    int res2 = rotor.transform(10, true);
+    EXPECT_NE(res1, res2) << "Different rotation positions should produce different results";
+}
+
+/** @brief Verifies move constructor produces same results as copy. */
+TEST_F(RotorTests, MoveConstructorResultsMatchCopy) {
+    RotorConfig configCopy = config;
+    Rotor rotorCopy(configCopy);
+    rotorCopy.setPosition(0);
+
+    RotorConfig configMove = config;
+    Rotor rotorMove(std::move(configMove));
+    rotorMove.setPosition(0);
+
+    for (int i = 0; i < 26; i++) {
+        EXPECT_EQ(rotorMove.transform(i, false), rotorCopy.transform(i, false));
+        EXPECT_EQ(rotorMove.transform(i, true), rotorCopy.transform(i, true));
+    }
+}
+
+/** @brief Verifies exception thrown for wiring value out of range. */
+TEST(RotorErrorTests, InvalidWiringValueOutOfRange) {
+    RotorConfig invalidConfig;
+    invalidConfig.wiring = std::array<int, 26>{0,  1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11, 12,
+                                               13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 30};
+    invalidConfig.notchPosition = 0;
+
+    EXPECT_THROW(Rotor rotor(invalidConfig), std::runtime_error);
+}
+
+/** @brief Verifies exception thrown for duplicate wiring values. */
+TEST(RotorErrorTests, InvalidWiringDuplicateValue) {
+    RotorConfig invalidConfig;
+    invalidConfig.wiring = std::array<int, 26>{0,  0,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11, 12,
+                                               13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25};
+    invalidConfig.notchPosition = 0;
+
+    EXPECT_THROW(Rotor rotor(invalidConfig), std::runtime_error);
 }

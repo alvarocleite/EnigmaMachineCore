@@ -7,7 +7,7 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 
 # Define project name, version, and language
-project(EnigmaMachineCore VERSION 0.0.1 LANGUAGES CXX)
+project(EnigmaMachineCore VERSION 0.1.0 LANGUAGES CXX)
 
 # --- GNU Install Directories ---
 include(GNUInstallDirs)
@@ -223,6 +223,27 @@ if(ENIGMA_USE_ASAN OR ENIGMA_USE_UBSAN OR ENIGMA_USE_MSAN)
     endif()
 endif()
 
+# --- Code Coverage ---
+option(ENIGMA_ENABLE_COVERAGE "Enable code coverage reporting with gcov/lcov" OFF)
+
+if(ENIGMA_ENABLE_COVERAGE)
+    find_program(GCOV_EXE gcov)
+    find_program(LCOV_EXE lcov)
+    find_program(GENHTML_EXE genhtml)
+
+    if(NOT GCOV_EXE OR NOT LCOV_EXE OR NOT GENHTML_EXE)
+        message(WARNING "gcov, lcov, or genhtml not found. Coverage reporting will not be available.")
+        set(ENIGMA_ENABLE_COVERAGE OFF)
+    endif()
+
+    if(ENIGMA_ENABLE_COVERAGE)
+        message(STATUS "Code coverage enabled")
+        set(COVERAGE_FLAGS -fprofile-arcs -ftest-coverage)
+
+        target_compile_options(EnigmaCore_OBJ PRIVATE ${COVERAGE_FLAGS})
+    endif()
+endif()
+
 # --- Main Executable Target ---
 if(ENIGMA_BUILD_CLI)
     # Application entry point
@@ -252,6 +273,12 @@ if(ENIGMA_BUILD_CLI)
     if(SANITIZER_FLAGS)
         target_compile_options(${PROJECT_NAME} PRIVATE ${SANITIZER_FLAGS})
         target_link_options(${PROJECT_NAME} PRIVATE ${SANITIZER_FLAGS})
+    endif()
+
+    # Apply coverage flags if enabled
+    if(ENIGMA_ENABLE_COVERAGE)
+        target_compile_options(${PROJECT_NAME} PRIVATE ${COVERAGE_FLAGS})
+        target_link_options(${PROJECT_NAME} PRIVATE ${COVERAGE_FLAGS})
     endif()
 
     # Define the installed assets path for the CLI fallback
@@ -306,6 +333,27 @@ if(ENIGMA_BUILD_TESTS)
     endif()
 
     add_subdirectory(tests)
+
+    if(ENIGMA_ENABLE_COVERAGE)
+        add_custom_target(enigma_coverage
+            COMMAND ${LCOV_EXE} --capture --directory . --output-file coverage_raw.info --include 'EnigmaMachineCore/*' --ignore-errors gcov,source,inconsistent,mismatch || true
+            COMMAND ${LCOV_EXE} --remove coverage_raw.info '*/tests/*' '*/_deps/*' '*/external/*' --output-file coverage.info --ignore-errors inconsistent || true
+            COMMAND ${GENHTML_EXE} coverage.info --output-directory coverage_html --branch-coverage --legend
+            WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+            DEPENDS EnigmaTests
+            COMMENT "Generating lcov coverage report"
+        )
+
+        add_custom_target(enigma_core_coverage
+            COMMAND ${LCOV_EXE} --capture --directory . --output-file coverage_core_raw.info --include 'EnigmaMachineCore/*' --ignore-errors gcov,source,inconsistent,mismatch || true
+            COMMAND ${LCOV_EXE} --remove coverage_core_raw.info '*/tests/*' '*/_deps/*' '*/external/*' --output-file coverage_core.info --ignore-errors inconsistent || true
+            COMMAND ${LCOV_EXE} --extract coverage_core.info '*/RotorBox/src/*' '*/PlugBoard/src/*' '*/EnigmaMachine/src/EnigmaMachine.cpp' --output-file coverage_core_only.info --ignore-errors mismatch || true
+            COMMAND ${GENHTML_EXE} coverage_core_only.info --output-directory coverage_core_html --branch-coverage --legend
+            WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+            DEPENDS EnigmaTests
+            COMMENT "Generating core crypto-only lcov coverage report"
+        )
+    endif()
 endif()
 
 # --- Benchmarking (Google Benchmark) ---
