@@ -1,13 +1,13 @@
 #include <gtest/gtest.h>
 #include <fstream>
+#include "EnigmaConfig.hpp"
 #include "FileAssetProvider.hpp"
-#include "config.hpp"
 
 class FileAssetProviderTests : public ::testing::Test {
 protected:
     FileAssetProvider provider;
-    const std::string existingAsset = std::string(assetsDir) + "Rotor1.toml";
-    const std::string nonExistentAsset = std::string(assetsDir) + "GhostRotor.toml";
+    const std::string existingAsset = std::string(enigma::assetsDir) + "Rotor1.toml";
+    const std::string nonExistentAsset = std::string(enigma::assetsDir) + "GhostRotor.toml";
 };
 
 /** @brief Verifies loading an existing asset file. */

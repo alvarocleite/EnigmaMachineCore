@@ -10,10 +10,10 @@
 #include <string>
 #include <utility>
 
+#include "EnigmaConfig.hpp"
 #include "Reflector.hpp"
 #include "Rotor.hpp"
 #include "RotorBox.hpp"
-#include "config.hpp"
 
 /**
  * @details Initializes a standard 3-rotor configuration with empty/default wiring.

@@ -3,9 +3,10 @@
 #include <array>
 #include <string>
 #include <vector>
+#include "EnigmaConfig.hpp"
+#include "EnigmaData.hpp"
 #include "EnigmaTypes.hpp"
-#include "PlugBoardPair.hpp"  // For PlugBoardPair and PLUGBOARD_MAX_PAIRS
-#include "config.hpp"         // For TRANSFORMER_SIZE
+#include "PlugBoardPair.hpp"
 
 /**
  * @brief Configuration structure for an individual Rotor.
@@ -15,7 +16,7 @@ struct RotorConfig {
     /** @brief The position (0 - (TRANSFORMER_SIZE - 1)) at which the rotor triggers the turnover of the next rotor. */
     AlphabetIndex notchPosition = 0;
     /** @brief The internal wiring permutation array (forward direction). Must be of size TRANSFORMER_SIZE. */
-    std::array<AlphabetIndex, TRANSFORMER_SIZE> wiring;
+    std::array<AlphabetIndex, enigma::TRANSFORMER_SIZE> wiring;
 };
 
 /**
@@ -24,7 +25,7 @@ struct RotorConfig {
 struct ReflectorConfig {
     ReflectorConfig();
     /** @brief The internal wiring permutation array (reflection map). Must be of size TRANSFORMER_SIZE. */
-    std::array<AlphabetIndex, TRANSFORMER_SIZE> wiring;
+    std::array<AlphabetIndex, enigma::TRANSFORMER_SIZE> wiring;
 };
 
 /**
@@ -44,11 +45,17 @@ struct EnigmaMachineConfig {
     /** @brief Configuration for the reflector. */
     ReflectorConfig reflector;
     /** @brief Plugboard connection pairs. */
-    std::array<PlugBoardPair, PLUGBOARD_MAX_PAIRS> plugBoardPairs;
+    std::array<PlugBoardPair, enigma::MAX_PLUGBOARD_PAIRS> plugBoardPairs;
 
     /**
      * @brief Default constructor.
      * Initializes plugboard pairs to -1 (unused).
      */
     EnigmaMachineConfig();
+
+    /**
+     * @brief Converts this configuration to a POD DTO for embedded/WASM targets.
+     * @return enigma::EnigmaMachineData POD structure.
+     */
+    enigma::EnigmaMachineData toData() const;
 };

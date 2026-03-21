@@ -2,7 +2,7 @@
 #include <sstream>
 #include <stdexcept>
 #include <toml.hpp>
-#include "config.hpp"
+#include "EnigmaConfig.hpp"
 
 namespace {
 
@@ -21,8 +21,8 @@ namespace {
 void validateTransformerConfig(const toml::value& data, const std::string& expectedType, const std::string& fileName) {
     try {
         auto size = toml::find<int>(data, "size");
-        if (size != TRANSFORMER_SIZE) {
-            throw std::runtime_error("Transformer size mismatch: expected " + std::to_string(TRANSFORMER_SIZE) +
+        if (size != enigma::TRANSFORMER_SIZE) {
+            throw std::runtime_error("Transformer size mismatch: expected " + std::to_string(enigma::TRANSFORMER_SIZE) +
                                      ", got " + std::to_string(size));
         }
 
@@ -43,7 +43,7 @@ RotorConfig EnigmaConfigLoader::loadRotor(const IAssetProvider& provider, const 
 
     RotorConfig rotorConfig;
     rotorConfig.notchPosition = toml::find<AlphabetIndex>(rotorData, "rotor", "notchPosition");
-    rotorConfig.wiring = toml::find<std::array<AlphabetIndex, TRANSFORMER_SIZE>>(rotorData, "rotor", "forward");
+    rotorConfig.wiring = toml::find<std::array<AlphabetIndex, enigma::TRANSFORMER_SIZE>>(rotorData, "rotor", "forward");
 
     return rotorConfig;
 }
@@ -54,7 +54,8 @@ ReflectorConfig EnigmaConfigLoader::loadReflector(const IAssetProvider& provider
     validateTransformerConfig(reflectorData, "reflector", fileName.string());
 
     ReflectorConfig reflectorConfig;
-    reflectorConfig.wiring = toml::find<std::array<AlphabetIndex, TRANSFORMER_SIZE>>(reflectorData, "reflector", "map");
+    reflectorConfig.wiring =
+        toml::find<std::array<AlphabetIndex, enigma::TRANSFORMER_SIZE>>(reflectorData, "reflector", "map");
     return reflectorConfig;
 }
 
@@ -80,7 +81,7 @@ EnigmaMachineConfig EnigmaConfigLoader::load(const IAssetProvider& provider, con
     auto reflectorFile = toml::find<std::string>(data, "ReflectorFile");
     auto reflector = loadReflector(provider, FileName(assetPath / reflectorFile));
     auto plugsCount = toml::find<int>(data, "plugboard", "PlugCount");
-    if (plugsCount > PLUGBOARD_MAX_PAIRS) {
+    if (plugsCount > enigma::MAX_PLUGBOARD_PAIRS) {
         throw std::runtime_error("Error: Plugboard pairs exceed maximum allowed.");
     }
 
@@ -89,7 +90,7 @@ EnigmaMachineConfig EnigmaConfigLoader::load(const IAssetProvider& provider, con
         throw std::runtime_error("Error: Plugboard pairs count does not match specified count.");
     }
 
-    std::array<PlugBoardPair, PLUGBOARD_MAX_PAIRS> plugBoardPairs;
+    std::array<PlugBoardPair, enigma::MAX_PLUGBOARD_PAIRS> plugBoardPairs;
 
     for (int i = 0; i < plugsCount; i++) {
         plugBoardPairs.at(i).sourcePortIndex = toml::find<int>(plugBoardArr.at(i), "from");

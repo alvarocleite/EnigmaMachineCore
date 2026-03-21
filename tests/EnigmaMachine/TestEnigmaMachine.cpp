@@ -1,9 +1,9 @@
 #include <gtest/gtest.h>
 #include <string>
 #include <vector>
+#include "EnigmaConfig.hpp"
 #include "EnigmaMachine.hpp"
 #include "FileAssetProvider.hpp"
-#include "config.hpp"
 
 class EnigmaMachineTests : public ::testing::Test {
 protected:
@@ -23,25 +23,25 @@ protected:
 
 TEST_F(EnigmaMachineTests, Initialization) {
     /** @brief Verifies EnigmaMachine can be initialized from a valid configuration file. */
-    EXPECT_NO_THROW({ EnigmaMachine machine(configPath, assetsDir); });
+    EXPECT_NO_THROW({ EnigmaMachine machine(configPath, enigma::assetsDir); });
 }
 
 TEST_F(EnigmaMachineTests, BasicEncryption) {
     /** @brief Verifies basic encryption produces consistent, valid output within alphabet bounds. */
-    EnigmaMachine machine(configPath, assetsDir);
+    EnigmaMachine machine(configPath, enigma::assetsDir);
     int res = machine.keyTransform(0);  // 'A'
     EXPECT_GE(res, 0);
     EXPECT_LT(res, 26);
     // Deterministic check:
     // With current Config1 (Rotors 1,2,3 at 6,18,1, Plugs 4-7...), 'A' maps to something specific.
     // Let's just ensure it's consistent.
-    EnigmaMachine m2(configPath, assetsDir);
+    EnigmaMachine m2(configPath, enigma::assetsDir);
     EXPECT_EQ(m2.keyTransform(0), res);
 }
 
 TEST_F(EnigmaMachineTests, StringEncryption) {
     /** @brief Verifies multi-character encryption with rotor stepping produces varying output. */
-    EnigmaMachine machine(configPath, assetsDir);
+    EnigmaMachine machine(configPath, enigma::assetsDir);
     std::string input = "AAAAA";
     std::string output = encryptString(machine, input);
 
@@ -61,11 +61,11 @@ TEST_F(EnigmaMachineTests, Reciprocity) {
     std::string plain = "HELLOWORLD";
 
     // 1. Encrypt
-    EnigmaMachine mEnc(configPath, assetsDir);
+    EnigmaMachine mEnc(configPath, enigma::assetsDir);
     std::string cipher = encryptString(mEnc, plain);
 
     // 2. Decrypt (New machine with same initial state)
-    EnigmaMachine mDec(configPath, assetsDir);
+    EnigmaMachine mDec(configPath, enigma::assetsDir);
     std::string recovered = encryptString(mDec, cipher);
 
     EXPECT_EQ(recovered, plain) << "Decryption failed to recover plaintext.";
@@ -74,7 +74,7 @@ TEST_F(EnigmaMachineTests, Reciprocity) {
 TEST_F(EnigmaMachineTests, PlugBoardEffect) {
     /** @brief Verifies plugboard configuration affects encryption output. */
     // 1. Machine WITH Plugboard (from file)
-    EnigmaMachine mWithPlugs(configPath, assetsDir);
+    EnigmaMachine mWithPlugs(configPath, enigma::assetsDir);
 
     // 2. Machine WITHOUT Plugboard
     // We can use a simpler config or rely on default behavior if we had one,
@@ -152,7 +152,7 @@ TEST_F(EnigmaMachineTests, LoggerInjectionAndPropagation) {
 
 TEST_F(EnigmaMachineTests, MoveConstructor) {
     /** @brief Verifies move constructor transfers machine state correctly. */
-    EnigmaMachine machineOriginal(configPath, assetsDir);
+    EnigmaMachine machineOriginal(configPath, enigma::assetsDir);
     int outputOriginal = machineOriginal.keyTransform(0);
 
     EnigmaMachine machineMoved(std::move(machineOriginal));
@@ -164,7 +164,7 @@ TEST_F(EnigmaMachineTests, MoveConstructor) {
 
 TEST_F(EnigmaMachineTests, MoveAssignment) {
     /** @brief Verifies move assignment operator transfers machine state correctly. */
-    EnigmaMachine machine1(configPath, assetsDir);
+    EnigmaMachine machine1(configPath, enigma::assetsDir);
     machine1.keyTransform(0);
 
     EnigmaMachine machine2;
@@ -219,7 +219,7 @@ TEST_F(EnigmaMachineTests, SetLoggerPropagation) {
 
 TEST_F(EnigmaMachineTests, ConstructorWithFilePath) {
     /** @brief Verifies EnigmaMachine construction from file path. */
-    EnigmaMachine machine(configPath, assetsDir);
+    EnigmaMachine machine(configPath, enigma::assetsDir);
     int res = machine.keyTransform(0);
     EXPECT_GE(res, 0);
     EXPECT_LT(res, 26);
@@ -228,7 +228,7 @@ TEST_F(EnigmaMachineTests, ConstructorWithFilePath) {
 TEST_F(EnigmaMachineTests, ConstructorWithFilePathAndLogger) {
     /** @brief Verifies EnigmaMachine construction from file path with logger. */
     TestLogger logger;
-    EnigmaMachine machine(configPath, assetsDir, &logger);
+    EnigmaMachine machine(configPath, enigma::assetsDir, &logger);
     int res = machine.keyTransform(0);
     EXPECT_GE(res, 0);
     EXPECT_LT(res, 26);

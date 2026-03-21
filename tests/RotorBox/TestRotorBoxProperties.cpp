@@ -1,19 +1,20 @@
 #include <gtest/gtest.h>
 #include <rapidcheck/gtest.h>
 #include <vector>
+#include "EnigmaConfig.hpp"
 #include "EnigmaConfigLoader.hpp"
 #include "EnigmaMachineConfig.hpp"
 #include "FileAssetProvider.hpp"
 #include "RotorBox.hpp"
-#include "config.hpp"
 
 using FileName = EnigmaConfigLoader::FileName;
 
 class RotorBoxProperties : public ::testing::Test {
 protected:
-    std::vector<FileName> rotorFiles = {
-        FileName(fs::path(assetsDir) / "Rotor1.toml"), FileName(fs::path(assetsDir) / "Rotor2.toml"),
-        FileName(fs::path(assetsDir) / "Rotor3.toml"), FileName(fs::path(assetsDir) / "Reflector.toml")};
+    std::vector<FileName> rotorFiles = {FileName(fs::path(enigma::assetsDir) / "Rotor1.toml"),
+                                        FileName(fs::path(enigma::assetsDir) / "Rotor2.toml"),
+                                        FileName(fs::path(enigma::assetsDir) / "Rotor3.toml"),
+                                        FileName(fs::path(enigma::assetsDir) / "Reflector.toml")};
 
     std::vector<RotorConfig> rotors;
     ReflectorConfig reflector;

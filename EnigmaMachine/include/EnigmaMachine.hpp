@@ -19,6 +19,9 @@ class RotorBox;
 class PlugBoard;
 struct EnigmaMachineConfig;
 class IAssetProvider;
+namespace enigma {
+struct EnigmaMachineData;
+}
 
 /**
  * @brief Class representing the Enigma machine.
@@ -45,7 +48,7 @@ protected:
      */
     explicit EnigmaMachine(EnigmaMachineConfig&& config, ILogger* logger = nullptr);
 
-private:
+protected:
     std::unique_ptr<RotorBox> rotorBox;
     std::unique_ptr<PlugBoard> plugBoard;
     std::vector<IEnigmaObserver*> observers;
@@ -69,6 +72,13 @@ public:
      */
     EnigmaMachine(const IAssetProvider& provider, std::string_view fileName, std::string_view assetPath = "",
                   ILogger* logger = nullptr);
+
+    /**
+     * @brief Constructor using POD DTO for embedded/WASM targets.
+     * @param data The POD configuration data.
+     * @param logger Optional logger for event reporting.
+     */
+    explicit EnigmaMachine(const enigma::EnigmaMachineData& data, ILogger* logger = nullptr);
 
     /**
      * @brief File-based Constructor.

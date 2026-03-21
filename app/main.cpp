@@ -5,8 +5,8 @@
 #include <iostream>
 #include <string>
 
+#include "EnigmaConfig.hpp"
 #include "EnigmaCore.hpp"
-#include "config.hpp"
 
 namespace fs = std::filesystem;
 
@@ -29,7 +29,7 @@ std::string resolveDefaultAssetPath() {
 #endif
 
     // Default to the header-defined constant if everything else fails
-    return std::string(assetsDir);
+    return std::string(enigma::assetsDir);
 }
 
 struct AppConfig {

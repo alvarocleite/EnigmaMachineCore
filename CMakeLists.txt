@@ -59,7 +59,6 @@ set(INCLUDE_DIRS
     ${CMAKE_CURRENT_SOURCE_DIR}/RotorBox/include
     ${CMAKE_CURRENT_SOURCE_DIR}/PlugBoard/include
     ${CMAKE_CURRENT_SOURCE_DIR}/EnigmaMachine/include
-    ${CMAKE_CURRENT_SOURCE_DIR}/config/
 )
 
 # --- External Dependencies ---
@@ -381,7 +380,7 @@ if(CLANG_FORMAT_EXE)
         "RotorBox/*.cpp" "RotorBox/*.hpp"
         "tests/*.cpp"
     )
-    list(APPEND ALL_SOURCES "app/main.cpp" "config/config.hpp")
+    list(APPEND ALL_SOURCES "app/main.cpp")
 
     add_custom_target(enigma_format
         COMMAND ${CLANG_FORMAT_EXE} -i -style=file ${ALL_SOURCES}
@@ -407,7 +406,10 @@ install(TARGETS EnigmaCore
 set(PUBLIC_HEADERS
     include/EnigmaCore.hpp
     include/EnigmaTypes.hpp
+    include/EnigmaConfig.hpp
+    include/EnigmaData.hpp
     EnigmaMachine/include/EnigmaMachine.hpp
+    EnigmaMachine/include/EnigmaMachineConfig.hpp
     EnigmaMachine/include/IEnigmaObserver.hpp
     EnigmaMachine/include/IAssetProvider.hpp
 )

@@ -2,21 +2,21 @@
 #include <rapidcheck/gtest.h>
 #include <array>
 #include <set>
+#include "EnigmaConfig.hpp"
 #include "PlugBoard.hpp"
-#include "config.hpp"
 
 class PlugBoardProperties : public ::testing::Test {};
 
 RC_GTEST_PROP(PlugBoardProperties, PlugBoardReciprocity, ()) {
     int numPairs = *rc::gen::inRange(0, 5);
 
-    std::array<PlugBoardPair, PLUGBOARD_MAX_PAIRS> pairs = {};
+    std::array<PlugBoardPair, enigma::MAX_PLUGBOARD_PAIRS> pairs = {};
     for (auto& p : pairs) {
         p = {0, 0};
     }
 
     std::set<int> usedPorts;
-    for (int i = 0; i < numPairs && i < PLUGBOARD_MAX_PAIRS; i++) {
+    for (int i = 0; i < numPairs && i < enigma::MAX_PLUGBOARD_PAIRS; i++) {
         int a, b;
         do {
             a = *rc::gen::inRange(0, 26);
@@ -39,9 +39,9 @@ RC_GTEST_PROP(PlugBoardProperties, PlugBoardReciprocity, ()) {
 RC_GTEST_PROP(PlugBoardProperties, PlugBoardOutputInRange, ()) {
     int numPairs = *rc::gen::inRange(0, 5);
 
-    std::array<PlugBoardPair, PLUGBOARD_MAX_PAIRS> pairs = {};
+    std::array<PlugBoardPair, enigma::MAX_PLUGBOARD_PAIRS> pairs = {};
     std::set<int> usedPorts;
-    for (int i = 0; i < numPairs && i < PLUGBOARD_MAX_PAIRS; i++) {
+    for (int i = 0; i < numPairs && i < enigma::MAX_PLUGBOARD_PAIRS; i++) {
         int a, b;
         do {
             a = *rc::gen::inRange(0, 26);
@@ -61,7 +61,7 @@ RC_GTEST_PROP(PlugBoardProperties, PlugBoardOutputInRange, ()) {
 }
 
 RC_GTEST_PROP(PlugBoardProperties, PlugBoardEmptyConfiguration, ()) {
-    std::array<PlugBoardPair, PLUGBOARD_MAX_PAIRS> pairs = {};
+    std::array<PlugBoardPair, enigma::MAX_PLUGBOARD_PAIRS> pairs = {};
     for (auto& p : pairs) {
         p = {0, 0};
     }
@@ -73,12 +73,12 @@ RC_GTEST_PROP(PlugBoardProperties, PlugBoardEmptyConfiguration, ()) {
 }
 
 RC_GTEST_PROP(PlugBoardProperties, PlugBoardSelfLoop, ()) {
-    std::array<PlugBoardPair, PLUGBOARD_MAX_PAIRS> pairs = {};
+    std::array<PlugBoardPair, enigma::MAX_PLUGBOARD_PAIRS> pairs = {};
     for (auto& p : pairs) {
         p = {0, 0};
     }
 
-    int selfIndex = *rc::gen::inRange(0, PLUGBOARD_MAX_PAIRS);
+    int selfIndex = *rc::gen::inRange(0, enigma::MAX_PLUGBOARD_PAIRS);
     int port = *rc::gen::inRange(0, 26);
     pairs[selfIndex] = {static_cast<AlphabetIndex>(port), static_cast<AlphabetIndex>(port)};
 
@@ -87,7 +87,7 @@ RC_GTEST_PROP(PlugBoardProperties, PlugBoardSelfLoop, ()) {
 }
 
 RC_GTEST_PROP(PlugBoardProperties, PlugBoardSymmetricMapping, ()) {
-    std::array<PlugBoardPair, PLUGBOARD_MAX_PAIRS> pairs = {};
+    std::array<PlugBoardPair, enigma::MAX_PLUGBOARD_PAIRS> pairs = {};
     pairs[0] = {static_cast<AlphabetIndex>(0), static_cast<AlphabetIndex>(25)};
     pairs[1] = {static_cast<AlphabetIndex>(1), static_cast<AlphabetIndex>(24)};
     pairs[2] = {static_cast<AlphabetIndex>(2), static_cast<AlphabetIndex>(23)};
@@ -102,7 +102,7 @@ RC_GTEST_PROP(PlugBoardProperties, PlugBoardSymmetricMapping, ()) {
 }
 
 RC_GTEST_PROP(PlugBoardProperties, PlugBoardAllInputsMapped, ()) {
-    std::array<PlugBoardPair, PLUGBOARD_MAX_PAIRS> pairs = {};
+    std::array<PlugBoardPair, enigma::MAX_PLUGBOARD_PAIRS> pairs = {};
     for (auto& p : pairs) {
         p = {0, 0};
     }
@@ -125,9 +125,9 @@ RC_GTEST_PROP(PlugBoardProperties, PlugBoardAllInputsMapped, ()) {
 RC_GTEST_PROP(PlugBoardProperties, PlugBoardDeterminism, ()) {
     int numPairs = *rc::gen::inRange(0, 5);
 
-    std::array<PlugBoardPair, PLUGBOARD_MAX_PAIRS> pairs = {};
+    std::array<PlugBoardPair, enigma::MAX_PLUGBOARD_PAIRS> pairs = {};
     std::set<int> usedPorts;
-    for (int i = 0; i < numPairs && i < PLUGBOARD_MAX_PAIRS; i++) {
+    for (int i = 0; i < numPairs && i < enigma::MAX_PLUGBOARD_PAIRS; i++) {
         int a, b;
         do {
             a = *rc::gen::inRange(0, 26);
@@ -154,7 +154,7 @@ RC_GTEST_PROP(PlugBoardProperties, PlugBoardDeterminism, ()) {
 }
 
 RC_GTEST_PROP(PlugBoardProperties, PlugBoardNoFixedPointExceptSelfLoops, ()) {
-    std::array<PlugBoardPair, PLUGBOARD_MAX_PAIRS> pairs = {};
+    std::array<PlugBoardPair, enigma::MAX_PLUGBOARD_PAIRS> pairs = {};
     pairs[0] = {static_cast<AlphabetIndex>(0), static_cast<AlphabetIndex>(25)};
     pairs[1] = {static_cast<AlphabetIndex>(1), static_cast<AlphabetIndex>(24)};
     pairs[2] = {static_cast<AlphabetIndex>(2), static_cast<AlphabetIndex>(23)};
@@ -190,9 +190,9 @@ RC_GTEST_PROP(PlugBoardProperties, PlugBoardOutOfBoundsUnchanged, ()) {
 RC_GTEST_PROP(PlugBoardProperties, PlugBoardConsistentMapping, ()) {
     int numPairs = *rc::gen::inRange(0, 5);
 
-    std::array<PlugBoardPair, PLUGBOARD_MAX_PAIRS> pairs = {};
+    std::array<PlugBoardPair, enigma::MAX_PLUGBOARD_PAIRS> pairs = {};
     std::set<int> usedPorts;
-    for (int i = 0; i < numPairs && i < PLUGBOARD_MAX_PAIRS; i++) {
+    for (int i = 0; i < numPairs && i < enigma::MAX_PLUGBOARD_PAIRS; i++) {
         int a, b;
         do {
             a = *rc::gen::inRange(0, 26);
@@ -215,9 +215,9 @@ RC_GTEST_PROP(PlugBoardProperties, PlugBoardConsistentMapping, ()) {
 RC_GTEST_PROP(PlugBoardProperties, PlugBoardMultipleSwaps, ()) {
     int numPairs = *rc::gen::inRange(0, 5);
 
-    std::array<PlugBoardPair, PLUGBOARD_MAX_PAIRS> pairs = {};
+    std::array<PlugBoardPair, enigma::MAX_PLUGBOARD_PAIRS> pairs = {};
     std::set<int> usedPorts;
-    for (int i = 0; i < numPairs && i < PLUGBOARD_MAX_PAIRS; i++) {
+    for (int i = 0; i < numPairs && i < enigma::MAX_PLUGBOARD_PAIRS; i++) {
         int a, b;
         do {
             a = *rc::gen::inRange(0, 26);
@@ -242,9 +242,9 @@ RC_GTEST_PROP(PlugBoardProperties, PlugBoardMultipleSwaps, ()) {
 RC_GTEST_PROP(PlugBoardProperties, PlugBoardInverseProperty, ()) {
     int numPairs = *rc::gen::inRange(0, 5);
 
-    std::array<PlugBoardPair, PLUGBOARD_MAX_PAIRS> pairs = {};
+    std::array<PlugBoardPair, enigma::MAX_PLUGBOARD_PAIRS> pairs = {};
     std::set<int> usedPorts;
-    for (int i = 0; i < numPairs && i < PLUGBOARD_MAX_PAIRS; i++) {
+    for (int i = 0; i < numPairs && i < enigma::MAX_PLUGBOARD_PAIRS; i++) {
         int a, b;
         do {
             a = *rc::gen::inRange(0, 26);
@@ -268,7 +268,7 @@ RC_GTEST_PROP(PlugBoardProperties, PlugBoardInverseProperty, ()) {
 }
 
 RC_GTEST_PROP(PlugBoardProperties, PlugBoardNoDuplicateOutputs, ()) {
-    std::array<PlugBoardPair, PLUGBOARD_MAX_PAIRS> pairs = {};
+    std::array<PlugBoardPair, enigma::MAX_PLUGBOARD_PAIRS> pairs = {};
     pairs[0] = {static_cast<AlphabetIndex>(0), static_cast<AlphabetIndex>(25)};
     pairs[1] = {static_cast<AlphabetIndex>(1), static_cast<AlphabetIndex>(24)};
     pairs[2] = {static_cast<AlphabetIndex>(2), static_cast<AlphabetIndex>(23)};
@@ -286,8 +286,8 @@ RC_GTEST_PROP(PlugBoardProperties, PlugBoardNoDuplicateOutputs, ()) {
 RC_GTEST_PROP(PlugBoardProperties, PlugBoardRandomConfiguration, ()) {
     int numPairs = *rc::gen::inRange(0, 5);
 
-    std::array<PlugBoardPair, PLUGBOARD_MAX_PAIRS> pairs = {};
-    for (int i = 0; i < numPairs && i < PLUGBOARD_MAX_PAIRS; i++) {
+    std::array<PlugBoardPair, enigma::MAX_PLUGBOARD_PAIRS> pairs = {};
+    for (int i = 0; i < numPairs && i < enigma::MAX_PLUGBOARD_PAIRS; i++) {
         pairs[i] = {static_cast<AlphabetIndex>(i * 2), static_cast<AlphabetIndex>((i * 2 + 1) % 26)};
     }
 

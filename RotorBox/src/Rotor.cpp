@@ -13,7 +13,7 @@
 /**
  * @details Initializes the Rotor by:
  * 1. Setting the notch position and initial rotation count.
- * 2. Validating the wiring size against TRANSFORMER_SIZE.
+ * 2. Validating the wiring size against enigma::TRANSFORMER_SIZE.
  * 3. Populating the forward transformation table.
  * 4. Generating the reverse transformation table via `initReverseLookupTable`.
  *
@@ -49,11 +49,11 @@ Rotor::Rotor(RotorConfig&& config) {
  */
 void Rotor::initReverseLookupTable() {
     const auto& forwardRow = getTransformRow(0);
-    std::vector<bool> seen(TRANSFORMER_SIZE, false);
+    std::vector<bool> seen(enigma::TRANSFORMER_SIZE, false);
 
     int newVal{0};
     std::for_each(forwardRow.begin(), forwardRow.end(), [&](int value) {
-        if (value < 0 || value >= TRANSFORMER_SIZE) {
+        if (value < 0 || value >= enigma::TRANSFORMER_SIZE) {
             throw std::runtime_error("Invalid Rotor mapping: Value out of range: " + std::to_string(value));
         }
         if (seen[value]) {
@@ -102,13 +102,13 @@ AlphabetIndex Rotor::transform(AlphabetIndex position, bool reverse) const {
  */
 AlphabetIndex Rotor::transformForward(AlphabetIndex position) const {
     position = (position + rotationCount);
-    if (position >= TRANSFORMER_SIZE) {
-        position -= TRANSFORMER_SIZE;
+    if (position >= enigma::TRANSFORMER_SIZE) {
+        position -= enigma::TRANSFORMER_SIZE;
     }
     position = getTransformValue(0, position);
-    position = (position - rotationCount + TRANSFORMER_SIZE);
-    if (position >= TRANSFORMER_SIZE) {
-        position -= TRANSFORMER_SIZE;
+    position = (position - rotationCount + enigma::TRANSFORMER_SIZE);
+    if (position >= enigma::TRANSFORMER_SIZE) {
+        position -= enigma::TRANSFORMER_SIZE;
     }
 
     return position;
@@ -122,28 +122,28 @@ AlphabetIndex Rotor::transformForward(AlphabetIndex position) const {
  */
 AlphabetIndex Rotor::transformReverse(AlphabetIndex position) const {
     position = (rotationCount + position);
-    if (position >= TRANSFORMER_SIZE) {
-        position -= TRANSFORMER_SIZE;
+    if (position >= enigma::TRANSFORMER_SIZE) {
+        position -= enigma::TRANSFORMER_SIZE;
     }
     position = getTransformValue(1, position);
-    position = (position - rotationCount + TRANSFORMER_SIZE);
-    if (position >= TRANSFORMER_SIZE) {
-        position -= TRANSFORMER_SIZE;
+    position = (position - rotationCount + enigma::TRANSFORMER_SIZE);
+    if (position >= enigma::TRANSFORMER_SIZE) {
+        position -= enigma::TRANSFORMER_SIZE;
     }
 
     return position;
 }
 
 /**
- * @details Increments the rotor's position by one step (modulo TRANSFORMER_SIZE).
+ * @details Increments the rotor's position by one step (modulo enigma::TRANSFORMER_SIZE).
  * Checks if the new position corresponds to the notch position.
  *
  * @return 1 if the rotor is now at the notch position (triggering a carry), 0 otherwise.
  */
 int Rotor::rotate() {
     rotationCount = (rotationCount + 1);
-    if (rotationCount >= TRANSFORMER_SIZE) {
-        rotationCount -= TRANSFORMER_SIZE;
+    if (rotationCount >= enigma::TRANSFORMER_SIZE) {
+        rotationCount -= enigma::TRANSFORMER_SIZE;
     }
     return isNotchPosition(rotationCount) ? 1 : 0;
 }
