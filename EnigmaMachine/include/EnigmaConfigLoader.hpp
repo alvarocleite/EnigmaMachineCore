@@ -3,6 +3,7 @@
 #include <filesystem>
 #include <string_view>
 
+#include "EnigmaError.hpp"
 #include "EnigmaMachineConfig.hpp"
 #include "IAssetProvider.hpp"
 
@@ -42,27 +43,26 @@ public:
      * @param provider The asset provider to load files from.
      * @param fileName The path to the main configuration TOML file.
      * @param assetPath An optional base directory path to prepend to relative paths found in the config file.
-     * @return EnigmaMachineConfig A fully populated configuration object.
-     * @throws std::runtime_error If parsing fails or validation checks fail.
+     * @return enigma::Result<EnigmaMachineConfig> A fully populated configuration object, or an error code.
      */
-    static EnigmaMachineConfig load(const IAssetProvider& provider, const FileName& fileName,
-                                    const AssetPath& assetPath = AssetPath());
+    static enigma::Result<EnigmaMachineConfig> load(const IAssetProvider& provider, const FileName& fileName,
+                                                    const AssetPath& assetPath = AssetPath());
 
     /**
      * @brief Loads a single rotor configuration from a TOML file.
      *
      * @param provider The asset provider to load files from.
      * @param fileName The path to the rotor configuration file.
-     * @return RotorConfig The parsed rotor configuration.
+     * @return enigma::Result<RotorConfig> The parsed rotor configuration, or an error code.
      */
-    static RotorConfig loadRotor(const IAssetProvider& provider, const FileName& fileName);
+    static enigma::Result<RotorConfig> loadRotor(const IAssetProvider& provider, const FileName& fileName);
 
     /**
      * @brief Loads a single reflector configuration from a TOML file.
      *
      * @param provider The asset provider to load files from.
      * @param fileName The path to the reflector configuration file.
-     * @return ReflectorConfig The parsed reflector configuration.
+     * @return enigma::Result<ReflectorConfig> The parsed reflector configuration, or an error code.
      */
-    static ReflectorConfig loadReflector(const IAssetProvider& provider, const FileName& fileName);
+    static enigma::Result<ReflectorConfig> loadReflector(const IAssetProvider& provider, const FileName& fileName);
 };

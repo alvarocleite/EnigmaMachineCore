@@ -16,45 +16,58 @@ activate Loader
 
     Loader -> Assets: loadAsset("config.toml")
     activate Assets
-    Assets --> Loader: rawContent (string)
+    Assets --> Loader: Result<string>
     deactivate Assets
 
-    Loader -> TOML: parse(rawContent)
-    activate TOML
-    TOML --> Loader: toml::value
-    deactivate TOML
+    alt Success
+        Loader -> TOML: parse(rawContent)
+        activate TOML
+        TOML --> Loader: toml::value
+        deactivate TOML
 
-    Loader -> Loader: parseRotorCount()
-    Loader -> Loader: parseRotorPositions() : vector<AlphabetIndex>
+        Loader -> Loader: parseRotorCount()
+        Loader -> Loader: parseRotorPositions() : vector<AlphabetIndex>
 
-    loop for each Rotor file defined
-        Loader -> Assets: loadAsset("RotorX.toml")
+        loop for each Rotor file defined
+            Loader -> Assets: loadAsset("RotorX.toml")
+            activate Assets
+            Assets --> Loader: Result<string>
+            deactivate Assets
+
+            alt Success
+                Loader -> TOML: parse(rotorContent)
+                TOML --> Loader: rotorData
+                Loader -> Loader: create RotorConfig (uses AlphabetIndex)
+            else Error
+                Loader --> App: Result<EnigmaMachineConfig> (with error)
+            end
+        end
+
+        Loader -> Assets: loadAsset("Reflector.toml")
         activate Assets
-        Assets --> Loader: rotorContent
+        Assets --> Loader: Result<string>
         deactivate Assets
 
-        Loader -> TOML: parse(rotorContent)
-        TOML --> Loader: rotorData
-        Loader -> Loader: create RotorConfig (uses AlphabetIndex)
+        alt Success
+            Loader -> TOML: parse(reflectorContent)
+            TOML --> Loader: reflectorData
+            Loader -> Loader: create ReflectorConfig (uses AlphabetIndex)
+        else Error
+            Loader --> App: Result<EnigmaMachineConfig> (with error)
+        end
+
+        Loader -> Loader: parsePlugBoardPairs()
+
+        create "EnigmaMachineConfig" as Config
+        Loader -> Config: create()
+
+        Loader --> App: Result<EnigmaMachineConfig>
+    else Error
+        Loader --> App: Result<EnigmaMachineConfig> (FileNotFound)
     end
-
-    Loader -> Assets: loadAsset("Reflector.toml")
-    activate Assets
-    Assets --> Loader: reflectorContent
-    deactivate Assets
-
-    Loader -> TOML: parse(reflectorContent)
-    TOML --> Loader: reflectorData
-    Loader -> Loader: create ReflectorConfig (uses AlphabetIndex)
-
-    Loader -> Loader: parsePlugBoardPairs()
-
-    create "EnigmaMachineConfig" as Config
-    Loader -> Config: create()
-
-Loader --> App: EnigmaMachineConfig
 deactivate Loader
 
+alt Success (App constructs EnigmaMachine)
 App -> EM: EnigmaMachine(config, logger)
 activate EM
 
@@ -67,5 +80,6 @@ activate EM
     EM -> EM: setupObservers()
 
 deactivate EM
+end
 
 @enduml

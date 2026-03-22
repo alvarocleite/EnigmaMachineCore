@@ -12,6 +12,7 @@
 #include "EnigmaConfig.hpp"
 #include "EnigmaConfigLoader.hpp"
 #include "EnigmaData.hpp"
+#include "EnigmaError.hpp"
 #include "EnigmaMachine.hpp"
 #include "EnigmaMachineConfig.hpp"
 #include "FileAssetProvider.hpp"
@@ -26,56 +27,78 @@ namespace fs = std::filesystem;
  * path defined during installation.
  */
 static std::string resolveDefaultAssetPath() {
-    // Check for local 'assets' directory
     if (fs::exists("assets") && fs::is_directory("assets")) {
         return "assets/";
     }
 
 #ifdef ENIGMA_INSTALL_ASSETS_PATH
-    // Fallback to the installed assets path if defined via CMake
     if (fs::exists(ENIGMA_INSTALL_ASSETS_PATH) && fs::is_directory(ENIGMA_INSTALL_ASSETS_PATH)) {
         return ENIGMA_INSTALL_ASSETS_PATH;
     }
 #endif
 
-    // Default to the header-defined constant if everything else fails
     return std::string(enigma::assetsDir);
 }
 
-/**
- * @details Loads default configuration files (Rotor1, Rotor2, Rotor3, Reflector)
- * from the global assets directory defined in `config.hpp`.
- */
+static void logEnigmaError(ILogger* logger, const std::string& context, enigma::EnigmaError error) {
+    if (!logger) return;
+    std::string msg = context + " failed with error code: " + std::to_string(static_cast<int>(error));
+    logger->log(LogLevel::Error, msg);
+}
+
 using FileName = EnigmaConfigLoader::FileName;
 using AssetPath = EnigmaConfigLoader::AssetPath;
 EnigmaMachine::EnigmaMachine(ILogger* logger) : logger(logger) {
     FileAssetProvider provider;
     fs::path assetsDirectory(resolveDefaultAssetPath());
-    try {
-        std::vector<RotorConfig> rotors;
-        rotors.push_back(
-            EnigmaConfigLoader::loadRotor(provider, FileName(assetsDirectory / enigma::defaultRotor1File)));
-        rotors.push_back(
-            EnigmaConfigLoader::loadRotor(provider, FileName(assetsDirectory / enigma::defaultRotor2File)));
-        rotors.push_back(
-            EnigmaConfigLoader::loadRotor(provider, FileName(assetsDirectory / enigma::defaultRotor3File)));
-        auto reflector =
-            EnigmaConfigLoader::loadReflector(provider, FileName(assetsDirectory / enigma::defaultReflectorFile));
 
-        rotorBox = std::make_unique<RotorBox>(std::vector<AlphabetIndex>{0, 0, 0}, rotors, reflector, logger);
-        plugBoard = std::make_unique<PlugBoard>();
-        rotorBox->registerObserver(this);
-    } catch (const std::exception& e) {
-        if (this->logger) {
-            this->logger->log(LogLevel::Error, "Failed to initialize default EnigmaMachine: " + std::string(e.what()));
-        }
-        throw;
+    std::vector<RotorConfig> rotors;
+    auto rotor1Result = EnigmaConfigLoader::loadRotor(provider, FileName(assetsDirectory / enigma::defaultRotor1File));
+    if (!rotor1Result) {
+        logEnigmaError(logger, "Failed to load Rotor 1", rotor1Result.error());
+        throw std::runtime_error("Failed to load Rotor 1");
     }
+    rotors.push_back(*rotor1Result);
+
+    auto rotor2Result = EnigmaConfigLoader::loadRotor(provider, FileName(assetsDirectory / enigma::defaultRotor2File));
+    if (!rotor2Result) {
+        logEnigmaError(logger, "Failed to load Rotor 2", rotor2Result.error());
+        throw std::runtime_error("Failed to load Rotor 2");
+    }
+    rotors.push_back(*rotor2Result);
+
+    auto rotor3Result = EnigmaConfigLoader::loadRotor(provider, FileName(assetsDirectory / enigma::defaultRotor3File));
+    if (!rotor3Result) {
+        logEnigmaError(logger, "Failed to load Rotor 3", rotor3Result.error());
+        throw std::runtime_error("Failed to load Rotor 3");
+    }
+    rotors.push_back(*rotor3Result);
+
+    auto reflectorResult =
+        EnigmaConfigLoader::loadReflector(provider, FileName(assetsDirectory / enigma::defaultReflectorFile));
+    if (!reflectorResult) {
+        logEnigmaError(logger, "Failed to load Reflector", reflectorResult.error());
+        throw std::runtime_error("Failed to load Reflector");
+    }
+
+    rotorBox = std::make_unique<RotorBox>(std::vector<AlphabetIndex>{0, 0, 0}, rotors, *reflectorResult, logger);
+    plugBoard = std::make_unique<PlugBoard>();
+    rotorBox->registerObserver(this);
 }
 
 EnigmaMachine::EnigmaMachine(const IAssetProvider& provider, std::string_view fileName, std::string_view assetPath,
                              ILogger* logger)
-    : EnigmaMachine(EnigmaConfigLoader::load(provider, FileName(fileName), AssetPath(assetPath)), logger) {}
+    : logger(logger) {
+    auto configResult = EnigmaConfigLoader::load(provider, FileName(fileName), AssetPath(assetPath));
+    if (!configResult) {
+        logEnigmaError(logger, "Failed to load Enigma configuration", configResult.error());
+        throw std::runtime_error("Failed to load Enigma configuration");
+    }
+    rotorBox =
+        std::make_unique<RotorBox>(configResult->rotorPositions, configResult->rotors, configResult->reflector, logger);
+    plugBoard = std::make_unique<PlugBoard>(configResult->plugBoardPairs);
+    rotorBox->registerObserver(this);
+}
 
 EnigmaMachine::EnigmaMachine(const EnigmaMachineConfig& config, ILogger* logger)
     : rotorBox(std::make_unique<RotorBox>(config.rotorPositions, config.rotors, config.reflector, logger)),
@@ -154,15 +177,6 @@ EnigmaMachine& EnigmaMachine::operator=(EnigmaMachine&& other) noexcept {
     return *this;
 }
 
-/**
- * @details The transformation follows the historic Enigma signal path:
- * 1. Pass through Plugboard (Forward).
- * 2. Pass through RotorBox (Rotors -> Reflector -> Rotors).
- * 3. Pass through Plugboard (Reverse).
- *
- * @internal The plugboard is its own inverse, so the same swap() method is used for both entry and exit.
- * The mechanical stepping happens inside rotorBox->keyTransform() before the signal starts.
- */
 AlphabetIndex EnigmaMachine::keyTransform(AlphabetIndex input) {
     AlphabetIndex originalInput = input;
     input = plugBoard->swap(input);

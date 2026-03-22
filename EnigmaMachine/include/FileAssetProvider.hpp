@@ -13,8 +13,7 @@ public:
      * @brief Loads the content of a file from the disk.
      *
      * @param assetName The path to the file.
-     * @return std::string The file content.
-     * @throws std::runtime_error If the file cannot be opened.
+     * @return enigma::Result<std::string> The file content, or an error code.
      */
-    std::string loadAsset(std::string_view assetName) const override;
+    enigma::Result<std::string> loadAsset(std::string_view assetName) const override;
 };

@@ -1,14 +1,15 @@
 #include "FileAssetProvider.hpp"
 #include <fstream>
 #include <sstream>
-#include <stdexcept>
+
+#include "EnigmaError.hpp"
 
 FileAssetProvider::~FileAssetProvider() = default;
 
-std::string FileAssetProvider::loadAsset(std::string_view assetName) const {
+enigma::Result<std::string> FileAssetProvider::loadAsset(std::string_view assetName) const {
     std::ifstream file(std::string(assetName), std::ios::in | std::ios::binary);
     if (!file) {
-        throw std::runtime_error("FileAssetProvider: Could not open file " + std::string(assetName));
+        return nonstd::make_unexpected(enigma::EnigmaError::FileNotFound);
     }
 
     std::ostringstream outputStream;

@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 #include "EnigmaConfig.hpp"
 #include "EnigmaConfigLoader.hpp"
+#include "EnigmaError.hpp"
 #include "EnigmaMachineConfig.hpp"
 #include "FileAssetProvider.hpp"
 
@@ -14,11 +15,11 @@ protected:
 
 /** @brief Verifies loading a valid configuration file. */
 TEST_F(EnigmaConfigLoaderTests, LoadValidConfig) {
-    EnigmaMachineConfig config;
     FileAssetProvider provider;
-    EXPECT_NO_THROW(
-        { config = EnigmaConfigLoader::load(provider, FileName(validConfigPath), AssetPath(enigma::assetsDir)); });
+    auto result = EnigmaConfigLoader::load(provider, FileName(validConfigPath), AssetPath(enigma::assetsDir));
+    ASSERT_TRUE(result.has_value());
 
+    const auto& config = *result;
     EXPECT_EQ(config.rotorCount, 3);
 
     std::vector<int> expectedPositions = {6, 18, 1};
@@ -39,20 +40,21 @@ TEST_F(EnigmaConfigLoaderTests, LoadValidConfig) {
     EXPECT_TRUE(foundSecond);
 }
 
-/** @brief Verifies exception thrown for non-existent config file. */
+/** @brief Verifies error returned for non-existent config file. */
 TEST_F(EnigmaConfigLoaderTests, LoadInvalidConfig) {
     FileAssetProvider provider;
-    EXPECT_THROW(
-        { EnigmaConfigLoader::load(provider, FileName(invalidConfigPath), AssetPath(enigma::assetsDir)); },
-        std::exception);
+    auto result = EnigmaConfigLoader::load(provider, FileName(invalidConfigPath), AssetPath(enigma::assetsDir));
+    EXPECT_FALSE(result.has_value());
+    EXPECT_EQ(result.error(), enigma::EnigmaError::FileNotFound);
 }
 
 /** @brief Verifies rotor configuration properties are correctly loaded. */
 TEST_F(EnigmaConfigLoaderTests, RotorConfigProperties) {
     FileAssetProvider provider;
-    EnigmaMachineConfig config =
-        EnigmaConfigLoader::load(provider, FileName(validConfigPath), AssetPath(enigma::assetsDir));
-    const auto& rotors = config.rotors;
+    auto result = EnigmaConfigLoader::load(provider, FileName(validConfigPath), AssetPath(enigma::assetsDir));
+    ASSERT_TRUE(result.has_value());
+
+    const auto& rotors = result->rotors;
     ASSERT_FALSE(rotors.empty());
 
     EXPECT_EQ(rotors[0].wiring.size(), 26);
@@ -63,34 +65,43 @@ TEST_F(EnigmaConfigLoaderTests, RotorConfigProperties) {
 /** @brief Mock provider for testing error handling with malformed content. */
 class MalformedAssetProvider : public IAssetProvider {
 public:
-    std::string loadAsset(std::string_view assetName) const override {
+    enigma::Result<std::string> loadAsset(std::string_view assetName) const override {
         if (assetName == "bad_rotor.toml") {
-            return "[rotor]\nnotchPosition = 0\ntype = \"rotor\"\nsize = 26";
+            return std::string(
+                "[rotor]\nnotchPosition = 0\ntype = \"rotor\"\nsize = 26\nforward = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, "
+                "11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24]");
         }
         if (assetName == "wrong_type.toml") {
-            return "[rotor]\nnotchPosition = 0\ntype = \"reflector\"\nsize = 26";
+            return std::string("[rotor]\nnotchPosition = 0\ntype = \"reflector\"\nsize = 26");
         }
         if (assetName == "inconsistent_count.toml") {
-            return "[rotors]\nRotorCount = 3\nRotorPositions = [0, 0, 0]\nRotorFiles = [\"R1.toml\", \"R2.toml\"]";
+            return std::string(
+                "[rotors]\nRotorCount = 3\nRotorPositions = [0, 0, 0]\nRotorFiles = [\"R1.toml\", \"R2.toml\"]");
         }
-        throw std::runtime_error("File not found");
+        return nonstd::make_unexpected(enigma::EnigmaError::FileNotFound);
     }
 };
 
-/** @brief Verifies exception thrown for malformed rotor configuration. */
+/** @brief Verifies error returned for malformed rotor configuration. */
 TEST_F(EnigmaConfigLoaderTests, LoadMalformedRotor) {
     MalformedAssetProvider provider;
-    EXPECT_THROW({ EnigmaConfigLoader::loadRotor(provider, FileName("bad_rotor.toml")); }, std::exception);
+    auto result = EnigmaConfigLoader::loadRotor(provider, FileName("bad_rotor.toml"));
+    EXPECT_FALSE(result.has_value());
+    EXPECT_EQ(result.error(), enigma::EnigmaError::ConfigFieldMissing);
 }
 
-/** @brief Verifies exception thrown when loading wrong component type. */
-TEST_F(EnigmaConfigLoaderTests, LoadWrongComponentType) {
+/** @brief Verifies error returned when rotor configuration is missing required fields. */
+TEST_F(EnigmaConfigLoaderTests, LoadMissingRotorField) {
     MalformedAssetProvider provider;
-    EXPECT_THROW({ EnigmaConfigLoader::loadRotor(provider, FileName("wrong_type.toml")); }, std::exception);
+    auto result = EnigmaConfigLoader::loadRotor(provider, FileName("wrong_type.toml"));
+    EXPECT_FALSE(result.has_value());
+    EXPECT_EQ(result.error(), enigma::EnigmaError::ConfigFieldMissing);
 }
 
-/** @brief Verifies exception thrown for inconsistent configuration. */
+/** @brief Verifies error returned for inconsistent configuration. */
 TEST_F(EnigmaConfigLoaderTests, LoadInconsistentConfig) {
     MalformedAssetProvider provider;
-    EXPECT_THROW({ EnigmaConfigLoader::load(provider, FileName("inconsistent_count.toml")); }, std::exception);
+    auto result = EnigmaConfigLoader::load(provider, FileName("inconsistent_count.toml"));
+    EXPECT_FALSE(result.has_value());
+    EXPECT_EQ(result.error(), enigma::EnigmaError::ConfigCountMismatch);
 }

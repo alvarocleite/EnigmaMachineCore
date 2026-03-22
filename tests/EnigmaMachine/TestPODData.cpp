@@ -80,9 +80,10 @@ TEST_F(EnigmaDataTests, PlugBoardPairDataFieldNamesAlign) {
 
 /** @brief Verifies EnigmaMachineConfig.toData() produces a correctly populated EnigmaMachineData. */
 TEST_F(EnigmaDataTests, toDataPopulatesAllFields) {
-    EnigmaMachineConfig config;
     FileAssetProvider provider;
-    config = EnigmaConfigLoader::load(provider, FileName(configPath), AssetPath(enigma::assetsDir));
+    auto configResult = EnigmaConfigLoader::load(provider, FileName(configPath), AssetPath(enigma::assetsDir));
+    ASSERT_TRUE(configResult.has_value());
+    EnigmaMachineConfig config = *configResult;
 
     enigma::EnigmaMachineData data = config.toData();
 
@@ -98,9 +99,10 @@ TEST_F(EnigmaDataTests, toDataPopulatesAllFields) {
 
 /** @brief Verifies EnigmaMachine can be constructed from EnigmaMachineData and encrypts correctly. */
 TEST_F(EnigmaDataTests, PODConstructorEncryption) {
-    EnigmaMachineConfig config;
     FileAssetProvider provider;
-    config = EnigmaConfigLoader::load(provider, FileName(configPath), AssetPath(enigma::assetsDir));
+    auto configResult = EnigmaConfigLoader::load(provider, FileName(configPath), AssetPath(enigma::assetsDir));
+    ASSERT_TRUE(configResult.has_value());
+    EnigmaMachineConfig config = *configResult;
 
     enigma::EnigmaMachineData data = config.toData();
 
@@ -117,9 +119,10 @@ TEST_F(EnigmaDataTests, PODConstructorEncryption) {
 /** @brief Verifies POD roundtrip: encrypt via file -> toData() -> same result. */
 TEST_F(EnigmaDataTests, toDataRoundtrip) {
     EnigmaMachine machine1(configPath, enigma::assetsDir);
-    EnigmaMachineConfig config;
     FileAssetProvider provider;
-    config = EnigmaConfigLoader::load(provider, FileName(configPath), AssetPath(enigma::assetsDir));
+    auto configResult = EnigmaConfigLoader::load(provider, FileName(configPath), AssetPath(enigma::assetsDir));
+    ASSERT_TRUE(configResult.has_value());
+    EnigmaMachineConfig config = *configResult;
     enigma::EnigmaMachineData data = config.toData();
     EnigmaMachine machine2(data);
 
@@ -132,9 +135,10 @@ TEST_F(EnigmaDataTests, toDataRoundtrip) {
 
 /** @brief Verifies POD-initialized machine exhibits reciprocal encryption. */
 TEST_F(EnigmaDataTests, PODReciprocity) {
-    EnigmaMachineConfig config;
     FileAssetProvider provider;
-    config = EnigmaConfigLoader::load(provider, FileName(configPath), AssetPath(enigma::assetsDir));
+    auto configResult = EnigmaConfigLoader::load(provider, FileName(configPath), AssetPath(enigma::assetsDir));
+    ASSERT_TRUE(configResult.has_value());
+    EnigmaMachineConfig config = *configResult;
     enigma::EnigmaMachineData data = config.toData();
 
     const std::string plain = "HELLOWORLD";
@@ -207,9 +211,10 @@ TEST_F(EnigmaDataTests, PODConstructorFullConfig) {
 
 /** @brief Verifies toData() and POD constructor preserve rotor stepping behavior. */
 TEST_F(EnigmaDataTests, PODPreservesRotorStepping) {
-    EnigmaMachineConfig config;
     FileAssetProvider provider;
-    config = EnigmaConfigLoader::load(provider, FileName(configPath), AssetPath(enigma::assetsDir));
+    auto configResult = EnigmaConfigLoader::load(provider, FileName(configPath), AssetPath(enigma::assetsDir));
+    ASSERT_TRUE(configResult.has_value());
+    EnigmaMachineConfig config = *configResult;
     enigma::EnigmaMachineData data = config.toData();
 
     EnigmaMachine machine(data);
