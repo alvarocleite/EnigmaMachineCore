@@ -54,6 +54,12 @@ jobs:
         test -f "$INSTALL_DIR/include/EnigmaMachineCore/EnigmaCore.hpp"
         test -f "$INSTALL_DIR/include/EnigmaMachineCore/EnigmaTypes.hpp"
         test -f "$INSTALL_DIR/share/EnigmaMachineCore/assets/EnigmaMachineConfig1.toml"
+        test -f "$INSTALL_DIR/include/EnigmaMachineCore/EnigmaConfig.hpp"
+        test -f "$INSTALL_DIR/include/EnigmaMachineCore/EnigmaData.hpp"
+        test -f "$INSTALL_DIR/include/EnigmaMachineCore/EnigmaMachine.hpp"
+        test -f "$INSTALL_DIR/include/EnigmaMachineCore/IEnigmaObserver.hpp"
+        test -f "$INSTALL_DIR/include/EnigmaMachineCore/IAssetProvider.hpp"
+        test -f "$INSTALL_DIR/include/EnigmaMachineCore/PlugBoardPair.hpp"
 
     - name: Setup Consumer App
       shell: bash

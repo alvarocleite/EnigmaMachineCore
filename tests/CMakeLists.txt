@@ -1,5 +1,6 @@
 add_executable(EnigmaTests
     AssetProvider/TestFileAssetProvider.cpp
+    EnigmaMachine/TestPODData.cpp
     EnigmaMachine/TestEnigmaMachine.cpp
     EnigmaMachine/TestEnigmaConfigLoader.cpp
     EnigmaMachine/TestEnigmaObserver.cpp

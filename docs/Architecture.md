@@ -24,7 +24,7 @@ The system is designed for flexibility across different platforms. The deploymen
 
 The library follows a "Strict Facade" approach. To ensure binary stability and security, only the high-level control interfaces are exported.
 
-*   **Public API:** `EnigmaMachine` (Execution), `IEnigmaObserver` (Monitoring), and `IAssetProvider` (Extensibility). See [Library API Specification](Library_API.md) for details.
+*   **Public API:** `EnigmaMachine` (Execution), `IEnigmaObserver` (Monitoring), `IAssetProvider` (Extensibility), and `enigma::EnigmaMachineData` (POD configuration). See [Library API Specification](Library_API.md) for details.
 *   **Hidden Internals:** All internal components (`Rotor`, `PlugBoard`, `RotorBox`, `EnigmaConfigLoader`) and raw configuration structs (`EnigmaMachineConfig`) are hidden from the binary's export table.
 *   **Symbol Visibility:** The library is compiled with `hidden` visibility by default. Only classes annotated with `ENIGMACORE_EXPORT` are visible to consumers.
 
@@ -51,6 +51,27 @@ The system strictly separates configuration data from the logic required to load
 *   **EnigmaConfigLoader (Factory):** A dedicated service responsible for parsing files and creating configuration objects.
     *   *Why:* Centralizes validation logic and allows the loading strategy to change (e.g., adding JSON support) without modifying the data structure or the core engine.
 
+#### 3.1.1. POD vs. Runtime Configuration (Embedded/WASM)
+
+The system provides **two parallel configuration paths**:
+
+*   **Runtime (Desktop/CLI):** `EnigmaMachineConfig` with `std::vector` members.
+    *   Loaded from TOML files via `EnigmaConfigLoader`. Heap allocation acceptable.
+    *   Constructors and validation logic built-in.
+*   **POD (Embedded/WASM):** `enigma::EnigmaMachineData` with `std::array` members.
+    *   No heap allocation — all fixed-size arrays using compile-time constants.
+    *   Trivially copyable — can be initialized with `{0}` or transmitted as binary blob.
+    *   Zero-initialization creates a valid identity machine.
+    *   Defined in `include/EnigmaData.hpp` (Phase 2, see [ADR 006](adr/006-POD-DTOs.md)).
+
+**Bidirectional conversion:**
+*   `EnigmaMachineConfig::toData()` — converts runtime → POD (for serialization).
+*   `EnigmaMachine(data)` — POD constructor accepts `enigma::EnigmaMachineData` directly.
+
+**Compile-time verification:** `static_assert` statements in `EnigmaData.hpp` ensure all POD structs are
+trivially copyable at build time. If any struct gains a non-trivial member, compilation fails — catching
+regressions early for embedded/WASM targets.
+
 ### 3.2. IO Abstraction (Dependency Injection)
 
 The core engine does not access the filesystem directly.
@@ -58,6 +79,9 @@ The core engine does not access the filesystem directly.
 *   **IAssetProvider:** An interface that defines how to retrieve configuration content.
 *   **FileAssetProvider:** The standard implementation that reads from disk.
     *   *Why:* This allows the engine to run in environments without a standard filesystem (e.g., Embedded, WebAssembly) and enables unit testing with in-memory mock data (`MockAssetProvider`).
+*   **POD Configuration (Embedded/WASM):** For deeply constrained environments without a filesystem at all,
+    `enigma::EnigmaMachineData` provides a zero-allocation alternative. Configurations can be embedded directly
+    in firmware as global `constexpr` objects or loaded from raw flash memory. See [ADR 006](adr/006-POD-DTOs.md) for details.
 
 ### 3.3. Core Domain (Facade)
 

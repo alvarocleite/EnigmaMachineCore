@@ -1,12 +1,12 @@
 #include <gtest/gtest.h>
 #include <array>
+#include "EnigmaConfig.hpp"
 #include "PlugBoard.hpp"
-#include "config.hpp"
 
 class PlugBoardTests : public ::testing::Test {
 protected:
-    std::array<PlugBoardPair, PLUGBOARD_MAX_PAIRS> createPairs(std::initializer_list<PlugBoardPair> init) {
-        std::array<PlugBoardPair, PLUGBOARD_MAX_PAIRS> pairs;
+    std::array<PlugBoardPair, enigma::MAX_PLUGBOARD_PAIRS> createPairs(std::initializer_list<PlugBoardPair> init) {
+        std::array<PlugBoardPair, enigma::MAX_PLUGBOARD_PAIRS> pairs;
         for (auto& p : pairs) {
             p = {0, 0};
         }
@@ -24,7 +24,7 @@ protected:
 /** @brief Verifies default constructor creates identity mapping. */
 TEST_F(PlugBoardTests, DefaultInitialization) {
     PlugBoard pb;
-    for (int i = 0; i < TRANSFORMER_SIZE; ++i) {
+    for (int i = 0; i < enigma::TRANSFORMER_SIZE; ++i) {
         EXPECT_EQ(pb.swap(i), i) << "Default PlugBoard should map " << i << " to itself";
     }
 }
@@ -48,7 +48,7 @@ TEST_F(PlugBoardTests, Reciprocity) {
     auto pairs = createPairs({{0, 25}, {10, 20}});
     PlugBoard pb(pairs);
 
-    for (int i = 0; i < TRANSFORMER_SIZE; ++i) {
+    for (int i = 0; i < enigma::TRANSFORMER_SIZE; ++i) {
         int swapped = pb.swap(i);
         int back = pb.swap(swapped);
         EXPECT_EQ(back, i) << "Reciprocity failed for input " << i;

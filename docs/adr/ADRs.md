@@ -9,3 +9,4 @@ This directory contains records of significant architectural decisions made for 
 * [ADR 003: Error Handling Strategy (Transition to std::expected)](003-error-handling-strategy.md)
 * [ADR 004: Split Signal Path Optimization (Branchless Signal Path)](004-split-signal-path-optimization.md)
 * [ADR 005: Modulo Optimization (Conditional Subtraction)](005-modulo-optimization.md)
+* [ADR 006: Plain Old Data (POD) Configuration DTOs](006-POD-DTOs.md) - Enable embedded/WASM without dynamic allocation

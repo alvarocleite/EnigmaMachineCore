@@ -4,6 +4,7 @@
 #include <memory>
 #include <random>
 #include <vector>
+#include "EnigmaConfig.hpp"
 #include "EnigmaMachine.hpp"
 #include "PlugBoard.hpp"
 #include "Reflector.hpp"
@@ -133,7 +134,7 @@ static void BM_EnigmaMachine_Throughput_Scaling(benchmark::State& state) {
     config.rotors.resize(nRotors);
 
     // Shared wiring for all rotors for simplicity
-    std::array<int, TRANSFORMER_SIZE> wiring = {
+    std::array<int, enigma::TRANSFORMER_SIZE> wiring = {
         {1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25, 0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24}};
     for (int i = 0; i < nRotors; ++i) {
         config.rotors[i].wiring = wiring;
@@ -147,7 +148,7 @@ static void BM_EnigmaMachine_Throughput_Scaling(benchmark::State& state) {
 
     std::vector<int> message(message_length);
     std::default_random_engine generator;
-    std::uniform_int_distribution<int> distribution(0, TRANSFORMER_SIZE - 1);
+    std::uniform_int_distribution<int> distribution(0, enigma::TRANSFORMER_SIZE - 1);
     for (int i = 0; i < message_length; ++i) {
         message[i] = distribution(generator);
     }
@@ -171,7 +172,7 @@ static void BM_EnigmaMachine_PlugBoard_Scaling(benchmark::State& state) {
     config.rotorPositions = {0, 0, 0};
     config.rotors.resize(3);
 
-    std::array<int, TRANSFORMER_SIZE> wiring = {
+    std::array<int, enigma::TRANSFORMER_SIZE> wiring = {
         {1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25, 0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24}};
     for (int i = 0; i < 3; ++i) {
         config.rotors[i].wiring = wiring;
@@ -189,7 +190,7 @@ static void BM_EnigmaMachine_PlugBoard_Scaling(benchmark::State& state) {
 
     std::vector<int> message(message_length);
     std::default_random_engine generator;
-    std::uniform_int_distribution<int> distribution(0, TRANSFORMER_SIZE - 1);
+    std::uniform_int_distribution<int> distribution(0, enigma::TRANSFORMER_SIZE - 1);
     for (int i = 0; i < message_length; ++i) {
         message[i] = distribution(generator);
     }
@@ -202,7 +203,7 @@ static void BM_EnigmaMachine_PlugBoard_Scaling(benchmark::State& state) {
     }
     state.SetBytesProcessed(state.iterations() * message_length);
 }
-BENCHMARK(BM_EnigmaMachine_PlugBoard_Scaling)->Arg(0)->Arg(PLUGBOARD_MAX_PAIRS);
+BENCHMARK(BM_EnigmaMachine_PlugBoard_Scaling)->Arg(0)->Arg(enigma::MAX_PLUGBOARD_PAIRS);
 
 static void BM_EnigmaMachine_KeyTransform(benchmark::State& state) {
     EnigmaMachine machine(CONFIG_FILE, ASSETS_DIR);
@@ -211,7 +212,7 @@ static void BM_EnigmaMachine_KeyTransform(benchmark::State& state) {
     // Pre-generate random message
     std::vector<int> message(message_length);
     std::default_random_engine generator;
-    std::uniform_int_distribution<int> distribution(0, TRANSFORMER_SIZE - 1);
+    std::uniform_int_distribution<int> distribution(0, enigma::TRANSFORMER_SIZE - 1);
     for (int i = 0; i < message_length; ++i) {
         message[i] = distribution(generator);
     }
@@ -239,7 +240,7 @@ static void BM_Rotor_Transform(benchmark::State& state) {
     for (auto _ : state) {
         int out = rotor.transform(input);
         benchmark::DoNotOptimize(out);
-        input = (input + 1) % TRANSFORMER_SIZE;
+        input = (input + 1) % enigma::TRANSFORMER_SIZE;
     }
 }
 BENCHMARK(BM_Rotor_Transform);
@@ -266,14 +267,14 @@ static void BM_Reflector_Transform(benchmark::State& state) {
     for (auto _ : state) {
         int out = reflector.transform(input);
         benchmark::DoNotOptimize(out);
-        input = (input + 1) % TRANSFORMER_SIZE;
+        input = (input + 1) % enigma::TRANSFORMER_SIZE;
     }
 }
 BENCHMARK(BM_Reflector_Transform);
 
 static void BM_PlugBoard_Swap(benchmark::State& state) {
-    std::array<PlugBoardPair, PLUGBOARD_MAX_PAIRS> pairs;
-    for (int i = 0; i < PLUGBOARD_MAX_PAIRS; ++i) {
+    std::array<PlugBoardPair, enigma::MAX_PLUGBOARD_PAIRS> pairs;
+    for (int i = 0; i < enigma::MAX_PLUGBOARD_PAIRS; ++i) {
         pairs[i] = {i * 2, i * 2 + 1};
     }
 
@@ -283,7 +284,7 @@ static void BM_PlugBoard_Swap(benchmark::State& state) {
     for (auto _ : state) {
         int out = pb.swap(input);
         benchmark::DoNotOptimize(out);
-        input = (input + 1) % TRANSFORMER_SIZE;
+        input = (input + 1) % enigma::TRANSFORMER_SIZE;
     }
 }
 BENCHMARK(BM_PlugBoard_Swap);

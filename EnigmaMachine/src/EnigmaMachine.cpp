@@ -9,12 +9,14 @@
 #include <stdexcept>
 #include <vector>
 
+#include "EnigmaConfig.hpp"
 #include "EnigmaConfigLoader.hpp"
+#include "EnigmaData.hpp"
 #include "EnigmaMachine.hpp"
+#include "EnigmaMachineConfig.hpp"
 #include "FileAssetProvider.hpp"
 #include "PlugBoard.hpp"
 #include "RotorBox.hpp"
-#include "config.hpp"
 
 namespace fs = std::filesystem;
 
@@ -37,7 +39,7 @@ static std::string resolveDefaultAssetPath() {
 #endif
 
     // Default to the header-defined constant if everything else fails
-    return std::string(assetsDir);
+    return std::string(enigma::assetsDir);
 }
 
 /**
@@ -51,10 +53,14 @@ EnigmaMachine::EnigmaMachine(ILogger* logger) : logger(logger) {
     fs::path assetsDirectory(resolveDefaultAssetPath());
     try {
         std::vector<RotorConfig> rotors;
-        rotors.push_back(EnigmaConfigLoader::loadRotor(provider, FileName(assetsDirectory / defaultRotor1File)));
-        rotors.push_back(EnigmaConfigLoader::loadRotor(provider, FileName(assetsDirectory / defaultRotor2File)));
-        rotors.push_back(EnigmaConfigLoader::loadRotor(provider, FileName(assetsDirectory / defaultRotor3File)));
-        auto reflector = EnigmaConfigLoader::loadReflector(provider, FileName(assetsDirectory / defaultReflectorFile));
+        rotors.push_back(
+            EnigmaConfigLoader::loadRotor(provider, FileName(assetsDirectory / enigma::defaultRotor1File)));
+        rotors.push_back(
+            EnigmaConfigLoader::loadRotor(provider, FileName(assetsDirectory / enigma::defaultRotor2File)));
+        rotors.push_back(
+            EnigmaConfigLoader::loadRotor(provider, FileName(assetsDirectory / enigma::defaultRotor3File)));
+        auto reflector =
+            EnigmaConfigLoader::loadReflector(provider, FileName(assetsDirectory / enigma::defaultReflectorFile));
 
         rotorBox = std::make_unique<RotorBox>(std::vector<AlphabetIndex>{0, 0, 0}, rotors, reflector, logger);
         plugBoard = std::make_unique<PlugBoard>();
@@ -88,6 +94,37 @@ EnigmaMachine::EnigmaMachine(EnigmaMachineConfig&& config, ILogger* logger)
 
 EnigmaMachine::EnigmaMachine(std::string_view fileName, std::string_view assetPath, ILogger* logger)
     : EnigmaMachine(FileAssetProvider{}, fileName, assetPath, logger) {}
+
+EnigmaMachine::EnigmaMachine(const enigma::EnigmaMachineData& data, ILogger* logger) : logger(logger) {
+    std::vector<AlphabetIndex> positions;
+    std::vector<RotorConfig> rotorConfigs;
+    std::array<PlugBoardPair, enigma::MAX_PLUGBOARD_PAIRS> plugPairs;
+
+    for (int i = 0; i < data.rotorCount && i < enigma::MAX_ROTORS; ++i) {
+        positions.push_back(static_cast<AlphabetIndex>(data.rotorPositions[i]));
+
+        RotorConfig rc;
+        rc.notchPosition = static_cast<AlphabetIndex>(data.rotors[i].notchPosition);
+        for (int j = 0; j < enigma::TRANSFORMER_SIZE; ++j) {
+            rc.wiring[j] = static_cast<AlphabetIndex>(data.rotors[i].wiring[j]);
+        }
+        rotorConfigs.push_back(std::move(rc));
+    }
+
+    ReflectorConfig refConfig;
+    for (int i = 0; i < enigma::TRANSFORMER_SIZE; ++i) {
+        refConfig.wiring[i] = static_cast<AlphabetIndex>(data.reflector.wiring[i]);
+    }
+
+    for (int i = 0; i < enigma::MAX_PLUGBOARD_PAIRS; ++i) {
+        plugPairs[i].sourcePortIndex = data.plugBoard.pairs[i].sourcePortIndex;
+        plugPairs[i].destinationPortIndex = data.plugBoard.pairs[i].destinationPortIndex;
+    }
+
+    rotorBox = std::make_unique<RotorBox>(positions, rotorConfigs, refConfig, logger);
+    plugBoard = std::make_unique<PlugBoard>(plugPairs);
+    rotorBox->registerObserver(this);
+}
 
 EnigmaMachine::~EnigmaMachine() = default;
 

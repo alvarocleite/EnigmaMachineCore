@@ -1,8 +1,8 @@
 #include <gtest/gtest.h>
 #include <string>
 #include <vector>
+#include "EnigmaConfig.hpp"
 #include "EnigmaMachine.hpp"
-#include "config.hpp"
 
 class HistoricalVectorTests : public ::testing::Test {
 protected:

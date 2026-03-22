@@ -1,8 +1,8 @@
 #include <gtest/gtest.h>
+#include "EnigmaConfig.hpp"
 #include "EnigmaConfigLoader.hpp"
 #include "EnigmaMachineConfig.hpp"
 #include "FileAssetProvider.hpp"
-#include "config.hpp"
 
 using FileName = EnigmaConfigLoader::FileName;
 using AssetPath = EnigmaConfigLoader::AssetPath;
@@ -16,7 +16,8 @@ protected:
 TEST_F(EnigmaConfigLoaderTests, LoadValidConfig) {
     EnigmaMachineConfig config;
     FileAssetProvider provider;
-    EXPECT_NO_THROW({ config = EnigmaConfigLoader::load(provider, FileName(validConfigPath), AssetPath(assetsDir)); });
+    EXPECT_NO_THROW(
+        { config = EnigmaConfigLoader::load(provider, FileName(validConfigPath), AssetPath(enigma::assetsDir)); });
 
     EXPECT_EQ(config.rotorCount, 3);
 
@@ -42,13 +43,15 @@ TEST_F(EnigmaConfigLoaderTests, LoadValidConfig) {
 TEST_F(EnigmaConfigLoaderTests, LoadInvalidConfig) {
     FileAssetProvider provider;
     EXPECT_THROW(
-        { EnigmaConfigLoader::load(provider, FileName(invalidConfigPath), AssetPath(assetsDir)); }, std::exception);
+        { EnigmaConfigLoader::load(provider, FileName(invalidConfigPath), AssetPath(enigma::assetsDir)); },
+        std::exception);
 }
 
 /** @brief Verifies rotor configuration properties are correctly loaded. */
 TEST_F(EnigmaConfigLoaderTests, RotorConfigProperties) {
     FileAssetProvider provider;
-    EnigmaMachineConfig config = EnigmaConfigLoader::load(provider, FileName(validConfigPath), AssetPath(assetsDir));
+    EnigmaMachineConfig config =
+        EnigmaConfigLoader::load(provider, FileName(validConfigPath), AssetPath(enigma::assetsDir));
     const auto& rotors = config.rotors;
     ASSERT_FALSE(rotors.empty());
 

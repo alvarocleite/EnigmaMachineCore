@@ -7,9 +7,9 @@
 
 #include <array>
 
+#include "EnigmaConfig.hpp"
 #include "EnigmaTypes.hpp"
 #include "PlugBoardPair.hpp"
-#include "config.hpp"
 
 /**
  * @brief Class representing the PlugBoard (Steckerbrett) of the Enigma machine.
@@ -21,7 +21,7 @@
  */
 class PlugBoard {
 private:
-    std::array<AlphabetIndex, TRANSFORMER_SIZE> mapping;  // Direct mapping: mapping[Input] = Output
+    std::array<AlphabetIndex, enigma::TRANSFORMER_SIZE> mapping;  // Direct mapping: mapping[Input] = Output
 
 public:
     /**
@@ -38,7 +38,7 @@ public:
      * @param pairs An array of pairs to initialize the plugboard with.
      * @throws std::invalid_argument If a port index is out of range or if there is a mapping conflict.
      */
-    explicit PlugBoard(const std::array<PlugBoardPair, PLUGBOARD_MAX_PAIRS>& pairs);
+    explicit PlugBoard(const std::array<PlugBoardPair, enigma::MAX_PLUGBOARD_PAIRS>& pairs);
     ~PlugBoard() = default;
 
     /**

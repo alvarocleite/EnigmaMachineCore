@@ -1,8 +1,8 @@
 #include <gtest/gtest.h>
 #include <rapidcheck/gtest.h>
+#include "EnigmaConfig.hpp"
 #include "EnigmaMachine.hpp"
 #include "FileAssetProvider.hpp"
-#include "config.hpp"
 
 class EnigmaMachineProperties : public ::testing::Test {};
 

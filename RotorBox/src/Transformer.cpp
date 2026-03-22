@@ -35,13 +35,13 @@ void Transformer::fillTransformRow(int row, AlphabetIndex value) { lookupTable.a
 /**
  * @brief Copies a whole array into a row of the transformation lookup table.
  */
-void Transformer::copyTransformRow(int row, const std::array<AlphabetIndex, TRANSFORMER_SIZE>& values) {
+void Transformer::copyTransformRow(int row, const std::array<AlphabetIndex, enigma::TRANSFORMER_SIZE>& values) {
     lookupTable.at(row) = values;
 }
 
 /**
  * @brief Gets a read-only reference to a row in the transformation lookup table.
  */
-const std::array<AlphabetIndex, TRANSFORMER_SIZE>& Transformer::getTransformRow(int row) const {
+const std::array<AlphabetIndex, enigma::TRANSFORMER_SIZE>& Transformer::getTransformRow(int row) const {
     return lookupTable.at(row);
 }

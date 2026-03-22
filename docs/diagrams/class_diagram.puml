@@ -19,11 +19,11 @@ class PlugBoardPair <<struct>> {
 
 class RotorConfig <<struct>> {
     + AlphabetIndex notchPosition
-    + std::array<AlphabetIndex, TRANSFORMER_SIZE> wiring
+    + std::array<AlphabetIndex, enigma::TRANSFORMER_SIZE> wiring
 }
 
 class ReflectorConfig <<struct>> {
-    + std::array<AlphabetIndex, TRANSFORMER_SIZE> wiring
+    + std::array<AlphabetIndex, enigma::TRANSFORMER_SIZE> wiring
 }
 
 ' Interfaces
@@ -50,8 +50,9 @@ class EnigmaMachineConfig <<struct>> {
     + std::vector<AlphabetIndex> rotorPositions
     + std::vector<RotorConfig> rotors
     + ReflectorConfig reflector
-    + std::array<PlugBoardPair, PLUGBOARD_MAX_PAIRS> plugBoardPairs
+    + std::array<PlugBoardPair, enigma::MAX_PLUGBOARD_PAIRS> plugBoardPairs
     + EnigmaMachineConfig()
+    + enigma::EnigmaMachineData toData() const
 }
 
 class EnigmaConfigLoader {
@@ -70,6 +71,7 @@ class EnigmaMachine {
     + EnigmaMachine(logger: ILogger* = nullptr)
     + EnigmaMachine(fileName: std::string_view, assetPath: std::string_view, logger: ILogger* = nullptr)
     + EnigmaMachine(provider: IAssetProvider, fileName: std::string_view, assetPath: std::string_view, logger: ILogger* = nullptr)
+    + EnigmaMachine(data: const enigma::EnigmaMachineData&, logger: ILogger* = nullptr)
     + ~EnigmaMachine()
     + keyTransform(input: AlphabetIndex) : AlphabetIndex
     + processBuffer(buffer: std::span<AlphabetIndex>) : void
@@ -81,9 +83,9 @@ class EnigmaMachine {
 }
 
 class PlugBoard {
-    - mapping : std::array<AlphabetIndex, TRANSFORMER_SIZE>
+    - mapping : std::array<AlphabetIndex, enigma::TRANSFORMER_SIZE>
     + PlugBoard()
-    + PlugBoard(pairs: std::array<PlugBoardPair, PLUGBOARD_MAX_PAIRS>)
+    + PlugBoard(pairs: std::array<PlugBoardPair, enigma::MAX_PLUGBOARD_PAIRS>)
     + ~PlugBoard()
     + swap(key: AlphabetIndex) : AlphabetIndex const
 }
@@ -107,13 +109,13 @@ class RotorBox {
 }
 
 abstract class Transformer {
-    - lookupTable : std::array<std::array<AlphabetIndex, TRANSFORMER_SIZE>, 2>
+    - lookupTable : std::array<std::array<AlphabetIndex, enigma::TRANSFORMER_SIZE>, 2>
     # type : TransformerType
     # setTransformValue(row: int, col: int, value: AlphabetIndex) : void
     # getTransformValue(row: int, col: int) : AlphabetIndex
     # fillTransformRow(row: int, value: AlphabetIndex) : void
-    # copyTransformRow(row: int, values: const std::array<AlphabetIndex, TRANSFORMER_SIZE>&) : void
-    # getTransformRow(row: int) : const std::array<AlphabetIndex, TRANSFORMER_SIZE>&
+    # copyTransformRow(row: int, values: const std::array<AlphabetIndex, enigma::TRANSFORMER_SIZE>&) : void
+    # getTransformRow(row: int) : const std::array<AlphabetIndex, enigma::TRANSFORMER_SIZE>&
     + Transformer()
     + {abstract} ~Transformer()
     + {abstract} transform(position: AlphabetIndex, reverse: bool) : AlphabetIndex
@@ -152,6 +154,35 @@ class Reflector {
     + rotate() : int
 }
 
+' POD Configuration
+namespace enigma {
+    struct RotorData <<struct>> {
+        + AlphabetIndex notchPosition
+        + std::array<AlphabetIndex, enigma::TRANSFORMER_SIZE> wiring
+    }
+
+    struct ReflectorData <<struct>> {
+        + std::array<AlphabetIndex, enigma::TRANSFORMER_SIZE> wiring
+    }
+
+    struct PlugBoardPairData <<struct>> {
+        + AlphabetIndex sourcePortIndex
+        + AlphabetIndex destinationPortIndex
+    }
+
+    struct PlugBoardData <<struct>> {
+        + std::array<PlugBoardPairData, enigma::MAX_PLUGBOARD_PAIRS> pairs
+    }
+
+    struct EnigmaMachineData <<struct>> {
+        + int rotorCount
+        + std::array<AlphabetIndex, enigma::MAX_ROTORS> rotorPositions
+        + std::array<RotorData, enigma::MAX_ROTORS> rotors
+        + ReflectorData reflector
+        + PlugBoardData plugBoard
+    }
+}
+
 ' Relationships
 IAssetProvider <|.. FileAssetProvider : implements
 IEnigmaObserver <|.. EnigmaMachine : implements
@@ -184,6 +215,16 @@ RotorBox ..> ILogger : uses
 Transformer <|-- Rotor
 Transformer <|-- Reflector
 Transformer ..> TransformerType
+
+' POD conversion and construction
+EnigmaMachineConfig ..> enigma::EnigmaMachineData : toData()
+EnigmaMachine ..> enigma::EnigmaMachineData : constructs from
+
+' POD composition
+enigma::EnigmaMachineData *-- enigma::RotorData
+enigma::EnigmaMachineData *-- enigma::ReflectorData
+enigma::EnigmaMachineData *-- enigma::PlugBoardData
+enigma::PlugBoardData *-- enigma::PlugBoardPairData
 
 
 @enduml

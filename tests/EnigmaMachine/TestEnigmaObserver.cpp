@@ -1,8 +1,8 @@
 #include <gtest/gtest.h>
 #include <vector>
+#include "EnigmaConfig.hpp"
 #include "EnigmaMachine.hpp"
 #include "IEnigmaObserver.hpp"
-#include "config.hpp"
 
 /** @brief Mock observer for testing IEnigmaObserver interface. */
 class MockObserver : public IEnigmaObserver {
@@ -33,7 +33,7 @@ protected:
 
 /** @brief Verifies observer receives rotor stepped and character encrypted notifications. */
 TEST_F(EnigmaObserverTests, ReceivesNotifications) {
-    EnigmaMachine machine(configPath, assetsDir);
+    EnigmaMachine machine(configPath, enigma::assetsDir);
     MockObserver observer;
     machine.registerObserver(&observer);
 
@@ -49,7 +49,7 @@ TEST_F(EnigmaObserverTests, ReceivesNotifications) {
 
 /** @brief Verifies removed observer no longer receives notifications. */
 TEST_F(EnigmaObserverTests, RemoveObserver) {
-    EnigmaMachine machine(configPath, assetsDir);
+    EnigmaMachine machine(configPath, enigma::assetsDir);
     MockObserver observer;
     machine.registerObserver(&observer);
     machine.removeObserver(&observer);

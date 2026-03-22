@@ -4,8 +4,8 @@
 #include <string>
 #include <toml.hpp>
 
+#include "EnigmaConfig.hpp"
 #include "EnigmaTypes.hpp"
-#include "config.hpp"
 
 /**
  * @file
@@ -23,7 +23,7 @@ enum class TransformerType { Undefined = 0, Rotor, Reflector };
  */
 class Transformer {
 private:
-    std::array<std::array<AlphabetIndex, TRANSFORMER_SIZE>, 2> lookupTable;
+    std::array<std::array<AlphabetIndex, enigma::TRANSFORMER_SIZE>, 2> lookupTable;
 
 protected:
     TransformerType type;
@@ -60,7 +60,7 @@ protected:
      * @param row The row index to copy into.
      * @param values The array of values to copy.
      */
-    void copyTransformRow(int row, const std::array<AlphabetIndex, TRANSFORMER_SIZE>& values);
+    void copyTransformRow(int row, const std::array<AlphabetIndex, enigma::TRANSFORMER_SIZE>& values);
 
     /**
      * @brief Gets a read-only reference to a row in the transformation lookup table.
@@ -69,7 +69,7 @@ protected:
      * @param row The row index to retrieve.
      * @return const std::array<AlphabetIndex, TRANSFORMER_SIZE>& Reference to the row array.
      */
-    const std::array<AlphabetIndex, TRANSFORMER_SIZE>& getTransformRow(int row) const;
+    const std::array<AlphabetIndex, enigma::TRANSFORMER_SIZE>& getTransformRow(int row) const;
 
 public:
     /**
