@@ -409,9 +409,9 @@ set(PUBLIC_HEADERS
     include/EnigmaConfig.hpp
     include/EnigmaData.hpp
     EnigmaMachine/include/EnigmaMachine.hpp
-    EnigmaMachine/include/EnigmaMachineConfig.hpp
     EnigmaMachine/include/IEnigmaObserver.hpp
     EnigmaMachine/include/IAssetProvider.hpp
+    PlugBoard/include/PlugBoardPair.hpp
 )
 
 install(FILES ${PUBLIC_HEADERS}

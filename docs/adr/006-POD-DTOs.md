@@ -165,22 +165,10 @@ objects internally. No separate `toConfig()` function is needed.
 
 ### Historical Data
 
-Include pre-defined wiring tables for historical Enigma models within the `enigma` namespace:
-
-```cpp
-namespace enigma {
-namespace historical {
-
-constexpr RotorData ROTOR_I = {
-    .notchPosition = 16,
-    .wiring = {4, 10, 12, 5, 11, 6, 3, 16, 21, 25, 13, 19, 14, 22, 24, 7, 23, 20, 18, 15, 0, 8, 1, 17, 2, 9}
-};
-constexpr RotorData ROTOR_II = {/* ... */};
-constexpr ReflectorData REFLECTOR_B = {/* ... */};
-
-} // namespace historical
-} // namespace enigma
-```
+Pre-defined wiring tables for historical Enigma models (e.g., `ROTOR_I`, `ROTOR_II`, `REFLECTOR_B`)
+will be defined as `constexpr` objects within the `enigma::historical` namespace in
+`include/EnigmaData.hpp`. This is **deferred to Phase 2c, Task 2.11**. Currently,
+configurations must be loaded from files or constructed programmatically.
 
 ### Error Handling
 
