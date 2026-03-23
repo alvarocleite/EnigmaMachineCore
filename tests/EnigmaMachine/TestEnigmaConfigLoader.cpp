@@ -119,6 +119,36 @@ public:
                 "[reflector]\ntype = \"reflector\"\nsize = 26\nmap = [24, 17, 20, 7, 16, 22, 15, 23, 18, 25, "
                 "8, 13, 1, 11, 4, 2, 19, 12, 14, 21, 6, 9, 3, 0, 10, 5]");
         }
+        if (assetName == "reflector_wrong_size.toml") {
+            return std::string(
+                "[reflector]\ntype = \"reflector\"\nsize = 24\nmap = [24, 17, 20, 7, 16, 22, 15, 23, 18, 25, "
+                "8, 13, 1, 11, 4, 2, 19, 12, 14, 21, 6, 9, 3, 0, 10, 5]");
+        }
+        if (assetName == "reflector_missing_field.toml") {
+            return std::string("[reflector]\ntype = \"reflector\"\nsize = 26\n");
+        }
+        if (assetName == "config_exceeds_plugs.toml") {
+            return std::string(
+                "[rotors]\nRotorCount = 1\nRotorPositions = [0]\nRotorFiles = [\"valid_rotor.toml\"]\n"
+                "ReflectorFile = \"valid_reflector.toml\"\n"
+                "[plugboard]\nPlugCount = 11\nPlugBoardPairs = [{from = 0, to = 1}, {from = 2, to = 3}, {from = 4, to "
+                "= 5}, "
+                "{from = 6, to = 7}, {from = 8, to = 9}, {from = 10, to = 11}, {from = 12, to = 13}, "
+                "{from = 14, to = 15}, {from = 16, to = 17}, {from = 18, to = 19}]");
+        }
+        if (assetName == "config_plug_count_mismatch.toml") {
+            return std::string(
+                "[rotors]\nRotorCount = 1\nRotorPositions = [0]\nRotorFiles = [\"valid_rotor.toml\"]\n"
+                "ReflectorFile = \"valid_reflector.toml\"\n"
+                "[plugboard]\nPlugCount = 2\nPlugBoardPairs = [{from = 0, to = 1}, {from = 2, to = 3}, {from = 4, to = "
+                "5}]");
+        }
+        if (assetName == "config_missing_rotor_section.toml") {
+            return std::string(
+                "[rotors]\nRotorCount = 3\nRotorPositions = [0, 0, 0]\nRotorFiles = [\"R1.toml\", \"R2.toml\"]\n"
+                "ReflectorFile = \"Reflector.toml\"\n"
+                "[plugboard]\nPlugCount = 0\nPlugBoardPairs = []");
+        }
         return nonstd::make_unexpected(enigma::EnigmaError::FileNotFound);
     }
 };
@@ -169,4 +199,44 @@ TEST_F(EnigmaConfigLoaderTests, LoadConfigMismatchedPlugCount) {
     auto result = EnigmaConfigLoader::load(provider, FileName("mismatched_plug_count.toml"));
     EXPECT_FALSE(result.has_value());
     EXPECT_EQ(result.error(), enigma::EnigmaError::ConfigFieldMissing);
+}
+
+/** @brief Verifies error returned when reflector has wrong size. */
+TEST_F(EnigmaConfigLoaderTests, LoadReflectorWrongSize) {
+    MalformedAssetProvider provider;
+    auto result = EnigmaConfigLoader::loadReflector(provider, FileName("reflector_wrong_size.toml"));
+    EXPECT_FALSE(result.has_value());
+    EXPECT_EQ(result.error(), enigma::EnigmaError::ConfigFieldMissing);
+}
+
+/** @brief Verifies error returned when reflector is missing required fields. */
+TEST_F(EnigmaConfigLoaderTests, LoadReflectorMissingField) {
+    MalformedAssetProvider provider;
+    auto result = EnigmaConfigLoader::loadReflector(provider, FileName("reflector_missing_field.toml"));
+    EXPECT_FALSE(result.has_value());
+    EXPECT_EQ(result.error(), enigma::EnigmaError::ConfigFieldMissing);
+}
+
+/** @brief Verifies error returned when config plug count exceeds maximum. */
+TEST_F(EnigmaConfigLoaderTests, LoadConfigExceedsMaxPlugs) {
+    MalformedAssetProvider provider;
+    auto result = EnigmaConfigLoader::load(provider, FileName("config_exceeds_plugs.toml"));
+    EXPECT_FALSE(result.has_value());
+    EXPECT_EQ(result.error(), enigma::EnigmaError::ConfigFieldMissing);
+}
+
+/** @brief Verifies error returned when plugboard count doesn't match. */
+TEST_F(EnigmaConfigLoaderTests, LoadConfigPlugCountMismatch) {
+    MalformedAssetProvider provider;
+    auto result = EnigmaConfigLoader::load(provider, FileName("config_plug_count_mismatch.toml"));
+    EXPECT_FALSE(result.has_value());
+    EXPECT_EQ(result.error(), enigma::EnigmaError::ConfigFieldMissing);
+}
+
+/** @brief Verifies error propagation when rotor file not found. */
+TEST_F(EnigmaConfigLoaderTests, LoadConfigRotorFileNotFound) {
+    MalformedAssetProvider provider;
+    auto result = EnigmaConfigLoader::load(provider, FileName("config_missing_rotor_section.toml"));
+    EXPECT_FALSE(result.has_value());
+    EXPECT_EQ(result.error(), enigma::EnigmaError::ConfigCountMismatch);
 }
