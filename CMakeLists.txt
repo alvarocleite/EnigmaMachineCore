@@ -420,6 +420,12 @@ install(FILES ${PUBLIC_HEADERS}
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/EnigmaMachineCore
 )
 
+# Install expected-lite headers for consumers (at root include level for <nonstd/expected.hpp>)
+install(DIRECTORY external/expected-lite/include/nonstd
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+    FILES_MATCHING PATTERN "*.hpp"
+)
+
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/generated/EnigmaCore_EXPORT.hpp
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/EnigmaMachineCore
 )

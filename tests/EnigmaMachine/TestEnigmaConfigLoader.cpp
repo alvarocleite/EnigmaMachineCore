@@ -78,6 +78,47 @@ public:
             return std::string(
                 "[rotors]\nRotorCount = 3\nRotorPositions = [0, 0, 0]\nRotorFiles = [\"R1.toml\", \"R2.toml\"]");
         }
+        if (assetName == "wrong_size.toml") {
+            return std::string(
+                "[rotor]\nnotchPosition = 0\ntype = \"rotor\"\nsize = 24\nforward = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, "
+                "11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25]");
+        }
+        if (assetName == "R1.toml") {
+            return std::string(
+                "[rotor]\nnotchPosition = 0\ntype = \"rotor\"\nsize = 26\nforward = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, "
+                "11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25]");
+        }
+        if (assetName == "Reflector.toml") {
+            return std::string(
+                "[reflector]\ntype = \"reflector\"\nsize = 26\nmap = [24, 17, 20, 7, 16, 22, 15, 23, 18, 25, "
+                "8, 13, 1, 11, 4, 2, 19, 12, 14, 21, 6, 9, 3, 0, 10, 5]");
+        }
+        if (assetName == "too_many_plugs.toml") {
+            return std::string(
+                "[rotors]\nRotorCount = 1\nRotorPositions = [0]\nRotorFiles = [\"valid_rotor.toml\"]\n"
+                "ReflectorFile = \"valid_reflector.toml\"\n"
+                "[plugboard]\nPlugCount = 15\nPlugBoardPairs = [{from = 0, to = 1}, {from = 2, to = 3}, {from = 4, to "
+                "= 5}, "
+                "{from = 6, to = 7}, {from = 8, to = 9}, {from = 10, to = 11}, {from = 12, to = 13}, "
+                "{from = 14, to = 15}, {from = 16, to = 17}, {from = 18, to = 19}, {from = 20, to = 21}, "
+                "{from = 22, to = 23}, {from = 24, to = 25}, {from = 3, to = 0}, {from = 5, to = 2}]");
+        }
+        if (assetName == "mismatched_plug_count.toml") {
+            return std::string(
+                "[rotors]\nRotorCount = 1\nRotorPositions = [0]\nRotorFiles = [\"valid_rotor.toml\"]\n"
+                "ReflectorFile = \"valid_reflector.toml\"\n"
+                "[plugboard]\nPlugCount = 3\nPlugBoardPairs = [{from = 0, to = 1}, {from = 2, to = 3}]");
+        }
+        if (assetName == "valid_rotor.toml") {
+            return std::string(
+                "[rotor]\nnotchPosition = 0\ntype = \"rotor\"\nsize = 26\nforward = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, "
+                "11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25]");
+        }
+        if (assetName == "valid_reflector.toml") {
+            return std::string(
+                "[reflector]\ntype = \"reflector\"\nsize = 26\nmap = [24, 17, 20, 7, 16, 22, 15, 23, 18, 25, "
+                "8, 13, 1, 11, 4, 2, 19, 12, 14, 21, 6, 9, 3, 0, 10, 5]");
+        }
         return nonstd::make_unexpected(enigma::EnigmaError::FileNotFound);
     }
 };
@@ -104,4 +145,28 @@ TEST_F(EnigmaConfigLoaderTests, LoadInconsistentConfig) {
     auto result = EnigmaConfigLoader::load(provider, FileName("inconsistent_count.toml"));
     EXPECT_FALSE(result.has_value());
     EXPECT_EQ(result.error(), enigma::EnigmaError::ConfigCountMismatch);
+}
+
+/** @brief Verifies error returned when rotor has wrong size. */
+TEST_F(EnigmaConfigLoaderTests, LoadRotorWrongSize) {
+    MalformedAssetProvider provider;
+    auto result = EnigmaConfigLoader::loadRotor(provider, FileName("wrong_size.toml"));
+    EXPECT_FALSE(result.has_value());
+    EXPECT_EQ(result.error(), enigma::EnigmaError::ConfigFieldMissing);
+}
+
+/** @brief Verifies error returned when plugboard exceeds maximum pairs. */
+TEST_F(EnigmaConfigLoaderTests, LoadConfigTooManyPlugs) {
+    MalformedAssetProvider provider;
+    auto result = EnigmaConfigLoader::load(provider, FileName("too_many_plugs.toml"));
+    EXPECT_FALSE(result.has_value());
+    EXPECT_EQ(result.error(), enigma::EnigmaError::ConfigFieldMissing);
+}
+
+/** @brief Verifies error returned when plugboard count doesn't match array size. */
+TEST_F(EnigmaConfigLoaderTests, LoadConfigMismatchedPlugCount) {
+    MalformedAssetProvider provider;
+    auto result = EnigmaConfigLoader::load(provider, FileName("mismatched_plug_count.toml"));
+    EXPECT_FALSE(result.has_value());
+    EXPECT_EQ(result.error(), enigma::EnigmaError::ConfigFieldMissing);
 }
