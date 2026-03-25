@@ -59,6 +59,7 @@ set(INCLUDE_DIRS
     ${CMAKE_CURRENT_SOURCE_DIR}/RotorBox/include
     ${CMAKE_CURRENT_SOURCE_DIR}/PlugBoard/include
     ${CMAKE_CURRENT_SOURCE_DIR}/EnigmaMachine/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/external/expected-lite/include
 )
 
 # --- External Dependencies ---
@@ -408,6 +409,7 @@ set(PUBLIC_HEADERS
     include/EnigmaTypes.hpp
     include/EnigmaConfig.hpp
     include/EnigmaData.hpp
+    include/EnigmaError.hpp
     EnigmaMachine/include/EnigmaMachine.hpp
     EnigmaMachine/include/IEnigmaObserver.hpp
     EnigmaMachine/include/IAssetProvider.hpp
@@ -416,6 +418,12 @@ set(PUBLIC_HEADERS
 
 install(FILES ${PUBLIC_HEADERS}
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/EnigmaMachineCore
+)
+
+# Install expected-lite headers for consumers (at root include level for <nonstd/expected.hpp>)
+install(DIRECTORY external/expected-lite/include/nonstd
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+    FILES_MATCHING PATTERN "*.hpp"
 )
 
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/generated/EnigmaCore_EXPORT.hpp

@@ -21,10 +21,26 @@ protected:
 
     void SetUp() override {
         FileAssetProvider provider;
-        rotors.push_back(EnigmaConfigLoader::loadRotor(provider, rotorFiles[0]));
-        rotors.push_back(EnigmaConfigLoader::loadRotor(provider, rotorFiles[1]));
-        rotors.push_back(EnigmaConfigLoader::loadRotor(provider, rotorFiles[2]));
-        reflector = EnigmaConfigLoader::loadReflector(provider, rotorFiles[3]);
+        auto r1 = EnigmaConfigLoader::loadRotor(provider, rotorFiles[0]);
+        auto r2 = EnigmaConfigLoader::loadRotor(provider, rotorFiles[1]);
+        auto r3 = EnigmaConfigLoader::loadRotor(provider, rotorFiles[2]);
+        auto refl = EnigmaConfigLoader::loadReflector(provider, rotorFiles[3]);
+        RC_ASSERT(r1.has_value());
+        RC_ASSERT(r2.has_value());
+        RC_ASSERT(r3.has_value());
+        RC_ASSERT(refl.has_value());
+        if (r1) {
+            rotors.push_back(*r1);
+        }
+        if (r2) {
+            rotors.push_back(*r2);
+        }
+        if (r3) {
+            rotors.push_back(*r3);
+        }
+        if (refl) {
+            reflector = *refl;
+        }
     }
 };
 

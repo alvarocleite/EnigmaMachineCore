@@ -13,7 +13,11 @@ protected:
 
     void SetUp() override {
         FileAssetProvider provider;
-        config = EnigmaConfigLoader::loadReflector(provider, FileName(configPath));
+        auto result = EnigmaConfigLoader::loadReflector(provider, FileName(configPath));
+        RC_ASSERT(result.has_value());
+        if (result) {
+            config = *result;
+        }
     }
 };
 

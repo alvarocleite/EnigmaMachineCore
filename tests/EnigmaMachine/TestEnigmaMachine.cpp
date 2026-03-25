@@ -2,8 +2,11 @@
 #include <string>
 #include <vector>
 #include "EnigmaConfig.hpp"
+#include "EnigmaError.hpp"
 #include "EnigmaMachine.hpp"
+#include "EnigmaMachineConfig.hpp"
 #include "FileAssetProvider.hpp"
+#include "IAssetProvider.hpp"
 
 class EnigmaMachineTests : public ::testing::Test {
 protected:
@@ -325,4 +328,51 @@ TEST_F(EnigmaMachineTests, Destructor) {
     EnigmaMachine* machine = new EnigmaMachine();
     machine->keyTransform(0);
     EXPECT_NO_THROW(delete machine);
+}
+
+/** @brief Mock provider that always returns errors for testing error paths. */
+class FailingAssetProvider : public IAssetProvider {
+public:
+    enigma::Result<std::string> loadAsset(std::string_view assetName) const override {
+        return nonstd::make_unexpected(enigma::EnigmaError::FileNotFound);
+    }
+};
+
+/** @brief Verifies EnigmaMachine constructor throws when config loading fails. */
+TEST_F(EnigmaMachineTests, ConstructorThrowsOnConfigLoadFailure) {
+    FailingAssetProvider provider;
+    EXPECT_THROW(EnigmaMachine machine(provider, "nonexistent.toml", "", nullptr), std::runtime_error);
+}
+
+/** @brief Verifies EnigmaMachine constructor throws when rotor loading fails. */
+TEST_F(EnigmaMachineTests, ConstructorThrowsOnRotorLoadFailure) {
+    FailingAssetProvider provider;
+    EXPECT_THROW(EnigmaMachine machine(provider, "assets/EnigmaMachineConfig1.toml", "", nullptr), std::runtime_error);
+}
+
+/** @brief Verifies move assignment operator works correctly. */
+TEST_F(EnigmaMachineTests, MoveAssignmentOperator) {
+    EnigmaMachine machine1(configPath, enigma::assetsDir);
+    EnigmaMachine machine2;
+    machine2 = std::move(machine1);
+    EXPECT_NO_THROW(machine2.keyTransform(0));
+}
+
+/** @brief Verifies setLogger updates the logger correctly. */
+TEST_F(EnigmaMachineTests, SetLogger) {
+    EnigmaMachine machine;
+    EXPECT_NO_THROW(machine.setLogger(nullptr));
+}
+
+/** @brief Verifies observer registration and removal work correctly. */
+TEST_F(EnigmaMachineTests, ObserverRegistration) {
+    EnigmaMachine machine;
+    class DummyObserver : public IEnigmaObserver {
+    public:
+        void onRotorStepped(int, AlphabetIndex) override {}
+        void onCharEncrypted(char, char) override {}
+    };
+    DummyObserver observer;
+    EXPECT_NO_THROW(machine.registerObserver(&observer));
+    EXPECT_NO_THROW(machine.removeObserver(&observer));
 }

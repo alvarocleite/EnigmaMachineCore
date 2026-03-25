@@ -16,6 +16,9 @@
 // Asset Management
 #include "IAssetProvider.hpp"
 
+// Error Handling
+#include "EnigmaError.hpp"
+
 // POD Configuration
 #include "EnigmaConfig.hpp"
 #include "EnigmaData.hpp"

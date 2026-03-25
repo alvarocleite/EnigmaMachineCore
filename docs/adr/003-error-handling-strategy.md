@@ -1,7 +1,7 @@
 # ADR 003: Error Handling Strategy (Transition to std::expected)
 
 ## Status
-Accepted
+Accepted — **Implemented by [ADR 007](007-result-type.md)**
 
 ## Context
 The Enigma Machine Core is designed to be universal, and it targets platforms that do not support exceptions (`-fno-exceptions`) or where exceptions are discouraged for performance reasons (e.g., Embedded systems, WASM).

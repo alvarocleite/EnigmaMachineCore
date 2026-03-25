@@ -12,6 +12,21 @@ enum TransformerType {
     Reflector
 }
 
+enum enigma::EnigmaError {
+    None = 0
+    FileNotFound
+    ConfigFieldMissing
+    TransformerSizeMismatch
+    ConfigCountMismatch
+    PlugBoardExceedsMaximum
+    PlugBoardCountMismatch
+    RotorWiringOutOfRange
+    RotorWiringDuplicate
+    RotorWiringNotBijective
+    PlugBoardPortOutOfRange
+    PlugBoardPortConflict
+}
+
 class PlugBoardPair <<struct>> {
     + AlphabetIndex sourcePortIndex
     + AlphabetIndex destinationPortIndex
@@ -28,7 +43,7 @@ class ReflectorConfig <<struct>> {
 
 ' Interfaces
 interface IAssetProvider {
-    + {abstract} loadAsset(assetName: std::string_view) : std::string
+    + {abstract} loadAsset(assetName: std::string_view) : enigma::Result<std::string>
 }
 
 interface IEnigmaObserver {
@@ -42,7 +57,7 @@ interface ILogger {
 
 ' Classes
 class FileAssetProvider {
-    + loadAsset(assetName: std::string_view) : std::string
+    + loadAsset(assetName: std::string_view) : enigma::Result<std::string>
 }
 
 class EnigmaMachineConfig <<struct>> {
@@ -56,9 +71,9 @@ class EnigmaMachineConfig <<struct>> {
 }
 
 class EnigmaConfigLoader {
-    + {static} load(provider: IAssetProvider, fileName: std::string_view, assetPath: std::string_view) : EnigmaMachineConfig
-    + {static} loadRotor(provider: IAssetProvider, fileName: std::string_view) : RotorConfig
-    + {static} loadReflector(provider: IAssetProvider, fileName: std::string_view) : ReflectorConfig
+    + {static} load(provider: IAssetProvider, fileName: std::string_view, assetPath: std::string_view) : enigma::Result<EnigmaMachineConfig>
+    + {static} loadRotor(provider: IAssetProvider, fileName: std::string_view) : enigma::Result<RotorConfig>
+    + {static} loadReflector(provider: IAssetProvider, fileName: std::string_view) : enigma::Result<ReflectorConfig>
 }
 
 class EnigmaMachine {
@@ -188,17 +203,17 @@ IAssetProvider <|.. FileAssetProvider : implements
 IEnigmaObserver <|.. EnigmaMachine : implements
 
 EnigmaConfigLoader ..> IAssetProvider : uses
-EnigmaConfigLoader ..> EnigmaMachineConfig : creates
-EnigmaConfigLoader ..> RotorConfig : creates
-EnigmaConfigLoader ..> ReflectorConfig : creates
+EnigmaConfigLoader ..> EnigmaMachineConfig : returns (via Result)
+EnigmaConfigLoader ..> RotorConfig : returns (via Result)
+EnigmaConfigLoader ..> ReflectorConfig : returns (via Result)
+EnigmaConfigLoader ..> enigma::EnigmaError : returns
 
 EnigmaMachineConfig *-- RotorConfig
 EnigmaMachineConfig *-- ReflectorConfig
 EnigmaMachineConfig *-- PlugBoardPair
 
-EnigmaMachine ..> EnigmaMachineConfig : uses
-EnigmaMachine ..> EnigmaConfigLoader : uses
-EnigmaMachine ..> IAssetProvider : uses
+EnigmaMachine ..> EnigmaConfigLoader : uses (throws on error)
+EnigmaMachine ..> IAssetProvider : uses (via ConfigLoader)
 EnigmaMachine ..> ILogger : uses
 EnigmaMachine *-- RotorBox
 EnigmaMachine *-- PlugBoard

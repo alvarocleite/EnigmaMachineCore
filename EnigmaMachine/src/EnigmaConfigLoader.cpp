@@ -2,7 +2,9 @@
 #include <sstream>
 #include <stdexcept>
 #include <toml.hpp>
+
 #include "EnigmaConfig.hpp"
+#include "EnigmaError.hpp"
 
 namespace {
 
@@ -15,31 +17,41 @@ namespace {
  *
  * @param data The parsed TOML data structure.
  * @param expectedType The expected type string (e.g., "rotor").
- * @param fileName The name of the file being parsed (for error reporting).
- * @throws std::runtime_error If validation fails or fields are missing.
+ * @return enigma::EnigmaError The error code, or None if validation passes.
  */
-void validateTransformerConfig(const toml::value& data, const std::string& expectedType, const std::string& fileName) {
+enigma::EnigmaError validateTransformerConfig(const toml::value& data, const std::string& expectedType) {
     try {
         auto size = toml::find<int>(data, "size");
         if (size != enigma::TRANSFORMER_SIZE) {
-            throw std::runtime_error("Transformer size mismatch: expected " + std::to_string(enigma::TRANSFORMER_SIZE) +
-                                     ", got " + std::to_string(size));
+            return enigma::EnigmaError::TransformerSizeMismatch;
         }
 
         auto typeStr = toml::find<std::string>(data, "type");
         if (typeStr != expectedType) {
-            throw std::runtime_error("Wrong config file: expected " + expectedType + ", got " + typeStr);
+            return enigma::EnigmaError::ConfigCountMismatch;
         }
-    } catch (const std::exception& e) {
-        throw std::runtime_error("Validation error in " + fileName + ": " + e.what());
+    } catch (const std::out_of_range&) {
+        return enigma::EnigmaError::ConfigFieldMissing;
+    } catch (const std::exception&) {
+        return enigma::EnigmaError::ConfigCountMismatch;
     }
+    return enigma::EnigmaError::None;
 }
 }  // namespace
 
-RotorConfig EnigmaConfigLoader::loadRotor(const IAssetProvider& provider, const FileName& fileName) {
-    std::istringstream stream(provider.loadAsset(fileName.string()));
+enigma::Result<RotorConfig> EnigmaConfigLoader::loadRotor(const IAssetProvider& provider, const FileName& fileName) {
+    auto assetResult = provider.loadAsset(fileName.string());
+    if (!assetResult) {
+        return nonstd::make_unexpected(assetResult.error());
+    }
+
+    std::istringstream stream(*assetResult);
     auto rotorData = toml::parse(stream, fileName.string());
-    validateTransformerConfig(rotorData, "rotor", fileName.string());
+
+    auto error = validateTransformerConfig(rotorData, "rotor");
+    if (error != enigma::EnigmaError::None) {
+        return nonstd::make_unexpected(error);
+    }
 
     RotorConfig rotorConfig;
     rotorConfig.notchPosition = toml::find<AlphabetIndex>(rotorData, "rotor", "notchPosition");
@@ -48,10 +60,20 @@ RotorConfig EnigmaConfigLoader::loadRotor(const IAssetProvider& provider, const 
     return rotorConfig;
 }
 
-ReflectorConfig EnigmaConfigLoader::loadReflector(const IAssetProvider& provider, const FileName& fileName) {
-    std::istringstream stream(provider.loadAsset(fileName.string()));
+enigma::Result<ReflectorConfig> EnigmaConfigLoader::loadReflector(const IAssetProvider& provider,
+                                                                  const FileName& fileName) {
+    auto assetResult = provider.loadAsset(fileName.string());
+    if (!assetResult) {
+        return nonstd::make_unexpected(assetResult.error());
+    }
+
+    std::istringstream stream(*assetResult);
     auto reflectorData = toml::parse(stream, fileName.string());
-    validateTransformerConfig(reflectorData, "reflector", fileName.string());
+
+    auto error = validateTransformerConfig(reflectorData, "reflector");
+    if (error != enigma::EnigmaError::None) {
+        return nonstd::make_unexpected(error);
+    }
 
     ReflectorConfig reflectorConfig;
     reflectorConfig.wiring =
@@ -59,9 +81,14 @@ ReflectorConfig EnigmaConfigLoader::loadReflector(const IAssetProvider& provider
     return reflectorConfig;
 }
 
-EnigmaMachineConfig EnigmaConfigLoader::load(const IAssetProvider& provider, const FileName& fileName,
-                                             const AssetPath& assetPath) {
-    std::istringstream stream(provider.loadAsset(fileName.string()));
+enigma::Result<EnigmaMachineConfig> EnigmaConfigLoader::load(const IAssetProvider& provider, const FileName& fileName,
+                                                             const AssetPath& assetPath) {
+    auto assetResult = provider.loadAsset(fileName.string());
+    if (!assetResult) {
+        return nonstd::make_unexpected(assetResult.error());
+    }
+
+    std::istringstream stream(*assetResult);
     auto data = toml::parse(stream, fileName.string());
 
     int rotorCount = toml::find<int>(data, "rotors", "RotorCount");
@@ -70,24 +97,33 @@ EnigmaMachineConfig EnigmaConfigLoader::load(const IAssetProvider& provider, con
 
     if (static_cast<size_t>(rotorCount) != rotorPositions.size() ||
         static_cast<size_t>(rotorCount) != rotorFilePaths.size()) {
-        throw std::runtime_error("Error: Number of rotors, positions, and files do not match.");
+        return nonstd::make_unexpected(enigma::EnigmaError::ConfigCountMismatch);
     }
 
     std::vector<RotorConfig> rotors;
     rotors.reserve(rotorFilePaths.size());
-    std::ranges::transform(rotorFilePaths, std::back_inserter(rotors),
-                           [&](const auto& rotorFile) { return loadRotor(provider, FileName(assetPath / rotorFile)); });
+    for (const auto& rotorFile : rotorFilePaths) {
+        auto rotorResult = loadRotor(provider, FileName(assetPath / rotorFile));
+        if (!rotorResult) {
+            return nonstd::make_unexpected(rotorResult.error());
+        }
+        rotors.push_back(*rotorResult);
+    }
 
     auto reflectorFile = toml::find<std::string>(data, "ReflectorFile");
-    auto reflector = loadReflector(provider, FileName(assetPath / reflectorFile));
+    auto reflectorResult = loadReflector(provider, FileName(assetPath / reflectorFile));
+    if (!reflectorResult) {
+        return nonstd::make_unexpected(reflectorResult.error());
+    }
+
     auto plugsCount = toml::find<int>(data, "plugboard", "PlugCount");
     if (plugsCount > enigma::MAX_PLUGBOARD_PAIRS) {
-        throw std::runtime_error("Error: Plugboard pairs exceed maximum allowed.");
+        return nonstd::make_unexpected(enigma::EnigmaError::PlugBoardExceedsMaximum);
     }
 
     auto plugBoardArr = toml::find<std::vector<toml::value>>(data, "plugboard", "PlugBoardPairs");
     if (plugBoardArr.size() != static_cast<size_t>(plugsCount)) {
-        throw std::runtime_error("Error: Plugboard pairs count does not match specified count.");
+        return nonstd::make_unexpected(enigma::EnigmaError::PlugBoardCountMismatch);
     }
 
     std::array<PlugBoardPair, enigma::MAX_PLUGBOARD_PAIRS> plugBoardPairs;
@@ -101,7 +137,7 @@ EnigmaMachineConfig EnigmaConfigLoader::load(const IAssetProvider& provider, con
     newConfig.rotorCount = rotorCount;
     newConfig.rotorPositions = std::move(rotorPositions);
     newConfig.rotors = std::move(rotors);
-    newConfig.reflector = reflector;
+    newConfig.reflector = *reflectorResult;
     newConfig.plugBoardPairs = plugBoardPairs;
 
     return newConfig;
