@@ -376,3 +376,33 @@ TEST_F(EnigmaMachineTests, ObserverRegistration) {
     EXPECT_NO_THROW(machine.registerObserver(&observer));
     EXPECT_NO_THROW(machine.removeObserver(&observer));
 }
+
+/** @brief Verifies factory create() method succeeds with valid config. */
+TEST_F(EnigmaMachineTests, FactoryCreateWithProviderSuccess) {
+    FileAssetProvider provider;
+    auto result = EnigmaMachine::create(provider, configPath, enigma::assetsDir);
+    ASSERT_TRUE(result.has_value());
+    EXPECT_NO_THROW((*result).keyTransform(0));
+}
+
+/** @brief Verifies factory create() method succeeds with file path. */
+TEST_F(EnigmaMachineTests, FactoryCreateWithPathSuccess) {
+    auto result = EnigmaMachine::create(configPath, enigma::assetsDir);
+    ASSERT_TRUE(result.has_value());
+    EXPECT_NO_THROW((*result).keyTransform(0));
+}
+
+/** @brief Verifies factory create() method returns error for non-existent file. */
+TEST_F(EnigmaMachineTests, FactoryCreateWithProviderFailure) {
+    FailingAssetProvider provider;
+    auto result = EnigmaMachine::create(provider, "nonexistent.toml", "", nullptr);
+    EXPECT_FALSE(result.has_value());
+    EXPECT_EQ(result.error(), enigma::EnigmaError::FileNotFound);
+}
+
+/** @brief Verifies factory create() method returns error with file path for missing file. */
+TEST_F(EnigmaMachineTests, FactoryCreateWithPathFailure) {
+    auto result = EnigmaMachine::create("nonexistent.toml", "", nullptr);
+    EXPECT_FALSE(result.has_value());
+    EXPECT_EQ(result.error(), enigma::EnigmaError::FileNotFound);
+}
