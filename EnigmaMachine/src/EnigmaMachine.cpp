@@ -118,6 +118,28 @@ EnigmaMachine::EnigmaMachine(EnigmaMachineConfig&& config, ILogger* logger)
 EnigmaMachine::EnigmaMachine(std::string_view fileName, std::string_view assetPath, ILogger* logger)
     : EnigmaMachine(FileAssetProvider{}, fileName, assetPath, logger) {}
 
+enigma::Result<EnigmaMachine> EnigmaMachine::create(const IAssetProvider& provider, std::string_view fileName,
+                                                    std::string_view assetPath, ILogger* logger) {
+    auto configResult = EnigmaConfigLoader::load(provider, FileName(fileName), AssetPath(assetPath));
+    if (!configResult) {
+        logEnigmaError(logger, "Failed to load Enigma configuration", configResult.error());
+        return nonstd::make_unexpected(configResult.error());
+    }
+
+    EnigmaMachine machine;
+    machine.logger = logger;
+    machine.rotorBox =
+        std::make_unique<RotorBox>(configResult->rotorPositions, configResult->rotors, configResult->reflector, logger);
+    machine.plugBoard = std::make_unique<PlugBoard>(configResult->plugBoardPairs);
+    machine.rotorBox->registerObserver(&machine);
+    return machine;
+}
+
+enigma::Result<EnigmaMachine> EnigmaMachine::create(std::string_view fileName, std::string_view assetPath,
+                                                    ILogger* logger) {
+    return create(FileAssetProvider{}, fileName, assetPath, logger);
+}
+
 EnigmaMachine::EnigmaMachine(const enigma::EnigmaMachineData& data, ILogger* logger) : logger(logger) {
     std::vector<AlphabetIndex> positions;
     std::vector<RotorConfig> rotorConfigs;

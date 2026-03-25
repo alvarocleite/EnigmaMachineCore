@@ -105,10 +105,12 @@ The initialization process orchestrates the `EnigmaConfigLoader`, `IAssetProvide
 
 ### 3.6. Error Handling Strategy
 
-The system uses **Exceptions** rather than error codes to handle runtime failures.
+The system uses **Result types** (`enigma::Result<T>`) rather than exceptions for error handling at the public API level. This enables compilation with `-fno-exceptions` for embedded/WASM targets.
 
-*   **std::runtime_error:** Thrown for recoverable errors such as missing configuration files, invalid TOML formats, or logical errors (e.g., misconfigured rotor wiring).
-*   **RAII (Resource Acquisition Is Initialization):** Constructors are responsible for establishing a valid state. If initialization fails (e.g., invalid arguments), the object is not created, preventing the system from entering an inconsistent state.
+*   **enigma::Result<T>:** The standard return type for all fallible operations (see [ADR 007](adr/007-result-type.md)).
+*   **Static Factories:** `EnigmaMachine::create()` returns `enigma::Result<EnigmaMachine>` - the recommended API (see [ADR 008](adr/008-static-factories.md)).
+*   **Backward Compatibility:** Throwing constructors remain for existing consumers who don't need error-safe initialization.
+*   **ILogger:** Error context is logged via `ILogger::log(LogLevel::Error, ...)` before returning errors.
 
 ## 4. Execution Flow
 

@@ -11,6 +11,7 @@
 #include <vector>
 
 #include "EnigmaCore_EXPORT.hpp"
+#include "EnigmaError.hpp"
 #include "EnigmaTypes.hpp"
 #include "IEnigmaObserver.hpp"
 
@@ -89,6 +90,29 @@ public:
      * @param logger Optional logger for event reporting.
      */
     explicit EnigmaMachine(std::string_view fileName, std::string_view assetPath = "", ILogger* logger = nullptr);
+
+    // Static Factory Methods
+
+    /**
+     * @brief Creates an EnigmaMachine from an asset provider and config file.
+     * @param provider The asset provider for loading config files.
+     * @param fileName Path to the TOML configuration file.
+     * @param assetPath Optional base directory for assets.
+     * @param logger Optional logger for event reporting.
+     * @return enigma::Result<EnigmaMachine> on success, or error on failure.
+     */
+    static enigma::Result<EnigmaMachine> create(const IAssetProvider& provider, std::string_view fileName,
+                                                std::string_view assetPath = "", ILogger* logger = nullptr);
+
+    /**
+     * @brief Creates an EnigmaMachine from a config file path (uses FileAssetProvider).
+     * @param fileName Path to the TOML configuration file.
+     * @param assetPath Optional base directory for assets.
+     * @param logger Optional logger for event reporting.
+     * @return enigma::Result<EnigmaMachine> on success, or error on failure.
+     */
+    static enigma::Result<EnigmaMachine> create(std::string_view fileName, std::string_view assetPath = "",
+                                                ILogger* logger = nullptr);
 
     // Rule of Five (Required due to unique_ptr)
     ~EnigmaMachine() override;
