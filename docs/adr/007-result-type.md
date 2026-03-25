@@ -97,7 +97,9 @@ static enigma::Result<ReflectorConfig> loadReflector(...);
 
 #### EnigmaMachine Constructors (Option A Bridge)
 
-`EnigmaMachine` constructors still throw exceptions as a temporary bridge until task 2.2 (Static Factories). When `EnigmaConfigLoader` returns an error, the constructor:
+`EnigmaMachine` constructors still throw exceptions as a temporary bridge (for backward compatibility), but task 2.2 (Static Factories) has now been implemented. The new `EnigmaMachine::create()` factory methods return `enigma::Result<EnigmaMachine>` directly. See [ADR 008](008-static-factories.md) for details.
+
+When the constructor approach is used and `EnigmaConfigLoader` returns an error, the constructor:
 1. Logs the error via `ILogger::log(LogLevel::Error, ...)` if a logger is available.
 2. Throws `std::runtime_error` with a brief message.
 
@@ -113,9 +115,9 @@ This keeps the consumer API unchanged (constructors still throw) while the inter
 
 ### Internal Components
 
-`Rotor`, `RotorBox`, and `PlugBoard` constructors **still throw exceptions** internally. Validation of POD data (duplicate wiring, port conflicts) is not yet handled via `Result`. This is deferred to task 2.2 (Static Factories) which will provide factory methods that return `Result`.
+`Rotor`, `RotorBox`, and `PlugBoard` constructors **still throw exceptions** internally. Validation of POD data (duplicate wiring, port conflicts) is not yet handled via `Result`. This could be addressed in a future iteration.
 
-ADR 006 explicitly noted: *"POD structs cannot enforce invariants at construction time. Invalid data must be validated separately."* The factory methods (task 2.2) will provide this validation layer.
+ADR 006 explicitly noted: *"POD structs cannot enforce invariants at construction time. Invalid data must be validated separately."* The factory methods (task 2.2) provide a validation layer for configuration loading, but internal component validation still uses exceptions.
 
 ### Error Context
 

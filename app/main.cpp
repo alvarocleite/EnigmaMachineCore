@@ -7,6 +7,7 @@
 
 #include "EnigmaConfig.hpp"
 #include "EnigmaCore.hpp"
+#include "EnigmaError.hpp"
 
 namespace fs = std::filesystem;
 
@@ -40,6 +41,36 @@ struct AppConfig {
     bool encode = false;
     bool decode = false;
 };
+
+/** @brief Converts EnigmaError code to user-friendly message. */
+std::string errorToString(enigma::EnigmaError error) {
+    switch (error) {
+        case enigma::EnigmaError::FileNotFound:
+            return "File not found";
+        case enigma::EnigmaError::ConfigFieldMissing:
+            return "Configuration field missing or invalid";
+        case enigma::EnigmaError::TransformerSizeMismatch:
+            return "Transformer size mismatch";
+        case enigma::EnigmaError::ConfigCountMismatch:
+            return "Configuration count mismatch (e.g., rotor count)";
+        case enigma::EnigmaError::PlugBoardExceedsMaximum:
+            return "Plugboard exceeds maximum pairs (10)";
+        case enigma::EnigmaError::PlugBoardCountMismatch:
+            return "Plugboard count mismatch";
+        case enigma::EnigmaError::RotorWiringOutOfRange:
+            return "Rotor wiring value out of range";
+        case enigma::EnigmaError::RotorWiringDuplicate:
+            return "Rotor wiring contains duplicates";
+        case enigma::EnigmaError::RotorWiringNotBijective:
+            return "Rotor wiring is not bijective";
+        case enigma::EnigmaError::PlugBoardPortOutOfRange:
+            return "Plugboard port out of range";
+        case enigma::EnigmaError::PlugBoardPortConflict:
+            return "Plugboard port conflict (already connected)";
+        default:
+            return "Unknown error";
+    }
+}
 
 /**
  * @brief Observer that logs Enigma machine events and engine messages to the console.
@@ -132,15 +163,17 @@ void runApplication(const AppConfig& config) {
     // Create observer first so it can be used during machine initialization
     ConsoleObserver observer;
 
-    EnigmaMachine machine(config.configPath, config.assetPath, config.debug ? &observer : nullptr);
+    auto machineResult = EnigmaMachine::create(config.configPath, config.assetPath, config.debug ? &observer : nullptr);
+    if (!machineResult) {
+        std::cerr << "Error: Failed to create Enigma machine: " << errorToString(machineResult.error()) << "\n";
+        return;
+    }
+    EnigmaMachine machine = std::move(*machineResult);
 
     // Register observer for events if debug is enabled
     if (config.debug) {
         machine.registerObserver(&observer);
         std::cout << "Debug mode enabled: Observer and Logger registered.\n";
-        // machine.keyTransform(0); // Removed dummy call
-        // We can't call machine.printTransformers() because it's not in the public API.
-        // It's in RotorBox. But Issue 59 is about decoupling.
     }
 
     std::string currentMessage = config.message;
@@ -153,7 +186,13 @@ void runApplication(const AppConfig& config) {
 
     if (config.decode) {
         // Re-initialize for decryption (symmetric cipher starting from same state)
-        EnigmaMachine decodeMachine(config.configPath, config.assetPath, config.debug ? &observer : nullptr);
+        auto decodeResult =
+            EnigmaMachine::create(config.configPath, config.assetPath, config.debug ? &observer : nullptr);
+        if (!decodeResult) {
+            std::cerr << "Error: Failed to create decode machine: " << errorToString(decodeResult.error()) << "\n";
+            return;
+        }
+        EnigmaMachine decodeMachine = std::move(*decodeResult);
 
         // Register observer for the decode machine events as well
         if (config.debug) {

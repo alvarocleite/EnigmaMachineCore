@@ -45,6 +45,10 @@ The `EnigmaMachine` class is the primary entry point for all encryption operatio
 *   `EnigmaMachine(string_view fileName, string_view assetPath)`: Standard file-based initialization.
 *   `EnigmaMachine(IAssetProvider& provider, string_view fileName, string_view assetPath)`: Dependency-injected initialization for custom environments.
 
+### **Static Factory Methods** (Recommended)
+*   `enigma::Result<EnigmaMachine> create(string_view fileName, string_view assetPath)`: Creates a machine from a config file. Returns `Result<EnigmaMachine>` - use `has_value()` to check success, `error()` to get failure reason.
+*   `enigma::Result<EnigmaMachine> create(IAssetProvider& provider, string_view fileName, string_view assetPath)`: Creates a machine using a custom asset provider. Returns `Result<EnigmaMachine>` for error-safe initialization.
+
 ### **Primary Methods**
 *   `AlphabetIndex keyTransform(AlphabetIndex input)`: Transforms a single character index (0 to `TRANSFORMER_SIZE - 1`). This method handles the internal rotor stepping, multi-stage transformation, and observer notifications.
 *   `void processBuffer(std::span<AlphabetIndex> buffer)`: Processes a contiguous block of characters in-place. This is the preferred method for performance-critical batch processing.
@@ -83,7 +87,8 @@ public:
     virtual ~IAssetProvider();
 
     // Loads the raw string content of a configuration or wiring asset
-    virtual std::string loadAsset(std::string_view assetName) = 0;
+    // Returns enigma::Result<std::string> - use has_value() to check success
+    virtual enigma::Result<std::string> loadAsset(std::string_view assetName) const = 0;
 };
 ```
 
@@ -103,15 +108,23 @@ class MyLogger : public IEnigmaObserver {
 };
 
 int main() {
-    // 1. Initialize (standard machine auto-resolves assets if installed)
-    EnigmaMachine machine;
+    // 1a. Initialize with factory method (recommended - returns Result)
+    auto result = EnigmaMachine::create("config.toml", "assets/");
+    if (!result) {
+        std::cerr << "Failed to create machine: " << static_cast<int>(result.error()) << "\n";
+        return 1;
+    }
+    EnigmaMachine machine = std::move(*result);
+
+    // 1b. Or use constructor directly (throws on failure)
+    // EnigmaMachine machine("config.toml", "assets/");
 
     // 2. Observe
     MyLogger logger;
     machine.registerObserver(&logger);
 
     // 3. Execute (Single character)
-    AlphabetIndex result = machine.keyTransform(7); // 'H'
+    AlphabetIndex result_char = machine.keyTransform(7); // 'H'
 
     // 4. Execute (Batch processing)
     std::vector<AlphabetIndex> buffer = {0, 1, 2}; // "ABC"
