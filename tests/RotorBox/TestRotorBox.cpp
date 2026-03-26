@@ -57,7 +57,9 @@ TEST_F(RotorBoxTests, DefaultConstructor) {
 /** @brief Verifies parameterized constructor accepts rotor configurations. */
 TEST_F(RotorBoxTests, ParameterizedConstructor) {
     std::vector<int> positions = {0, 0, 0};
-    RotorBox rb(positions, rotors, reflector);
+    auto rbResult = RotorBox::create(positions, rotors, reflector);
+    ASSERT_TRUE(rbResult.has_value());
+    RotorBox& rb = *rbResult;
 
     int output = rb.keyTransform(0);
     EXPECT_GE(output, 0);
@@ -72,13 +74,17 @@ TEST_F(RotorBoxTests, RoundTrip) {
 
     {
         std::vector<int> positions = {0, 0, 0};
-        RotorBox rb(positions, rotors, reflector);
+        auto rbResult = RotorBox::create(positions, rotors, reflector);
+        ASSERT_TRUE(rbResult.has_value());
+        RotorBox& rb = *rbResult;
         ciphertext = rb.keyTransform(input);
     }
 
     {
         std::vector<int> positions = {0, 0, 0};
-        RotorBox rb(positions, rotors, reflector);
+        auto rbResult = RotorBox::create(positions, rotors, reflector);
+        ASSERT_TRUE(rbResult.has_value());
+        RotorBox& rb = *rbResult;
         decrypted = rb.keyTransform(ciphertext);
     }
 
@@ -88,7 +94,9 @@ TEST_F(RotorBoxTests, RoundTrip) {
 /** @brief Verifies notch-based rotor stepping mechanics. */
 TEST_F(RotorBoxTests, SteppingMechanism) {
     std::vector<int> startPos = {25, 0, 0};
-    RotorBox rb(startPos, rotors, reflector);
+    auto rbResult = RotorBox::create(startPos, rotors, reflector);
+    ASSERT_TRUE(rbResult.has_value());
+    RotorBox& rb = *rbResult;
 
     int out1 = rb.keyTransform(0);
     EXPECT_GE(out1, 0);
@@ -98,7 +106,9 @@ TEST_F(RotorBoxTests, SteppingMechanism) {
 /** @brief Verifies multiple notch carries propagate correctly. */
 TEST_F(RotorBoxTests, MultiStepCarry) {
     std::vector<int> startPos = {25, 25, 0};
-    RotorBox rb(startPos, rotors, reflector);
+    auto rbResult = RotorBox::create(startPos, rotors, reflector);
+    ASSERT_TRUE(rbResult.has_value());
+    RotorBox& rb = *rbResult;
 
     int out = rb.keyTransform(0);
     EXPECT_GE(out, 0);
@@ -107,7 +117,9 @@ TEST_F(RotorBoxTests, MultiStepCarry) {
 /** @brief Verifies double-stepping when middle rotor at notch. */
 TEST_F(RotorBoxTests, DoubleSteppingMechanism_1) {
     std::vector<int> startPos = {0, 1, 0};
-    RotorBox rb(startPos, rotors, reflector);
+    auto rbResult = RotorBox::create(startPos, rotors, reflector);
+    ASSERT_TRUE(rbResult.has_value());
+    RotorBox& rb = *rbResult;
     EnigmaObserverTest observer(3);
     rb.registerObserver(&observer);
 
@@ -120,7 +132,9 @@ TEST_F(RotorBoxTests, DoubleSteppingMechanism_1) {
 /** @brief Verifies stepping when rightmost rotor steps only. */
 TEST_F(RotorBoxTests, DoubleSteppingMechanism_2) {
     std::vector<int> startPos = {0, 0, 0};
-    RotorBox rb(startPos, rotors, reflector);
+    auto rbResult = RotorBox::create(startPos, rotors, reflector);
+    ASSERT_TRUE(rbResult.has_value());
+    RotorBox& rb = *rbResult;
     EnigmaObserverTest observer(3);
     rb.registerObserver(&observer);
 
@@ -133,7 +147,9 @@ TEST_F(RotorBoxTests, DoubleSteppingMechanism_2) {
 /** @brief Verifies mixed stepping pattern. */
 TEST_F(RotorBoxTests, DoubleSteppingMechanism_3) {
     std::vector<int> startPos = {1, 0, 2};
-    RotorBox rb(startPos, rotors, reflector);
+    auto rbResult = RotorBox::create(startPos, rotors, reflector);
+    ASSERT_TRUE(rbResult.has_value());
+    RotorBox& rb = *rbResult;
     EnigmaObserverTest observer(3);
     rb.registerObserver(&observer);
 
@@ -214,7 +230,9 @@ TEST_F(RotorBoxTests, PrintTransformers) {
 
     TestLogger logger;
     std::vector<int> positions = {0, 0, 0};
-    RotorBox rb(positions, rotors, reflector, &logger);
+    auto rbResult = RotorBox::create(positions, rotors, reflector, &logger);
+    ASSERT_TRUE(rbResult.has_value());
+    RotorBox& rb = *rbResult;
 
     rb.printTransformers();
 

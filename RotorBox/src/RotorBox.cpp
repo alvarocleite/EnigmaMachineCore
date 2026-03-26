@@ -75,6 +75,70 @@ void RotorBox::removeObserver(IEnigmaObserver* observer) {
     observers.erase(iterator, observers.end());
 }
 
+namespace {
+
+enigma::EnigmaError validateRotorBoxConfig(const std::vector<AlphabetIndex>& rotorPositions,
+                                           const std::vector<RotorConfig>& rotors) {
+    if (std::cmp_not_equal(rotorPositions.size(), rotors.size())) {
+        return enigma::EnigmaError::ConfigCountMismatch;
+    }
+    return enigma::EnigmaError::None;
+}
+
+}  // namespace
+
+enigma::Result<RotorBox> RotorBox::create(const std::vector<AlphabetIndex>& rotorPositions,
+                                          const std::vector<RotorConfig>& rotors, const ReflectorConfig& reflector,
+                                          ILogger* logger) {
+    auto error = validateRotorBoxConfig(rotorPositions, rotors);
+    if (error != enigma::EnigmaError::None) {
+        return nonstd::make_unexpected(error);
+    }
+
+    RotorBox box;
+    box.logger = logger;
+    box.rotorCount = (int)rotorPositions.size();
+    box.rotorPositions = rotorPositions;
+
+    box.initTransformers(rotors, reflector);
+
+    for (int i = 0; i < box.rotorCount; i++) {
+        box.transformers.at(i)->setPosition(box.rotorPositions.at(i));
+    }
+
+    return box;
+}
+
+enigma::Result<RotorBox> RotorBox::create(std::vector<AlphabetIndex>&& rotorPositions,
+                                          std::vector<RotorConfig>&& rotors, ReflectorConfig&& reflector,
+                                          ILogger* logger) {
+    auto error = validateRotorBoxConfig(rotorPositions, rotors);
+    if (error != enigma::EnigmaError::None) {
+        return nonstd::make_unexpected(error);
+    }
+
+    RotorBox box;
+    box.logger = logger;
+    box.rotorCount = (int)rotorPositions.size();
+    box.rotorPositions = std::move(rotorPositions);
+
+    box.transformers.reserve(box.rotorCount + 1);
+    for (auto& rotorConfig : rotors) {
+        auto rotorResult = Rotor::create(std::move(rotorConfig));
+        if (!rotorResult) {
+            return nonstd::make_unexpected(rotorResult.error());
+        }
+        box.transformers.push_back(std::make_unique<Rotor>(std::move(*rotorResult)));
+    }
+    box.transformers.push_back(std::make_unique<Reflector>(std::move(reflector)));
+
+    for (int i = 0; i < box.rotorCount; i++) {
+        box.transformers.at(i)->setPosition(box.rotorPositions.at(i));
+    }
+
+    return box;
+}
+
 /**
  * @details Populates the internal transformer vector with unique pointers to Rotor and Reflector objects.
  *

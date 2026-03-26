@@ -8,6 +8,7 @@
 #include <array>
 
 #include "EnigmaConfig.hpp"
+#include "EnigmaError.hpp"
 #include "EnigmaTypes.hpp"
 #include "PlugBoardPair.hpp"
 
@@ -39,6 +40,16 @@ public:
      * @throws std::invalid_argument If a port index is out of range or if there is a mapping conflict.
      */
     explicit PlugBoard(const std::array<PlugBoardPair, enigma::MAX_PLUGBOARD_PAIRS>& pairs);
+
+    /**
+     * @brief Factory method to create a PlugBoard from pairs.
+     * Returns a Result to allow error handling without exceptions.
+     *
+     * @param pairs An array of pairs to initialize the plugboard with.
+     * @return enigma::Result<PlugBoard> The created PlugBoard or an error code.
+     */
+    static enigma::Result<PlugBoard> create(const std::array<PlugBoardPair, enigma::MAX_PLUGBOARD_PAIRS>& pairs);
+
     ~PlugBoard() = default;
 
     /**

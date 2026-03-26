@@ -45,6 +45,8 @@ struct AppConfig {
 /** @brief Converts EnigmaError code to user-friendly message. */
 std::string errorToString(enigma::EnigmaError error) {
     switch (error) {
+        case enigma::EnigmaError::None:
+            return "No error";
         case enigma::EnigmaError::FileNotFound:
             return "File not found";
         case enigma::EnigmaError::ConfigFieldMissing:
@@ -67,6 +69,8 @@ std::string errorToString(enigma::EnigmaError error) {
             return "Plugboard port out of range";
         case enigma::EnigmaError::PlugBoardPortConflict:
             return "Plugboard port conflict (already connected)";
+        case enigma::EnigmaError::RotorBoxPositionMismatch:
+            return "Rotor count does not match position count";
         default:
             return "Unknown error";
     }

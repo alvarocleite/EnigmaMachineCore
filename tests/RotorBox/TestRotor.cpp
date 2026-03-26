@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 #include <array>
 #include "EnigmaConfigLoader.hpp"
+#include "EnigmaError.hpp"
 #include "EnigmaMachineConfig.hpp"
 #include "FileAssetProvider.hpp"
 #include "Rotor.hpp"
@@ -20,13 +21,17 @@ protected:
 
 /** @brief Verifies rotor initialization and type identification. */
 TEST_F(RotorTests, InitializationAndType) {
-    Rotor rotor(config);
+    auto rotorResult = Rotor::create(config);
+    ASSERT_TRUE(rotorResult.has_value());
+    Rotor& rotor = *rotorResult;
     EXPECT_EQ(rotor.getType(), TransformerType::Rotor);
 }
 
 /** @brief Verifies basic forward and reverse transformation. */
 TEST_F(RotorTests, BasicTransformation) {
-    Rotor rotor(config);
+    auto rotorResult = Rotor::create(config);
+    ASSERT_TRUE(rotorResult.has_value());
+    Rotor& rotor = *rotorResult;
     rotor.setPosition(0);
 
     EXPECT_EQ(rotor.transform(0, false), 3);
@@ -35,7 +40,9 @@ TEST_F(RotorTests, BasicTransformation) {
 
 /** @brief Verifies rotor is reciprocal: transform(reverse(transform(x))) == x. */
 TEST_F(RotorTests, Reciprocity) {
-    Rotor rotor(config);
+    auto rotorResult = Rotor::create(config);
+    ASSERT_TRUE(rotorResult.has_value());
+    Rotor& rotor = *rotorResult;
     rotor.setPosition(0);
 
     for (int i = 0; i < 26; i++) {
@@ -47,7 +54,9 @@ TEST_F(RotorTests, Reciprocity) {
 
 /** @brief Verifies rotation changes the transformation mapping. */
 TEST_F(RotorTests, RotationEffect) {
-    Rotor rotor(config);
+    auto rotorResult = Rotor::create(config);
+    ASSERT_TRUE(rotorResult.has_value());
+    Rotor& rotor = *rotorResult;
     rotor.setPosition(0);
 
     int initialOutput = rotor.transform(0, false);
@@ -61,7 +70,9 @@ TEST_F(RotorTests, RotationEffect) {
 
 /** @brief Verifies 26 rotations return to starting position. */
 TEST_F(RotorTests, FullRotationCycle) {
-    Rotor rotor(config);
+    auto rotorResult = Rotor::create(config);
+    ASSERT_TRUE(rotorResult.has_value());
+    Rotor& rotor = *rotorResult;
     rotor.setPosition(0);
 
     int startVal = rotor.transform(0, false);
@@ -75,7 +86,9 @@ TEST_F(RotorTests, FullRotationCycle) {
 
 /** @brief Verifies setPosition manually sets rotor position. */
 TEST_F(RotorTests, SetPosition) {
-    Rotor rotor(config);
+    auto rotorResult = Rotor::create(config);
+    ASSERT_TRUE(rotorResult.has_value());
+    Rotor& rotor = *rotorResult;
 
     rotor.setPosition(5);
     int valAt5 = rotor.transform(0, false);
@@ -92,7 +105,9 @@ TEST_F(RotorTests, SetPosition) {
 
 /** @brief Verifies notch signaling when rotor steps into notch position. */
 TEST_F(RotorTests, NotchSignaling) {
-    Rotor rotor(config);
+    auto rotorResult = Rotor::create(config);
+    ASSERT_TRUE(rotorResult.has_value());
+    Rotor& rotor = *rotorResult;
 
     rotor.setPosition(25);
     int signal = rotor.rotate();
@@ -114,7 +129,9 @@ TEST_F(RotorTests, MoveConstructor) {
 
 /** @brief Verifies reverse transform handles wrap-around at boundaries. */
 TEST_F(RotorTests, ReverseTransformWrapAround) {
-    Rotor rotor(config);
+    auto rotorResult = Rotor::create(config);
+    ASSERT_TRUE(rotorResult.has_value());
+    Rotor& rotor = *rotorResult;
 
     for (int rot = 0; rot < 26; rot++) {
         rotor.setPosition(rot);
@@ -155,15 +172,19 @@ TEST(RotorErrorTests, InvalidWiringValueOutOfRange) {
                                                13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 30};
     invalidConfig.notchPosition = 0;
 
-    EXPECT_THROW(Rotor rotor(invalidConfig), std::runtime_error);
+    auto result = Rotor::create(invalidConfig);
+    ASSERT_FALSE(result.has_value());
+    EXPECT_EQ(result.error(), enigma::EnigmaError::RotorWiringOutOfRange);
 }
 
-/** @brief Verifies exception thrown for duplicate wiring values. */
+/** @brief Verifies error returned for duplicate wiring values. */
 TEST(RotorErrorTests, InvalidWiringDuplicateValue) {
     RotorConfig invalidConfig;
     invalidConfig.wiring = std::array<int, 26>{0,  0,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11, 12,
                                                13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25};
     invalidConfig.notchPosition = 0;
 
-    EXPECT_THROW(Rotor rotor(invalidConfig), std::runtime_error);
+    auto result = Rotor::create(invalidConfig);
+    ASSERT_FALSE(result.has_value());
+    EXPECT_EQ(result.error(), enigma::EnigmaError::RotorWiringDuplicate);
 }

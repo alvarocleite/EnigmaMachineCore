@@ -1,5 +1,6 @@
 #pragma once
 
+#include "EnigmaError.hpp"
 #include "EnigmaMachineConfig.hpp"  // For RotorConfig
 #include "Transformer.hpp"
 
@@ -36,6 +37,11 @@ private:
 
 public:
     /**
+     * @brief Default constructor for Rotor.
+     */
+    Rotor() = default;
+
+    /**
      * @brief Constructor for the Rotor class.
      * Initializes the rotor with a configuration.
      *
@@ -43,6 +49,17 @@ public:
      */
     explicit Rotor(const RotorConfig& config);
     explicit Rotor(RotorConfig&& config);
+
+    /**
+     * @brief Factory method to create a Rotor from configuration.
+     * Returns a Result to allow error handling without exceptions.
+     *
+     * @param config The RotorConfig structure containing wiring and notch info.
+     * @return enigma::Result<Rotor> The created Rotor or an error code.
+     */
+    static enigma::Result<Rotor> create(const RotorConfig& config);
+    static enigma::Result<Rotor> create(RotorConfig&& config);
+
     ~Rotor() override = default;
 
     /**
