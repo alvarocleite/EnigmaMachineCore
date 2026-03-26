@@ -27,6 +27,7 @@ enum class EnigmaError {
     RotorWiringNotBijective,
     PlugBoardPortOutOfRange,
     PlugBoardPortConflict,
+    RotorBoxPositionMismatch,
 };
 
 /**
