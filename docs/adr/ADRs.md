@@ -12,3 +12,4 @@ This directory contains records of significant architectural decisions made for 
 * [ADR 006: Plain Old Data (POD) Configuration DTOs](006-POD-DTOs.md) - Enable embedded/WASM without dynamic allocation
 * [ADR 007: Result Type Implementation](007-result-type.md) - std::expected via expected-lite + EnigmaError enum
 * [ADR 008: Static Factory Methods](008-static-factories.md) - Result<EnigmaMachine> factory methods for exception-free initialization
+* [ADR 009: Exception-Free Build Configuration](009-exception-free-build.md) - CMake option for -fno-exceptions -fno-rtti

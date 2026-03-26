@@ -1,0 +1,57 @@
+name: Exception-Free Build
+
+on:
+  push:
+    branches: [ "main", "development" ]
+  pull_request:
+    branches: [ "main", "development" ]
+
+jobs:
+  exception-free:
+    name: Build without exceptions
+    runs-on: ubuntu-latest
+    continue-on-error: true
+
+    steps:
+    - uses: actions/checkout@v6
+      with:
+        submodules: recursive
+
+    - name: Configure CMake
+      run: |
+        cmake -B build \
+          -DCMAKE_BUILD_TYPE=Release \
+          -DENIGMA_NO_EXCEPTIONS=ON \
+          -DENIGMA_BUILD_CLI=ON \
+          -DENIGMA_BUILD_TESTS=ON \
+          -DENIGMA_BUILD_PROPERTY_TESTS=ON
+
+    - name: Build
+      run: cmake --build build
+
+    - name: Run Unit Tests
+      if: success()
+      shell: bash
+      run: |
+        cd build
+        ctest --output-on-failure -E Properties
+
+    - name: Run Property Tests
+      if: success()
+      shell: bash
+      run: |
+        cd build
+        ctest --output-on-failure -R Properties
+
+    - name: Upload Diagnostic
+      if: failure()
+      run: |
+        echo "## Exception-Free Build Status" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "⚠️ Build failed. This is expected until all core code converts from `throw` to `Result<T>`." >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "**Required for full compilation:**" >> $GITHUB_STEP_SUMMARY
+        echo "1. Convert remaining `throw` statements in core code to `Result<T>`" >> $GITHUB_STEP_SUMMARY
+        echo "2. Or use POD DTO initialization path (bypasses toml11)" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "See [ADR 009](./docs/adr/009-exception-free-build.md) for details." >> $GITHUB_STEP_SUMMARY

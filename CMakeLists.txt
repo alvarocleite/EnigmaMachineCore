@@ -25,6 +25,7 @@ option(ENIGMA_BUILD_CLI "Build the Enigma Machine CLI executable" ${ENIGMA_IS_TO
 option(ENIGMA_BUILD_TESTS "Build the test suite" OFF)
 option(ENIGMA_BUILD_BENCHMARKS "Build the benchmark suite" OFF)
 option(ENIGMA_BUILD_DOCS "Build the documentation" OFF)
+option(ENIGMA_NO_EXCEPTIONS "Build without exceptions and RTTI for embedded/WASM targets" OFF)
 
 # --- C++ Standard ---
 set(CMAKE_CXX_STANDARD 20)
@@ -128,6 +129,21 @@ if(MSVC)
     target_compile_options(EnigmaCore_OBJ PRIVATE /W4)
 else()
     target_compile_options(EnigmaCore_OBJ PRIVATE -Wall -Wextra -Wpedantic)
+endif()
+
+# --- Exception-Free Build ---
+# Note: Full exception-free compilation requires:
+# 1. All core code to use Result<T> instead of throw statements
+# 2. External dependencies (toml11) to support -fno-exceptions
+# This option enables the compiler flags; complete conversion is tracked in Phase 2c
+if(ENIGMA_NO_EXCEPTIONS)
+    message(STATUS "Building without exceptions and RTTI")
+    message(STATUS "Note: Core code must use Result<T> instead of throw for full compatibility")
+    if(MSVC)
+        target_compile_options(EnigmaCore_OBJ PRIVATE /EHsc- /GR-)
+    else()
+        target_compile_options(EnigmaCore_OBJ PRIVATE -fno-exceptions -fno-rtti)
+    endif()
 endif()
 
 # --- Static Analysis (clang-tidy) ---

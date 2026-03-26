@@ -8,6 +8,7 @@
 #include <memory>
 #include <vector>
 
+#include "EnigmaError.hpp"
 #include "EnigmaMachineConfig.hpp"
 #include "EnigmaTypes.hpp"
 #include "IEnigmaObserver.hpp"
@@ -75,6 +76,23 @@ public:
      */
     RotorBox(std::vector<AlphabetIndex>&& rotorPositions, std::vector<RotorConfig>&& rotors,
              ReflectorConfig&& reflector, ILogger* logger = nullptr);
+
+    /**
+     * @brief Factory method to create a RotorBox.
+     * Returns a Result to allow error handling without exceptions.
+     *
+     * @param rotorPositions A vector containing the initial positions of each rotor.
+     * @param rotors A vector containing the configuration for each rotor.
+     * @param reflector Configuration for the reflector.
+     * @param logger Optional logger for event reporting.
+     * @return enigma::Result<RotorBox> The created RotorBox or an error code.
+     */
+    static enigma::Result<RotorBox> create(const std::vector<AlphabetIndex>& rotorPositions,
+                                           const std::vector<RotorConfig>& rotors, const ReflectorConfig& reflector,
+                                           ILogger* logger = nullptr);
+    static enigma::Result<RotorBox> create(std::vector<AlphabetIndex>&& rotorPositions,
+                                           std::vector<RotorConfig>&& rotors, ReflectorConfig&& reflector,
+                                           ILogger* logger = nullptr);
 
     // Disable Copy
     RotorBox(const RotorBox&) = delete;

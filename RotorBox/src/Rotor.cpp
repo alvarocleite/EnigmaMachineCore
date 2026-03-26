@@ -41,6 +41,62 @@ Rotor::Rotor(RotorConfig&& config) {
     initRotorPosition();
 }
 
+namespace {
+
+enigma::EnigmaError validateRotorConfig(const RotorConfig& config) {
+    const auto& forwardRow = config.wiring;
+    std::vector<bool> seen(enigma::TRANSFORMER_SIZE, false);
+
+    for (int i = 0; i < enigma::TRANSFORMER_SIZE; ++i) {
+        int value = forwardRow[i];
+        if (value < 0 || value >= enigma::TRANSFORMER_SIZE) {
+            return enigma::EnigmaError::RotorWiringOutOfRange;
+        }
+        if (seen[value]) {
+            return enigma::EnigmaError::RotorWiringDuplicate;
+        }
+        seen[value] = true;
+    }
+
+    auto missing_it = std::find(seen.begin(), seen.end(), false);
+    if (missing_it != seen.end()) {
+        return enigma::EnigmaError::RotorWiringNotBijective;
+    }
+
+    return enigma::EnigmaError::None;
+}
+
+}  // namespace
+
+enigma::Result<Rotor> Rotor::create(const RotorConfig& config) { return create(RotorConfig(config)); }
+
+enigma::Result<Rotor> Rotor::create(RotorConfig&& config) {
+    auto error = validateRotorConfig(config);
+    if (error != enigma::EnigmaError::None) {
+        return nonstd::make_unexpected(error);
+    }
+
+    Rotor rotor;
+    rotor.notchPosition = config.notchPosition;
+    rotor.rotationCount = 0;
+    rotor.type = TransformerType::Rotor;
+
+    rotor.copyTransformRow(0, config.wiring);
+
+    const auto& forwardRow = rotor.getTransformRow(0);
+    std::vector<bool> seen(enigma::TRANSFORMER_SIZE, false);
+
+    int newVal{0};
+    for (int i = 0; i < enigma::TRANSFORMER_SIZE; ++i) {
+        int value = forwardRow[i];
+        seen[value] = true;
+        rotor.setTransformValue(1, value, newVal++);
+    }
+
+    rotor.initRotorPosition();
+    return rotor;
+}
+
 /**
  * @details Generates the mathematical inverse of the forward wiring to handle the return signal.
  * @internal If Forward(X) = Y, then Reverse(Y) = X. This ensures the signal can traverse

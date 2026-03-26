@@ -102,6 +102,9 @@ The project uses CMake options to control the build process. By default, **only 
 *   **`ENIGMA_ENABLE_CLANG_TIDY`**: Enable static analysis during the build process. Default is `OFF`.
 *   **`ENIGMA_ENABLE_COVERAGE`**: Enable code coverage instrumentation (gcov/lcov). Default is `OFF`.
 *   **`ENIGMA_ENABLE_CPPCHECK`**: Run cppcheck static analysis. Default is `OFF`.
+*   **`ENIGMA_NO_EXCEPTIONS`**: Build without exceptions and RTTI. Enables `-fno-exceptions -fno-rtti` (or `/EHsc- /GR-` on MSVC). Default is `OFF`. Required for embedded and WASM targets.
+
+> **Note:** Full exception-free compilation requires all core code to use `Result<T>` instead of `throw` statements. The infrastructure is in place (CMake option + CI), but some core files still contain throw statements. For exception-free operation, use the POD DTO initialization path (see ADR 006 and ADR 009).
 
 ### Internal Variables
 *   **`${PROJECT_NAME}`**: The name of the main project (`EnigmaMachineCore`).

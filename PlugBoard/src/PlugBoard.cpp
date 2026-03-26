@@ -48,6 +48,51 @@ PlugBoard::PlugBoard(const std::array<PlugBoardPair, enigma::MAX_PLUGBOARD_PAIRS
     }
 }
 
+namespace {
+
+enigma::EnigmaError validatePlugBoardPairs(const std::array<PlugBoardPair, enigma::MAX_PLUGBOARD_PAIRS>& pairs,
+                                           std::array<AlphabetIndex, enigma::TRANSFORMER_SIZE>& mapping) {
+    for (const auto& [sourcePortIndex, destinationPortIndex] : pairs) {
+        if (sourcePortIndex == -1 || destinationPortIndex == -1) {
+            continue;
+        }
+
+        if (sourcePortIndex < 0 || sourcePortIndex >= enigma::TRANSFORMER_SIZE || destinationPortIndex < 0 ||
+            destinationPortIndex >= enigma::TRANSFORMER_SIZE) {
+            return enigma::EnigmaError::PlugBoardPortOutOfRange;
+        }
+
+        if (sourcePortIndex == destinationPortIndex) {
+            continue;
+        }
+
+        if (mapping.at(sourcePortIndex) != sourcePortIndex ||
+            mapping.at(destinationPortIndex) != destinationPortIndex) {
+            return enigma::EnigmaError::PlugBoardPortConflict;
+        }
+
+        mapping.at(sourcePortIndex) = destinationPortIndex;
+        mapping.at(destinationPortIndex) = sourcePortIndex;
+    }
+    return enigma::EnigmaError::None;
+}
+
+}  // namespace
+
+enigma::Result<PlugBoard> PlugBoard::create(const std::array<PlugBoardPair, enigma::MAX_PLUGBOARD_PAIRS>& pairs) {
+    std::array<AlphabetIndex, enigma::TRANSFORMER_SIZE> mapping;
+    std::iota(mapping.begin(), mapping.end(), 0);
+
+    auto error = validatePlugBoardPairs(pairs, mapping);
+    if (error != enigma::EnigmaError::None) {
+        return nonstd::make_unexpected(error);
+    }
+
+    PlugBoard pb;
+    pb.mapping = mapping;
+    return pb;
+}
+
 /**
  * @details Performs a character swap using the pre-calculated mapping table.
  * @internal This operation is O(1) and is performed twice for every key press in the EnigmaMachine.

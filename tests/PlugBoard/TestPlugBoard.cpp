@@ -32,7 +32,9 @@ TEST_F(PlugBoardTests, DefaultInitialization) {
 /** @brief Verifies custom plug pairs create correct wiring. */
 TEST_F(PlugBoardTests, CustomConfiguration) {
     auto pairs = createPairs({{0, 3}, {1, 4}});
-    PlugBoard pb(pairs);
+    auto pbResult = PlugBoard::create(pairs);
+    ASSERT_TRUE(pbResult.has_value());
+    PlugBoard& pb = *pbResult;
 
     EXPECT_EQ(pb.swap(0), 3);
     EXPECT_EQ(pb.swap(3), 0);
@@ -46,7 +48,9 @@ TEST_F(PlugBoardTests, CustomConfiguration) {
 /** @brief Verifies plugboard is reciprocal: swap(swap(x)) == x. */
 TEST_F(PlugBoardTests, Reciprocity) {
     auto pairs = createPairs({{0, 25}, {10, 20}});
-    PlugBoard pb(pairs);
+    auto pbResult = PlugBoard::create(pairs);
+    ASSERT_TRUE(pbResult.has_value());
+    PlugBoard& pb = *pbResult;
 
     for (int i = 0; i < enigma::TRANSFORMER_SIZE; ++i) {
         int swapped = pb.swap(i);
@@ -55,16 +59,20 @@ TEST_F(PlugBoardTests, Reciprocity) {
     }
 }
 
-/** @brief Verifies exception thrown when conflicting plug pairs are used. */
+/** @brief Verifies error returned when conflicting plug pairs are used. */
 TEST_F(PlugBoardTests, ConflictHandling) {
     auto pairs = createPairs({{0, 1}, {0, 2}});
-    EXPECT_THROW({ PlugBoard pb(pairs); }, std::invalid_argument);
+    auto pbResult = PlugBoard::create(pairs);
+    ASSERT_FALSE(pbResult.has_value());
+    EXPECT_EQ(pbResult.error(), enigma::EnigmaError::PlugBoardPortConflict);
 }
 
 /** @brief Verifies self-loop pairs (A-A) are handled correctly. */
 TEST_F(PlugBoardTests, SelfLoop) {
     auto pairs = createPairs({{0, 0}, {1, 1}});
-    PlugBoard pb(pairs);
+    auto pbResult = PlugBoard::create(pairs);
+    ASSERT_TRUE(pbResult.has_value());
+    PlugBoard& pb = *pbResult;
 
     EXPECT_EQ(pb.swap(0), 0);
     EXPECT_EQ(pb.swap(1), 1);
@@ -81,7 +89,9 @@ TEST_F(PlugBoardTests, OutOfBounds) {
 /** @brief Verifies uninitialized pairs (-1, -1) are skipped. */
 TEST_F(PlugBoardTests, UninitializedPairs) {
     auto pairs = createPairs({{0, 1}, {-1, -1}, {2, 3}, {-1, -1}});
-    PlugBoard pb(pairs);
+    auto pbResult = PlugBoard::create(pairs);
+    ASSERT_TRUE(pbResult.has_value());
+    PlugBoard& pb = *pbResult;
 
     EXPECT_EQ(pb.swap(0), 1);
     EXPECT_EQ(pb.swap(1), 0);
@@ -89,8 +99,10 @@ TEST_F(PlugBoardTests, UninitializedPairs) {
     EXPECT_EQ(pb.swap(3), 2);
 }
 
-/** @brief Verifies exception thrown for out-of-range port indices. */
+/** @brief Verifies error returned for out-of-range port indices. */
 TEST_F(PlugBoardTests, OutOfRangePortIndex) {
     auto pairs = createPairs({{0, 1}, {30, 5}});
-    EXPECT_THROW({ PlugBoard pb(pairs); }, std::invalid_argument);
+    auto pbResult = PlugBoard::create(pairs);
+    ASSERT_FALSE(pbResult.has_value());
+    EXPECT_EQ(pbResult.error(), enigma::EnigmaError::PlugBoardPortOutOfRange);
 }
